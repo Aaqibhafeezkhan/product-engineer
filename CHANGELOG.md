@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.5.0 (unreleased)
+## 0.5.0 (2026-10-14)
 
 **Breaking: Node 22 or newer.** `engines.node` moves from `>=20` to `>=22`, because Node 20 reached
 end of life on 2026-04-30 and receives no security fixes. The code did not change for it, and the
