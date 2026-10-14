@@ -180,7 +180,8 @@ node bin/check.mjs check --pr 12 --comment       # and one comment on the pull r
 node bin/check.mjs template                      # print an empty block to fill in (supports --lang)
 ```
 
-To configure git to use the block as your commit template:
+To configure git to use the block as your commit template (the `template` command was contributed by
+[@Enard52](https://github.com/Enard52) in [#41](https://github.com/Bubblegunn/product-engineer/pull/41)):
 
 ```sh
 product-engineer template > .gitmessage.txt

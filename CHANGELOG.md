@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.6.0 (unreleased)
+
+**`product-engineer template` prints the block to fill in.** In English by default, in a shipped language
+with `--lang tr|ja|zh`, or in the heading set from `.product-engineer.json`; an unknown `--lang` exits 2.
+`product-engineer template > .gitmessage.txt` plus `git config commit.template .gitmessage.txt` makes git
+open every commit with the block. `check` now reads a heading followed only by an unfilled
+`<placeholder>` as empty, so a half-filled template fails: on 0.5.2 a leftover
+`Automation effect: <…>` line passed with no errors, and now it is reported. A line that merely starts
+with an angle bracket, such as `What changed: <video> embeds play again.`, still passes. Written by
+[@Enard52](https://github.com/Enard52) ([#41](https://github.com/Bubblegunn/product-engineer/pull/41), closes
+[#25](https://github.com/Bubblegunn/product-engineer/issues/25)).
+
 ## 0.5.2 (2026-10-14)
 
 **A long run of `.`, `!` or `?` no longer stalls the check.** The sentence splitter in
