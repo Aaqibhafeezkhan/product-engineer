@@ -76,6 +76,9 @@ Gemini CLI and the rest). Where each file lands, the Claude Code plugin commands
 hook and the CI action are in [`docs/install.md`](docs/install.md); Cursor as a rule file
 rather than a skill is in [`docs/cursor.md`](docs/cursor.md).
 
+The skills are text files and need nothing installed. The `product-engineer` command (`check`,
+`doctor`, the pre-commit entry) needs Node 22 or newer; the commit-msg hook itself is POSIX sh.
+
 ## Measured
 
 Eight small tasks, each run twice with Claude Code in headless mode: once bare, once with

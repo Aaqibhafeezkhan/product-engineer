@@ -2,6 +2,13 @@
 
 ## 0.5.0 (unreleased)
 
+**Breaking: Node 22 or newer.** `engines.node` moves from `>=20` to `>=22`, because Node 20 reached
+end of life on 2026-04-30 and receives no security fixes. The code did not change for it, and the
+suite still passes on Node 20.20.2 today (106 tests, run once in `node:20`), but no workflow here has
+ever run on Node 20, so nothing would notice when that stops being true. npm prints an engine
+warning on Node 20 and installs anyway unless `engine-strict` is set. The skills themselves are text
+and are not affected; the GitHub Action runs on whatever Node the runner provides.
+
 **The version a file states is now checked everywhere the release sets it.** The package was 0.4.0
 while `skills/product-engineer/SKILL.md` said 0.3.2, the other three skills said 0.3.0, and the
 pre-commit snippet in `docs/install.md` pinned `rev: v0.3.0`, so a reader copying it installed the
@@ -27,8 +34,8 @@ and no comment is posted. It exists so CI can run the Action on fixed text.
 **The commit-msg hook refused a Chinese block when no UTF-8 locale was set.** The heading pattern
 put the ASCII and fullwidth colons in one bracket, `[:：]`, and without a UTF-8 locale grep reads
 `：` as three bytes, of which a bracket matches one. `给客户：` therefore failed under `LC_ALL=C` with
-both BSD grep (macOS) and GNU grep (Debian), which is also what Git Bash on Windows gives a hook when
-`LANG` is unset. The colon is an alternation now, `(:|：)`, and the hook test runs every case a second
+both BSD grep (macOS) and GNU grep (Debian). A Git Bash on Windows with no `LANG` set should behave
+the same way; that was reasoned, not observed. The colon is an alternation now, `(:|：)`, and the hook test runs every case a second
 time under `LC_ALL=C`.
 
 CI runs the tests on Windows as well as Ubuntu and macOS, in Git Bash, which is the shell Git for

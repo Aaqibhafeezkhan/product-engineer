@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // product-engineer check: does a commit message or PR description carry the
 // "For the customer" block, and does the block read the way the skill asks?
-// Zero dependencies, Node 20 or newer. Exit 1 on a missing block unless --warn.
+// Zero dependencies, Node 22 or newer. Exit 1 on a missing block unless --warn.
 import { readFileSync, existsSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { dirname, join } from "node:path";

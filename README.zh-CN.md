@@ -29,6 +29,9 @@ npx skills add Bubblegunn/product-engineer
 `customer-block`（只要客户说明块）、`done-means-observed`（只要有据可查的"完成"报告）和
 `release-notes`（给写发布说明、不写代码的智能体）。
 
+技能本身是文本文件，不需要安装任何东西。`product-engineer` 命令（`check`、`doctor`、
+pre-commit 入口）需要 Node 22 或更新版本；commit-msg 钩子本身是 POSIX sh。
+
 ## 之前和之后
 
 之前：

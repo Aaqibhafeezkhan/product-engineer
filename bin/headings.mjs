@@ -1,5 +1,5 @@
 // The block headings, read from one table so the check, the commit-msg hook and the skill
-// cannot disagree. Zero dependencies, Node 20 or newer.
+// cannot disagree. Zero dependencies, Node 22 or newer.
 import { readFileSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";

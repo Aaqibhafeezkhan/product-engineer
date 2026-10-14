@@ -52,6 +52,8 @@ what agents actually emit. Add your language to the language line at the top of 
 
 ## Before you push
 
+Node 22 or newer (`engines.node` in `package.json`; CI tests on 22, the floor).
+
 ```
 npm test
 ```

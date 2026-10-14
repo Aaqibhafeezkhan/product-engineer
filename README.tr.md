@@ -30,6 +30,9 @@ Her ajanda dosyanın nereye düştüğü, Claude Code plugin komutları, git kan
 kural), `customer-block` (yalnız müşteri bloğu), `done-means-observed` (yalnız gözlemlenmiş
 "bitti" raporu) ve `release-notes` (kod yazmayan, sürüm notu yazan ajan için).
 
+Skill'ler düz metin dosyasıdır, kurulum gerektirmez. `product-engineer` komutu (`check`,
+`doctor`, pre-commit girişi) Node 22 veya daha yenisini ister; commit-msg kancası POSIX sh'tir.
+
 ## Öncesi ve sonrası
 
 Öncesi:
