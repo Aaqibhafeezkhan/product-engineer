@@ -81,3 +81,13 @@ test("a hyphenated identifier that contains a claim is a name, not a claim", () 
   assert.ok(warns("This change is documentation only.", src).some((w) => /documentation only/.test(w.message)));
   assert.ok(warns("A docs-only change.", src).some((w) => /documentation only/.test(w.message)));
 });
+
+test("a table cell escapes the backslash before the pipe", async () => {
+  // Escaping only `|` turned a message holding `a\|b` into `a\\|b`: an escaped backslash
+  // followed by a bare pipe, which ends the cell and shifts every column after it.
+  const { tableCell } = await import("../evals/baseline/markdown.mjs");
+  assert.equal(tableCell("a|b"), "a\\|b");
+  assert.equal(tableCell("a\\|b"), "a\\\\\\|b");
+  assert.equal(tableCell("C:\\path"), "C:\\\\path");
+  assert.equal(tableCell("names `src/a.ts`, which the change does not touch"), "names `src/a.ts`, which the change does not touch");
+});

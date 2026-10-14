@@ -11,6 +11,7 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { crossCheck } from "../../bin/diff.mjs";
 import { MUTATIONS } from "./mutate.mjs";
+import { tableCell } from "./markdown.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const argv = process.argv.slice(2);
@@ -143,7 +144,7 @@ if (harnessArtefacts.length) {
 
 if (falseAlarms.length) {
   lines.push("Every false alarm, in full:", "", "| commit | warning |", "|---|---|");
-  for (const f of falseAlarms) lines.push(`| \`${f.sha.slice(0, 8)}\` | ${f.message.replace(/\|/g, "\\|")} |`);
+  for (const f of falseAlarms) lines.push(`| \`${f.sha.slice(0, 8)}\` | ${tableCell(f.message)} |`);
   lines.push("");
 }
 
