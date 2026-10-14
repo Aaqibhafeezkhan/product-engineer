@@ -207,3 +207,42 @@ test("a sentence ends at an ideographic full stop too", () => {
   assert.ok(warn, "the heuristic still fires");
   assert.ok(!warn.message.includes("これは毎月"), "the excerpt stops at the full stop instead of swallowing the block");
 });
+
+test("template command prints the block in English, --lang, and configured language", () => {
+  const en = execFileSync("node", [cli, "template"], { encoding: "utf8" });
+  assert.match(en, /^For the customer:\nWhat changed: </);
+  assert.match(en, /Why it matters: </);
+
+  const tr = execFileSync("node", [cli, "template", "--lang", "tr"], { encoding: "utf8" });
+  assert.match(tr, /^Müşteri için:\nNe değişti: </);
+
+  const ja = execFileSync("node", [cli, "template", "--lang", "ja"], { encoding: "utf8" });
+  assert.match(ja, /^お客さまへ:\n変わったこと: </);
+
+  const zh = execFileSync("node", [cli, "template", "--lang", "zh"], { encoding: "utf8" });
+  assert.match(zh, /^给客户:\n改动内容: </);
+
+  const dir = mkdtempSync(join(tmpdir(), "product-engineer-tmpl-"));
+  try {
+    writeFileSync(
+      join(dir, ".product-engineer.json"),
+      JSON.stringify({ headings: { block: "Pour le client:", what: "Ce qui a changé:", why: "Pourquoi c'est important:", automation: "Effet d'automatisation:" } }),
+    );
+    const fr = execFileSync("node", [cli, "template"], { cwd: dir, encoding: "utf8" });
+    assert.match(fr, /^Pour le client:\nCe qui a changé: </);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("an unfilled template fails check, and passes once filled in", () => {
+  const en = execFileSync("node", [cli, "template"], { encoding: "utf8" });
+  const messageUnfilled = `feat: add something\n\n${en}\n`;
+  const resUnfilled = analyse(messageUnfilled);
+  assert.equal(exitCode(resUnfilled), 1, "unfilled template must fail check");
+
+  const messageFilled = `feat: add something\n\nFor the customer:\nWhat changed: Users can export their monthly data to CSV.\nWhy it matters: They requested this to automate reporting.\n`;
+  const resFilled = analyse(messageFilled);
+  assert.equal(exitCode(resFilled), 0, "filled template must pass check");
+});
+

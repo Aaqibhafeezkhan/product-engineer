@@ -177,7 +177,16 @@ table used without an explanation.
 node bin/check.mjs check .git/COMMIT_EDITMSG     # or: product-engineer check <file|->
 node bin/check.mjs check --pr 12                 # the body through the GitHub API, or gh outside Actions
 node bin/check.mjs check --pr 12 --comment       # and one comment on the pull request, updated in place
+node bin/check.mjs template                      # print an empty block to fill in (supports --lang)
 ```
+
+To configure git to use the block as your commit template:
+
+```sh
+product-engineer template > .gitmessage.txt
+git config commit.template .gitmessage.txt
+```
+
 
 ### Does the message match the change?
 

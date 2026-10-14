@@ -70,6 +70,23 @@ directory.
 without the block is refused with a two-line explanation. Merge, fixup, squash and revert
 commits pass, and `[no-customer]` anywhere in the message opts one commit out.
 
+## Commit template
+
+Use `product-engineer template` to set up a git commit template for your repository or editor:
+
+```sh
+npx product-engineer template > .gitmessage.txt
+git config commit.template .gitmessage.txt
+```
+
+To output another language from `skills/product-engineer/references/headings.md`, pass `--lang`:
+
+```sh
+npx product-engineer template --lang tr > .gitmessage.txt
+```
+
+A heading set configured in `.product-engineer.json` is also honoured automatically without `--lang`.
+
 ## CI
 
 ```yaml

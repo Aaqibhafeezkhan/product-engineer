@@ -7,10 +7,11 @@ import { execFileSync } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { readability } from "./readability.mjs";
-import { acceptedHeadings, preferredHeadings, isHeading, headingWithText, normalise } from "./headings.mjs";
+import { acceptedHeadings, preferredHeadings, shippedHeadings, isHeading, headingWithText, normalise } from "./headings.mjs";
 import { referenceFindings } from "./references.mjs";
 
 const HELP = `usage: product-engineer check [file|-|--stdin] [--pr <number>] [--warn] [--lang <code>] [--format text|github] [--comment]
+       product-engineer template [--lang <code>]
        product-engineer doctor
 
 Reads a commit message or pull request description and reports whether it
@@ -303,6 +304,22 @@ async function main(argv) {
     const report = doctor();
     console.log(renderDoctor(report));
     return report.stale ? 1 : 0;
+  }
+  if (command === "template") {
+    const langIndex = argv.indexOf("--lang");
+    const lang = langIndex >= 0 ? argv[langIndex + 1] : undefined;
+    let heading;
+    if (lang) {
+      heading = shippedHeadings().find((r) => r.language === lang);
+      if (!heading) {
+        console.error(`unknown --lang: ${lang}`);
+        return 2;
+      }
+    } else {
+      heading = preferredHeadings(process.cwd());
+    }
+    console.log(template(heading));
+    return 0;
   }
   if (command && command !== "check" && !command.startsWith("-") && !existsSync(command)) {
     console.error(HELP);
