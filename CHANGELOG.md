@@ -17,6 +17,10 @@ systems, no longer restores an npm cache: `package-manager-cache: false` on its 
 `publish` job already had. A cache written by another workflow run could otherwise reach a job that
 runs on a release tag. zizmor 1.30.1 reported it as `cache-poisoning` and reports nothing now.
 
+Dependabot waits seven days after a release before proposing it, for both GitHub Actions and npm
+(`cooldown.default-days: 7`), so a version that is pulled soon after publishing is less likely to
+reach this repository.
+
 ## 0.5.1 (2026-10-14)
 
 **The Action can be listed on GitHub Marketplace.** Marketplace accepts a description of fewer than 125 characters; this
