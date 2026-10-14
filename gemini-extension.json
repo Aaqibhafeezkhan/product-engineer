@@ -1,6 +1,6 @@
 {
   "name": "product-engineer",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Use when building, changing, or describing software for other people. Makes the agent restate work as a customer outcome, write a plain-language \"For the customer\" block in every commit and PR, refuse to call unobserved work done, name what it deliberately did not build, and never print a number it did not count.",
   "contextFileName": "GEMINI.md"
 }

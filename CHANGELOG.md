@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.5.1 (unreleased)
+## 0.5.1 (2026-10-14)
 
 **The Action can be listed on GitHub Marketplace.** Marketplace accepts a description of fewer than 125 characters; this
 one was 138. It is now 119, and a test fails on a description of 125 characters or more. Nothing a workflow uses changes.

@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use this software, cite it as below."
 title: "product-engineer"
-version: "0.5.0"
+version: "0.5.1"
 date-released: "2026-10-14"
 authors:
   - family-names: "Genc"
