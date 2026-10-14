@@ -86,6 +86,9 @@ jobs:
     # ACTION_PATH wiring and the node on the runner. A composite step exposes only success or
     # failure, so the exact exit codes (0, 1, 2) are pinned by test/action.test.mjs, which runs the
     # same shell step locally. `body-file` gives the Action fixed text, so nothing is fetched.
+    # `./` stays rather than zizmor's `$/`: GitHub's workflow-syntax page (read 2026-10-14) shows
+    # `$/path/to/action` and no form for an action.yml at the repository root, and `body-file` needs
+    # the checkout anyway.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -94,21 +97,21 @@ jobs:
       - name: A description with the block passes
         id: with-block
         continue-on-error: true
-        uses: ./
+        uses: ./ # zizmor: ignore[self-repository] GitHub documents $/path/to/action, not $/ for an action.yml at the root
         with:
           body-file: test/fixtures/with-block.txt
           comment: "false"
       - name: A description without the block fails
         id: without-block
         continue-on-error: true
-        uses: ./
+        uses: ./ # zizmor: ignore[self-repository] GitHub documents $/path/to/action, not $/ for an action.yml at the root
         with:
           body-file: test/fixtures/without-block.txt
           comment: "false"
       - name: Without the block and warn set, it passes
         id: warned
         continue-on-error: true
-        uses: ./
+        uses: ./ # zizmor: ignore[self-repository] GitHub documents $/path/to/action, not $/ for an action.yml at the root
         with:
           body-file: test/fixtures/without-block.txt
           warn: "true"
@@ -116,7 +119,7 @@ jobs:
       - name: A pr that is not a number fails, even with a description that would pass
         id: bad-pr
         continue-on-error: true
-        uses: ./
+        uses: ./ # zizmor: ignore[self-repository] GitHub documents $/path/to/action, not $/ for an action.yml at the root
         with:
           pr: "12a"
           body-file: test/fixtures/with-block.txt
