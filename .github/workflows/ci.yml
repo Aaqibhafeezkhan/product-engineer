@@ -49,7 +49,7 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci --ignore-scripts
-      - run: npx publint --strict
+      - run: npx --yes publint@0.3.25 --strict # exact version: an unpinned npx runs whatever the registry serves that day
       - name: Install the packed tarball in an empty project and run it
         run: sh scripts/smoke-tarball.sh
   release-gate:
