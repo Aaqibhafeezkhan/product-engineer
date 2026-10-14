@@ -93,7 +93,7 @@ verdict, the findings, and the block to paste when it is missing. The comment is
 place on every push, never duplicated. A pull request from a fork runs with a read-only
 token, so there the comment becomes a warning in the log and the check still runs.
 
-Inputs: `pr` (defaults to the event's pull request), `warn`, `comment`, `token`.
+Inputs: `pr` (defaults to the event's pull request), `warn`, `comment`, `token`, and `body-file` (check a file instead of fetching the pull request; nothing is fetched or posted, which is how this repository's CI runs the Action on fixed text).
 
 ## pre-commit
 

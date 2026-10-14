@@ -14,13 +14,17 @@ inputs:
     required: false
     default: "false"
   comment:
-    description: Set to "false" to skip the pull request comment. With "true" the job needs `pull-requests: write`; a read-only token (a pull request from a fork) turns the post into a warning.
+    description: 'Set to "false" to skip the pull request comment. With "true" the job needs `pull-requests: write`; a read-only token (a pull request from a fork) turns the post into a warning.'
     required: false
     default: "true"
   token:
     description: Token for reading the pull request and posting the comment.
     required: false
     default: ${{ github.token }}
+  body-file:
+    description: Path to a file to check instead of the pull request description. Nothing is fetched and no comment is posted. Exists so this repository's CI can run the Action on fixed text; `pr` is still validated when given.
+    required: false
+    default: ""
 runs:
   using: composite
   steps:
@@ -32,11 +36,17 @@ runs:
         PR_NUMBER: ${{ inputs.pr }}
         WARN: ${{ inputs.warn }}
         COMMENT: ${{ inputs.comment }}
+        BODY_FILE: ${{ inputs.body-file }}
       run: |
         case "$PR_NUMBER" in
-          ''|*[!0-9]*) echo "pr must be a number, got: $PR_NUMBER" >&2; exit 2 ;;
+          '') [ -n "$BODY_FILE" ] || { echo "pr must be a number, got: (empty)" >&2; exit 2; } ;;
+          *[!0-9]*) echo "pr must be a number, got: $PR_NUMBER" >&2; exit 2 ;;
         esac
-        set -- check --pr "$PR_NUMBER" --format github
+        if [ -n "$BODY_FILE" ]; then
+          set -- check "$BODY_FILE" --format github
+        else
+          set -- check --pr "$PR_NUMBER" --format github
+          [ "$COMMENT" != "false" ] && set -- "$@" --comment
+        fi
         [ "$WARN" = "true" ] && set -- "$@" --warn
-        [ "$COMMENT" != "false" ] && set -- "$@" --comment
         node "$ACTION_PATH/bin/check.mjs" "$@"

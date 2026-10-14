@@ -12,6 +12,18 @@ and the gate fails on any one that disagrees with `package.json`. A test changes
 a copy of the repository in turn and requires the gate to refuse it. `doctor` reports the package's
 own version.
 
+**`action.yml` has not been valid YAML since 0.3.0, and nothing ran it.** The `comment` input's
+description said `pull-requests: write` without quotes, and YAML reads the second `: ` as a nested
+mapping. PyYAML, `yaml@2` and actionlint (Go YAML) all refuse the file at line 17; GitHub's own
+parser was not observed here, but a workflow using `Bubblegunn/product-engineer@v0` should expect the
+same refusal until this ships. The description is quoted now. CI gains an `action` job that runs the
+Action through `uses: ./` on a description with the block, one without, one without but with `warn`,
+and a non-numeric `pr`, and requires each outcome; `test/action.test.mjs` runs the Action's shell step
+with bash and pins the exit codes 0, 1 and 2, and fails on any unquoted value containing `: `.
+
+New Action input `body-file`: check a file instead of fetching the pull request. Nothing is fetched
+and no comment is posted. It exists so CI can run the Action on fixed text.
+
 ## 0.4.0 (2026-09-21)
 
 **A message can cite a file that is not there, and until now nothing noticed.** `check` resolves
