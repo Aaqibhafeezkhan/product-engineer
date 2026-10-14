@@ -1,6 +1,6 @@
 name: metrics
-# Nightly: stars, unique visitors and clones (GitHub keeps traffic for 14 days only). This repository
-# is not an npm package, so the downloads column stays blank.
+# Nightly: stars, unique visitors and clones (GitHub keeps traffic for 14 days only), and yesterday's
+# npm downloads of the product-engineer package, read from api.npmjs.org (no token needed).
 # Appended to metrics.csv on the `metrics` branch so main's history stays about the code.
 on:
   schedule:
@@ -19,3 +19,4 @@ jobs:
       - run: sh scripts/record-metrics.sh
         env:
           GH_TOKEN: ${{ secrets.METRICS_TOKEN || secrets.GITHUB_TOKEN }} # METRICS_TOKEN (optional) unlocks the traffic columns
+          NPM_PACKAGE: product-engineer # without it scripts/record-metrics.sh leaves the downloads column blank
