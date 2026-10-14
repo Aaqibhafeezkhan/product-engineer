@@ -30,9 +30,11 @@ export function descriptionFrom(skillText) {
  * disagree about which headings exist. A basic regular expression, so it runs under any
  * POSIX sh; the anchored alternation covers the shipped rows and `grep -F` covers a
  * heading configured in .product-engineer.json, whose text may contain anything.
+ * The colon is an alternation, not a bracket expression: without a UTF-8 locale grep reads
+ * a fullwidth colon as three bytes, and a bracket would match only one of them.
  */
 export function hookFrom(rows) {
-  const alt = (key) => rows.map((r) => r[key].replace(/[.[\]\\*^$]/g, "\\$&").replace(/:$/, "[:：]")).join("|");
+  const alt = (key) => rows.map((r) => r[key].replace(/[.[\]\\*^$]/g, "\\$&").replace(/:$/, "(:|：)")).join("|");
   return `#!/bin/sh
 # Generated from ${HEADINGS} by scripts/generate-adapters.mjs.
 # Edit the table, then run: node scripts/generate-adapters.mjs

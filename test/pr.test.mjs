@@ -84,7 +84,7 @@ function fakeApi() {
 // Async on purpose: the fake API runs in this process, and a blocking spawn would never let it answer.
 const runWith = (env, ...args) =>
   new Promise((resolve) => {
-    const child = spawn(process.execPath, [cli, "check", ...args], { env: { PATH: process.env.PATH, ...env }, stdio: ["ignore", "pipe", "pipe"] });
+    const child = spawn(process.execPath, [cli, "check", ...args], { env: { PATH: process.env.PATH, ...(process.env.SystemRoot ? { SystemRoot: process.env.SystemRoot } : {}), ...env }, stdio: ["ignore", "pipe", "pipe"] });
     let stdout = "";
     let stderr = "";
     child.stdout.on("data", (c) => (stdout += c));

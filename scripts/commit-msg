@@ -12,7 +12,7 @@ esac
 if grep -q '\[no-customer\]' "$file"; then exit 0; fi
 
 # The shipped languages: en, tr, ja, zh.
-if grep -qE '^(For the customer[:：]|Müşteri için[:：]|お客さまへ[:：]|给客户[:：])[[:space:]]*$' "$file" && grep -qE '^(What changed[:：]|Ne değişti[:：]|変わったこと[:：]|改动内容[:：])' "$file"; then exit 0; fi
+if grep -qE '^(For the customer(:|：)|Müşteri için(:|：)|お客さまへ(:|：)|给客户(:|：))[[:space:]]*$' "$file" && grep -qE '^(What changed(:|：)|Ne değişti(:|：)|変わったこと(:|：)|改动内容(:|：))' "$file"; then exit 0; fi
 
 # A heading this repository configured for a language the table does not ship.
 cfg=".product-engineer.json"

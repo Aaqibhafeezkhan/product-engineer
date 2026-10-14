@@ -25,8 +25,12 @@ test("the shareable config enables the rule as an error", () => {
 });
 
 test("the pre-commit entry runs check on the message file", () => {
-  const r = spawnSync("sh", [join(root, "scripts/pre-commit-check.sh"), join(root, "test/fixtures/without-block.txt")], { encoding: "utf8" });
-  assert.equal(r.status, 1);
-  const ok = spawnSync("sh", [join(root, "scripts/pre-commit-check.sh"), join(root, "test/fixtures/with-block.txt")], { encoding: "utf8" });
+  // Forward slashes: the script takes its own directory with `dirname "$0"`, and a Windows path
+  // with backslashes is not one that every sh splits the same way.
+  const posix = (p) => p.replaceAll("\\", "/");
+  const script = posix(join(root, "scripts/pre-commit-check.sh"));
+  const r = spawnSync("sh", [script, posix(join(root, "test/fixtures/without-block.txt"))], { encoding: "utf8" });
+  assert.equal(r.status, 1, r.stderr);
+  const ok = spawnSync("sh", [script, posix(join(root, "test/fixtures/with-block.txt"))], { encoding: "utf8" });
   assert.equal(ok.status, 0);
 });

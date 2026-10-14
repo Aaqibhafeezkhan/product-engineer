@@ -77,17 +77,19 @@ test("project and user scopes are reported separately", () => {
   assert.equal(report.found, 2);
 });
 
+// os.homedir() reads HOME on Linux and macOS and USERPROFILE on Windows; both are set so the
+// spawned doctor never walks the real home directory of the machine running the tests.
 test("the command exits 1 when a copy is out of date", () => {
   const dir = project();
   put(dir, ".claude/skills/product-engineer/SKILL.md", packaged.replace("## 1. Restate before building", "## 1. Old rule"));
-  const run = spawnSync(process.execPath, [join(root, "bin", "doctor.mjs")], { cwd: dir, env: { ...process.env, HOME: dir }, encoding: "utf8" });
+  const run = spawnSync(process.execPath, [join(root, "bin", "doctor.mjs")], { cwd: dir, env: { ...process.env, HOME: dir, USERPROFILE: dir }, encoding: "utf8" });
   assert.equal(run.status, 1);
   assert.match(run.stdout, /1 out of date/);
 });
 
 test("the bin exposes doctor as a subcommand", () => {
   const dir = project();
-  const run = spawnSync(process.execPath, [join(root, "bin", "check.mjs"), "doctor"], { cwd: dir, env: { ...process.env, HOME: dir }, encoding: "utf8" });
+  const run = spawnSync(process.execPath, [join(root, "bin", "check.mjs"), "doctor"], { cwd: dir, env: { ...process.env, HOME: dir, USERPROFILE: dir }, encoding: "utf8" });
   assert.equal(run.status, 0);
   assert.match(run.stdout, /No copy found/);
 });

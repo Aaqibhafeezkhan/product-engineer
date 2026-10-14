@@ -24,6 +24,18 @@ with bash and pins the exit codes 0, 1 and 2, and fails on any unquoted value co
 New Action input `body-file`: check a file instead of fetching the pull request. Nothing is fetched
 and no comment is posted. It exists so CI can run the Action on fixed text.
 
+**The commit-msg hook refused a Chinese block when no UTF-8 locale was set.** The heading pattern
+put the ASCII and fullwidth colons in one bracket, `[:：]`, and without a UTF-8 locale grep reads
+`：` as three bytes, of which a bracket matches one. `给客户：` therefore failed under `LC_ALL=C` with
+both BSD grep (macOS) and GNU grep (Debian), which is also what Git Bash on Windows gives a hook when
+`LANG` is unset. The colon is an alternation now, `(:|：)`, and the hook test runs every case a second
+time under `LC_ALL=C`.
+
+CI runs the tests on Windows as well as Ubuntu and macOS, in Git Bash, which is the shell Git for
+Windows runs the hook with. A new `.gitattributes` checks every text file out with LF on all
+platforms, since Git for Windows converts to CRLF by default and the hook, the shell tests and the
+version patterns match line ends.
+
 ## 0.4.0 (2026-09-21)
 
 **A message can cite a file that is not there, and until now nothing noticed.** `check` resolves

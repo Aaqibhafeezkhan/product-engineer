@@ -58,7 +58,7 @@ npm test
 
 That runs the structure script, the hook test, the check, adapter, scorer, integration and
 readability tests, and refuses generated adapters that disagree with `SKILL.md` (run
-`node scripts/generate-adapters.mjs` after editing it). CI runs the same on Ubuntu and macOS.
+`node scripts/generate-adapters.mjs` after editing it). CI runs the same on Ubuntu, macOS and Windows; on Windows the scripts run in Git Bash, the shell Git for Windows runs hooks with, so `npm test` there needs Git Bash too (`npm config set script-shell "C:\\Program Files\\Git\\bin\\bash.exe"`). Two judge tests are skipped on Windows and say why: their fake judge is a shell script.
 
 ## Commits
 

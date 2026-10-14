@@ -8,6 +8,10 @@ check() { # $1 expected exit, $2 name, $3 message
   printf '%s\n' "$3" > "$tmp/msg"
   if sh "$hook" "$tmp/msg" >/dev/null 2>&1; then got=0; else got=1; fi
   if [ "$got" = "$1" ]; then pass=$((pass+1)); else fail=$((fail+1)); echo "FAIL: $2 (expected exit $1, got $got)"; fi
+  # Again with no UTF-8 locale (LC_ALL=C, and Git Bash on Windows when LANG is unset), where grep
+  # reads the message byte by byte. A fullwidth colon in a bracket expression is then three bytes.
+  if LC_ALL=C sh "$hook" "$tmp/msg" >/dev/null 2>&1; then got=0; else got=1; fi
+  if [ "$got" = "$1" ]; then pass=$((pass+1)); else fail=$((fail+1)); echo "FAIL: $2 under LC_ALL=C (expected exit $1, got $got)"; fi
 }
 check 0 "full block" "feat: thing
 

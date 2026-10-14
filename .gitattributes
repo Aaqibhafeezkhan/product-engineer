@@ -1,0 +1,4 @@
+# Every text file is checked out with LF on every platform. The hook, the shell tests and the
+# version patterns in scripts/versioned-files.json match line ends; Git for Windows defaults to
+# core.autocrlf=true, which would turn each into CRLF on a Windows checkout.
+* text=auto eol=lf
