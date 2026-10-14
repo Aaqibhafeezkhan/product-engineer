@@ -8,6 +8,7 @@
   <img src="https://img.shields.io/github/stars/Bubblegunn/product-engineer?style=flat-square&color=111111" alt="stars">
   <img src="https://img.shields.io/badge/dependencies-0-111111?style=flat-square" alt="zero dependencies">
   <img src="https://img.shields.io/badge/license-MIT-111111?style=flat-square" alt="MIT">
+  <a href="https://github.com/marketplace/actions/product-engineer-check"><img src="https://img.shields.io/badge/GitHub_Marketplace-product--engineer--check-111111?style=flat-square&logo=github" alt="GitHub Marketplace"></a>
 </p>
 
 一个智能体技能，让 AI 编码智能体像产品工程师一样思考，而不是像打印代码的机器。动手之前，

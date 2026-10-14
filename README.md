@@ -12,6 +12,7 @@
   <img src="https://img.shields.io/github/actions/workflow/status/Bubblegunn/product-engineer/ci.yml?style=flat-square&color=111111&label=ci" alt="ci">
   <img src="https://img.shields.io/badge/license-MIT-111111?style=flat-square" alt="MIT">
   <a href="https://doi.org/10.5281/zenodo.22395211"><img src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.22395211-111111?style=flat-square" alt="DOI"></a>
+  <a href="https://github.com/marketplace/actions/product-engineer-check"><img src="https://img.shields.io/badge/GitHub_Marketplace-product--engineer--check-111111?style=flat-square&logo=github" alt="GitHub Marketplace"></a>
 </p>
 
 An agent skill that makes an AI coding agent think like a product engineer instead of a
