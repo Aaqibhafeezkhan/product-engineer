@@ -87,3 +87,16 @@ test("Latin scores are unchanged by the refusal path", () => {
   assert.equal(tr.score, 63);
   assert.equal(tr.lix, 39);
 });
+
+test("a long run of punctuation is split in linear time, not quadratic", () => {
+  // The sentence splitter used to retry a run of `.!?` from every position inside it, so a
+  // block of 40,000 exclamation marks took two seconds and doubling it took four times that.
+  // A pull request body is untrusted input to the GitHub Action, so that is a denial of
+  // service on the check itself.
+  const text = "a" + "!".repeat(50_000) + "a";
+  const start = performance.now();
+  readability(text);
+  const ms = performance.now() - start;
+  assert.ok(ms < 250, `50,000 exclamation marks took ${ms.toFixed(0)} ms`);
+  assert.equal(lix("Hi!  ! There. a!!!b"), lix("Hi! There. a!!!b"));
+});

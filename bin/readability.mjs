@@ -14,7 +14,10 @@
 // calibration of these formulas is implemented here. So this module scores Latin script and
 // refuses everything else by name, because rule 5 of the skill is that a number comes from a
 // count, and a refusal is more useful than a confident zero.
-const sentencesOf = (t) => t.split(/[.!?]+(\s|$)/).map((s) => (s ?? "").trim()).filter((s) => /[\p{L}\p{N}]/u.test(s));
+// A sentence ends where a run of `.!?` meets whitespace or the end of the text. The split
+// happens at the whitespace after one punctuation mark, so a long run of `!` is read once;
+// `[.!?]+(\s|$)` retried that run from every position inside it, which is quadratic.
+const sentencesOf = (t) => t.split(/(?<=[.!?])(?:\s+|$)/).map((s) => s.trim()).filter((s) => /[\p{L}\p{N}]/u.test(s));
 const wordsOf = (t) => t.match(/[\p{L}\p{N}']+/gu) ?? [];
 
 export function syllablesEn(word) {

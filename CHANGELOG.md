@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.5.2 (unreleased)
+
+**A long run of `.`, `!` or `?` no longer stalls the check.** The sentence splitter in
+`bin/readability.mjs` used `[.!?]+(\s|$)`, which retried a run of punctuation from every position
+inside it. A block holding 40,000 exclamation marks between two letters took 2,051 ms to score, and
+time grew with the square of the run, so a pull request body could hold the Action for as long as
+its author liked. The split now happens at the whitespace after a punctuation mark: the same input
+takes 0.3 ms. Readability results are byte-identical before and after on 101 texts (the test
+fixtures, `examples/`, every commit message in this repository and eight punctuation edge cases).
+`test/readability.test.mjs` fails if 50,000 exclamation marks take 250 ms or more; before the fix
+they took 3,244 ms.
+
 ## 0.5.1 (2026-10-14)
 
 **The Action can be listed on GitHub Marketplace.** Marketplace accepts a description of fewer than 125 characters; this
