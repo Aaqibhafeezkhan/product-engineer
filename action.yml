@@ -1,5 +1,5 @@
 name: product-engineer check
-description: Fails a pull request whose description has no "For the customer" block, warns on the rest, and says so in one comment on the pull request.
+description: 'Fails a pull request whose description has no "For the customer" block, and says so in one comment on the pull request.'
 author: Efe Genc
 branding:
   icon: check-square

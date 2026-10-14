@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.1 (unreleased)
+
+**The Action can be listed on GitHub Marketplace.** Marketplace accepts a description of fewer than 125 characters; this
+one was 138. It is now 119, and a test fails on a description of 125 characters or more. Nothing a workflow uses changes.
+
 ## 0.5.0 (2026-10-14)
 
 **Breaking: Node 22 or newer.** `engines.node` moves from `>=20` to `>=22`, because Node 20 reached

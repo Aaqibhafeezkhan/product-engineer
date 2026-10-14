@@ -83,3 +83,16 @@ test("no pr and no body file exits 2", () => {
   const r = run({});
   assert.equal(r.status, 2, r.stdout + r.stderr);
 });
+
+// GitHub Marketplace refuses an action.yml whose description is 125 characters or longer, and a name
+// that equals an existing action, user or organization: "workproof" is a GitHub user, so the listing
+// was refused on 2026-10-14 until the name and the description changed.
+test("action.yml's name and description fit what GitHub Marketplace accepts", () => {
+  const yml = readFileSync(join(root, "action.yml"), "utf8");
+  const unquote = (v) => (/^'.*'$/.test(v) ? v.slice(1, -1).replaceAll("''", "'") : v.replace(/^"|"$/g, ""));
+  const name = unquote(/^name: (.+)$/m.exec(yml)?.[1] ?? "");
+  const description = unquote(/^description: (.+)$/m.exec(yml)?.[1] ?? "");
+  assert.ok(name.length > 0 && description.length > 0, "action.yml needs a top-level name and description on one line each");
+  assert.ok(description.length < 125, `description is ${description.length} characters; Marketplace needs fewer than 125`);
+  assert.notEqual(name, "workproof", "a GitHub user is called workproof, so Marketplace refuses that name");
+});
