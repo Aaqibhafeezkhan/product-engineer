@@ -12,6 +12,11 @@ fixtures, `examples/`, every commit message in this repository and eight punctua
 `test/readability.test.mjs` fails if 50,000 exclamation marks take 250 ms or more; before the fix
 they took 3,244 ms.
 
+The release workflow's `smoke` job, which installs the published package on three operating
+systems, no longer restores an npm cache: `package-manager-cache: false` on its `setup-node`, as the
+`publish` job already had. A cache written by another workflow run could otherwise reach a job that
+runs on a release tag. zizmor 1.30.1 reported it as `cache-poisoning` and reports nothing now.
+
 ## 0.5.1 (2026-10-14)
 
 **The Action can be listed on GitHub Marketplace.** Marketplace accepts a description of fewer than 125 characters; this
