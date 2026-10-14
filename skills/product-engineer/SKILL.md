@@ -4,7 +4,7 @@ description: Use when building, changing, or describing software for other peopl
 license: MIT
 metadata:
   author: Efe Genc
-  version: 0.3.2
+  version: 0.4.0
   source: https://github.com/Bubblegunn/product-engineer
   measuredBy: [customerBlock, observedOrHonest, notShipped, numbersWithMethod, scopeRespected]
 ---

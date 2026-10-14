@@ -4,7 +4,7 @@ description: Use when writing release notes, a changelog entry, a status update 
 license: MIT
 metadata:
   author: Efe Genc
-  version: 0.3.0
+  version: 0.4.0
   source: https://github.com/Bubblegunn/product-engineer
   measuredBy: [notShipped, numbersWithMethod]
   measuredGap: the metrics are scored on coding tasks; no task in evals/tasks writes release notes, so this skill is measured only through the rules it shares with the core skill

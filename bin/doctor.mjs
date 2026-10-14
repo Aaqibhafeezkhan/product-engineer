@@ -9,6 +9,9 @@ import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const PACKAGED = join(here, "..", "skills", "product-engineer", "SKILL.md");
+// The version reported is the installed package's. The SKILL.md metadata.version once drifted to
+// 0.3.2 under a 0.4.0 package, and doctor printed the drifted one.
+const packageVersion = () => JSON.parse(readFileSync(join(here, "..", "package.json"), "utf8")).version;
 
 /** The rules: the skill body without front matter and without the title line. */
 export function rulesFrom(skillText) {
@@ -50,7 +53,7 @@ export function doctor(opts = {}) {
   const home = opts.home ?? homedir();
   const packaged = readFileSync(opts.packagedPath ?? PACKAGED, "utf8");
   const wantRules = normalise(rulesFrom(packaged));
-  const wantVersion = versionFrom(packaged);
+  const wantVersion = packageVersion();
 
   const scopes = [];
   // Running in your home directory would otherwise count each copy twice. The key is the

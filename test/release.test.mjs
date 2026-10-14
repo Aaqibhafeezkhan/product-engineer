@@ -45,6 +45,12 @@ function fixture() {
   write("README.md", "# fixture\n\n- uses: Bubblegunn/fixture-pkg@v0.1.0\n- uses: Bubblegunn/fixture-pkg@v0\n");
   write(".claude-plugin/plugin.json", '{\n  "name": "fixture-pkg",\n  "version": "0.1.0",\n  "keywords": ["a", "b"]\n}\n');
   write("python/pyproject.toml", '[project]\nname = "fixture-pkg"\nversion = "0.1.0"\n');
+  write("docs/install.md", "```yaml\n  - repo: https://github.com/Bubblegunn/fixture-pkg\n    rev: v0.1.0\n```\n");
+  write("skills/one/SKILL.md", "---\nname: one\nmetadata:\n  version: 0.1.0\n---\n");
+  write(
+    "scripts/versioned-files.json",
+    `${JSON.stringify({ files: [{ path: "docs/install.md", pattern: "^    rev: v(\\d+\\.\\d+\\.\\d+)$" }, { path: "skills/one/SKILL.md", pattern: "^  version: (\\S+)$" }] }, null, 2)}\n`,
+  );
   git("add", "-A");
   git("commit", "--quiet", "-m", "init");
   git("remote", "add", "origin", origin);
@@ -69,6 +75,8 @@ test("dry run prints the plan and changes nothing", () => {
     assert.match(r.stdout, /action\.yml: version input default 0\.2\.0/);
     assert.match(r.stdout, /README\.md: Bubblegunn\/fixture-pkg@v0\.2\.0/);
     assert.match(r.stdout, /move v0 to v0\.2\.0 and force-push it/);
+    assert.match(r.stdout, /docs\/install\.md: version 0\.2\.0/);
+    assert.match(r.stdout, /skills\/one\/SKILL\.md: version 0\.2\.0/);
     assert.equal(f.git("status", "--porcelain"), "");
     assert.equal(f.read("package.json").includes('"0.1.0"'), true);
   } finally {
@@ -92,6 +100,8 @@ test("a release dates the entry, bumps every version, commits, tags and pushes",
     assert.match(f.read("README.md"), /fixture-pkg@v0\n/);
     assert.equal(JSON.parse(f.read(".claude-plugin/plugin.json")).version, "0.2.0");
     assert.match(f.read("python/pyproject.toml"), /^version = "0\.2\.0"$/m);
+    assert.match(f.read("docs/install.md"), /^    rev: v0\.2\.0$/m);
+    assert.match(f.read("skills/one/SKILL.md"), /^  version: 0\.2\.0$/m);
     assert.equal(f.git("status", "--porcelain"), "");
     assert.equal(f.git("log", "-1", "--format=%s"), "chore(release): 0.2.0");
     assert.match(f.git("log", "-1", "--format=%b"), /For the customer:/);
@@ -156,4 +166,20 @@ test("a pattern that truly matches nothing still fails", () => {
   const r = run(f.repo, "0.2.0");
   assert.notEqual(r.status, 0);
   assert.match(r.stdout + r.stderr, /CITATION\.cff: nothing matched for version/);
+});
+
+test("a listed file whose pattern matches nothing is refused before anything is written", () => {
+  const f = fixture();
+  try {
+    writeFileSync(join(f.repo, "docs", "install.md"), "no pin here\n");
+    f.git("commit", "--quiet", "-am", "install page without a pin");
+    f.git("push", "--quiet", "origin", "main");
+    const r = run(f.repo, "0.2.0");
+    assert.equal(r.status, 1);
+    assert.match(r.stderr, /docs\/install\.md: nothing matched for the pattern in scripts\/versioned-files\.json/);
+    assert.match(f.read("CHANGELOG.md"), /^## 0\.2\.0 \(unreleased\)$/m, "the CHANGELOG entry was dated before the refusal");
+    assert.equal(f.git("status", "--porcelain"), "");
+  } finally {
+    rmSync(f.base, { recursive: true, force: true });
+  }
 });

@@ -91,3 +91,15 @@ test("the bin exposes doctor as a subcommand", () => {
   assert.equal(run.status, 0);
   assert.match(run.stdout, /No copy found/);
 });
+
+test("the reported version is the package's, not the version a SKILL.md carries", () => {
+  // doctor used to print the SKILL.md metadata.version, which had drifted to 0.3.2 while the
+  // package was 0.4.0. A skill file with a version nobody ships proves which one is read.
+  const dir = project();
+  const skill = join(dir, "SKILL.md");
+  writeFileSync(skill, packaged.replace(/^(\s*version:\s*)\S+\s*$/m, "$19.9.9"));
+  const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
+  const report = doctor({ cwd: project(), home: project(), packagedPath: skill });
+  assert.equal(report.version, pkg.version);
+  assert.match(render(report), new RegExp(`^product-engineer ${pkg.version.replaceAll(".", "\\.")}$`, "m"));
+});

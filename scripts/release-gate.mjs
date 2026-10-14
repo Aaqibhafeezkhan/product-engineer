@@ -1,15 +1,18 @@
 #!/usr/bin/env node
 // The release gate, run in CI on every push: the version the package states must be the
-// version the CHANGELOG, the citation file, the Action and the plugin manifest state, and
+// version the CHANGELOG, the citation file, the Action, the plugin manifest and every file in
+// scripts/versioned-files.json state, and
 // `npm pack` must ship nothing outside scripts/pack-allowlist.txt.
 //
 // `--update` rewrites the allowlist from the current pack (review the diff before committing).
-// Same file in every Bubblegunn repository. Node built-ins only.
+// Same file in every Bubblegunn repository; what differs between them lives in
+// scripts/versioned-files.json. Node built-ins only.
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { compareVersions } from "./version.mjs";
 import { extractPackedFiles } from "./npm-pack.mjs";
+import { versionedFiles, readVersion, LIST } from "./versioned-files.mjs";
 
 const root = process.cwd();
 const read = (f) => readFileSync(join(root, f), "utf8");
@@ -62,6 +65,21 @@ if (has("python/pyproject.toml")) {
 if (has(".claude-plugin/plugin.json")) {
   const v = JSON.parse(read(".claude-plugin/plugin.json")).version;
   if (v !== version) problems.push(`.claude-plugin/plugin.json version is ${v}, package.json is ${version}`);
+}
+
+// The repository's own list (scripts/versioned-files.json), the same one release.mjs sets.
+try {
+  for (const entry of versionedFiles(root)) {
+    if (!has(entry.path)) {
+      problems.push(`${entry.path} is listed in ${LIST} but does not exist`);
+      continue;
+    }
+    const v = readVersion(read(entry.path), entry);
+    if (v === null) problems.push(`${entry.path}: the pattern in ${LIST} matched nothing`);
+    else if (v !== version) problems.push(`${entry.path} version is ${v}, package.json is ${version}`);
+  }
+} catch (err) {
+  problems.push(err instanceof Error ? err.message : String(err));
 }
 
 const packed = JSON.parse(

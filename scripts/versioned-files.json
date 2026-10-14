@@ -1,0 +1,11 @@
+{
+  "comment": "Every file in this repository that states the package version and that scripts/release.mjs and scripts/release-gate.mjs would not otherwise know about. Both scripts read this list: the release sets each one, the gate fails when one disagrees with package.json. `pattern` is a regular expression (multiline) whose first capture group is the version. package.json, package-lock.json, CITATION.cff, .claude-plugin/plugin.json and the README `uses:` pin are handled by the scripts themselves.",
+  "files": [
+    { "path": "gemini-extension.json", "pattern": "^  \"version\": \"([^\"]+)\",?$" },
+    { "path": "skills/product-engineer/SKILL.md", "pattern": "^  version: (\\S+)$" },
+    { "path": "skills/customer-block/SKILL.md", "pattern": "^  version: (\\S+)$" },
+    { "path": "skills/done-means-observed/SKILL.md", "pattern": "^  version: (\\S+)$" },
+    { "path": "skills/release-notes/SKILL.md", "pattern": "^  version: (\\S+)$" },
+    { "path": "docs/install.md", "pattern": "^    rev: v(\\d+\\.\\d+\\.\\d+)$" }
+  ]
+}

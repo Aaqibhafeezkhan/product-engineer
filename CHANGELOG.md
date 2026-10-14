@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.5.0 (unreleased)
+
+**The version a file states is now checked everywhere the release sets it.** The package was 0.4.0
+while `skills/product-engineer/SKILL.md` said 0.3.2, the other three skills said 0.3.0, and the
+pre-commit snippet in `docs/install.md` pinned `rev: v0.3.0`, so a reader copying it installed the
+hook as it was in 0.3.0. `product-engineer doctor` printed the 0.3.2 as the installed version. Nothing
+failed, because neither `scripts/release.mjs` nor `scripts/release-gate.mjs` knew those files
+existed. Both now read one list, `scripts/versioned-files.json`; the release sets every file on it
+and the gate fails on any one that disagrees with `package.json`. A test changes each listed file in
+a copy of the repository in turn and requires the gate to refuse it. `doctor` reports the package's
+own version.
+
 ## 0.4.0 (2026-09-21)
 
 **A message can cite a file that is not there, and until now nothing noticed.** `check` resolves
