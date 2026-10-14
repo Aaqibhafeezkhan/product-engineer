@@ -102,7 +102,7 @@ Inputs: `pr` (defaults to the event's pull request), `warn`, `comment`, `token`,
 ```yaml
 repos:
   - repo: https://github.com/Bubblegunn/product-engineer
-    rev: v0.5.1
+    rev: v0.5.2
     hooks:
       - id: product-engineer-check
 ```

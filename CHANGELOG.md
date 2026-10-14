@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.5.2 (unreleased)
+## 0.5.2 (2026-10-14)
 
 **A long run of `.`, `!` or `?` no longer stalls the check.** The sentence splitter in
 `bin/readability.mjs` used `[.!?]+(\s|$)`, which retried a run of punctuation from every position
