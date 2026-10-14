@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.6.0 (unreleased)
+## 0.6.0 (2026-10-14)
 
 **`product-engineer template` prints the block to fill in.** In English by default, in a shipped language
 with `--lang tr|ja|zh`, or in the heading set from `.product-engineer.json`; an unknown `--lang` exits 2.
