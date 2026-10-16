@@ -6,6 +6,7 @@
 #   sh evals/run.sh 03 skill     # one task prefix, one condition
 #   PE_EVAL_RUNS=3 sh evals/run.sh   # three runs per arm, results/<task>/<condition>/run-N
 #   sh evals/run.sh --yes --overwrite   # replace the published run in evals/results
+#   PE_EVAL_SKILL=customer-block sh evals/run.sh --yes   # install only skills/customer-block in the skill arm
 #
 # Requires the `claude` CLI, logged in. Each run costs real tokens, so the script
 # prints what it is about to spend and stops unless you pass --yes (or set
@@ -28,6 +29,13 @@ case "$only_condition" in --*) only_condition="" ;; esac
 # unpinned run silently compares against whatever the CLI defaults to that week.
 model="${PE_EVAL_MODEL:-claude-opus-5}"
 runs="${PE_EVAL_RUNS:-1}"
+# The skill the skill arm installs. Defaults to the core pack; a single skill
+# directory under skills/ lets that skill be measured on its own.
+skill="${PE_EVAL_SKILL:-product-engineer}"
+case "$skill" in
+  */*|.*|"") echo "PE_EVAL_SKILL must be a skill directory name, not '$skill'" >&2; exit 1 ;;
+esac
+[ -f "$root/skills/$skill/SKILL.md" ] || { echo "no skill named '$skill' under skills/" >&2; exit 1; }
 yes="${PE_EVAL_YES:-}"
 overwrite=""
 for arg in "$@"; do
@@ -40,10 +48,13 @@ mkdir -p "$results_dir"
 cli_version=$(claude --version 2>/dev/null | head -1 || echo "unknown")
 task_count=$(find "$tasks_dir" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d " ")
 run_count=$((task_count * 2 * runs))
+skill_line=""
+[ -n "${PE_EVAL_SKILL:-}" ] && skill_line="
+  skill       $skill (installed in the skill arm only)"
 cat <<INFO
 product-engineer evals
   tasks       $task_count
-  conditions  bare, skill
+  conditions  bare, skill$skill_line
   runs/arm    $runs
   total runs  $run_count
   model       $model
@@ -68,8 +79,8 @@ for task in "$tasks_dir"/*/; do
     cp -R "$task"/. "$work"/
     rm -f "$work/TASK.md"
     if [ "$condition" = "skill" ]; then
-      mkdir -p "$work/.claude/skills/product-engineer"
-      cp -R "$root/skills/product-engineer"/. "$work/.claude/skills/product-engineer"/
+      mkdir -p "$work/.claude/skills/$skill"
+      cp -R "$root/skills/$skill"/. "$work/.claude/skills/$skill"/
     fi
     (
       cd "$work"
@@ -100,8 +111,8 @@ for task in "$tasks_dir"/*/; do
       let d = {};
       try { d = JSON.parse(fs.readFileSync(process.argv[1], "utf8")); } catch {}
       fs.writeFileSync(process.argv[2], (d.result || "") + "\n");
-      fs.writeFileSync(process.argv[3], JSON.stringify({ model: Object.keys(d.modelUsage || {}).join(",") || null, requested_model: process.argv[4] || null, cli: process.argv[5] || null, cost_usd: d.total_cost_usd || null, turns: d.num_turns || null, duration_ms: d.duration_ms || null }) + "\n");
-    ' "$out/transcript.json" "$out/final.md" "$out/meta.json" "$model" "$cli_version"
+      fs.writeFileSync(process.argv[3], JSON.stringify({ model: Object.keys(d.modelUsage || {}).join(",") || null, requested_model: process.argv[4] || null, cli: process.argv[5] || null, skill: process.argv[6] || null, cost_usd: d.total_cost_usd || null, turns: d.num_turns || null, duration_ms: d.duration_ms || null }) + "\n");
+    ' "$out/transcript.json" "$out/final.md" "$out/meta.json" "$model" "$cli_version" "$([ "$condition" = skill ] && echo "$skill")"
     (
       cd "$work"
       if [ "$(git rev-list --count HEAD)" -gt 1 ]; then

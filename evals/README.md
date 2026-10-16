@@ -12,6 +12,7 @@ A small, reproducible before/after of what the skill changes in a coding agent.
 sh evals/run.sh                        # prints the plan and the cost, runs nothing
 sh evals/run.sh --yes                  # 16 headless runs into evals/results-<timestamp>
 PE_EVAL_RUNS=3 sh evals/run.sh --yes   # 48 runs
+PE_EVAL_SKILL=customer-block sh evals/run.sh --yes   # the skill arm installs only that skill
 sh evals/run.sh --yes --overwrite      # replace the published run in evals/results
 node evals/score.mjs                   # table, per-task rows, and every failing cell
 node evals/score.mjs evals/results-... # score your own run instead
@@ -24,6 +25,11 @@ the CLI defaults to that week; override it with `PE_EVAL_MODEL`. The `claude --v
 string and the requested model are written into every `meta.json`, so a result carries
 the versions that produced it. And a rerun writes to `evals/results-<timestamp>` rather
 than over `evals/results`, which holds the run the table in `RESULTS.md` is built from.
+
+`PE_EVAL_SKILL` names one directory under `skills/` for the skill arm to install instead of the
+core pack, so `customer-block`, `done-means-observed` and `release-notes` can be measured on their
+own. `meta.json` records it as `skill`, and `score.mjs` refuses to put runs of different skills in
+one table. Runs recorded before `meta.json` named the skill count as `product-engineer`.
 
 `node evals/score.mjs --failures` prints every cell that failed together with the
 evidence: the commit line that had no block, the sentence that carried a bare number,

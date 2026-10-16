@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.1
+
+**Measure one skill at a time.** `PE_EVAL_SKILL=customer-block sh evals/run.sh` installs only that skill in the
+skill arm, `meta.json` records which skill ran, and `evals/score.mjs` refuses to table runs of different skills
+together. The paid rerun, and removing the `measuredGap` notes it would settle, are still to do. Written by
+[@jay23606](https://github.com/jay23606) ([#43](https://github.com/Bubblegunn/product-engineer/pull/43), closes
+[#33](https://github.com/Bubblegunn/product-engineer/issues/33)).
+
 ## 0.6.0 (2026-10-14)
 
 **`product-engineer template` prints the block to fill in.** In English by default, in a shipped language

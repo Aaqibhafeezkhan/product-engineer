@@ -142,6 +142,10 @@ function taskMeans(rows, key) {
 }
 
 export function table(rows) {
+  // Runs from different skills measure different things; a table of them would mislead.
+  // Runs recorded before meta.json named the skill all installed the core pack.
+  const skills = new Set(rows.filter((r) => r.condition === "skill").map((r) => r.meta?.skill ?? "product-engineer"));
+  if (skills.size > 1) throw new Error(`refusing to table runs of different skills together: ${[...skills].join(", ")}`);
   const conditions = ["bare", "skill"];
   const n = Object.fromEntries(conditions.map((c) => [c, rows.filter((r) => r.condition === c).length]));
   const repeated = rows.length > 0 && Object.keys(metrics).length > 0 && taskMeans(rows, Object.keys(metrics)[0]).every((t) => t.runs >= 2);
