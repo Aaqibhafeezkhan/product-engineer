@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.6.2
+## 0.6.2 (2026-10-16)
 
 **`customer-block` and `done-means-observed` are measured on their own.** With `PE_EVAL_SKILL` from 0.6.1, each
 was run alone against a fresh bare arm on the eight tasks (17 October, `claude-opus-5`, one run per task, 32 runs
