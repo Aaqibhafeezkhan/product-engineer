@@ -1,0 +1,16 @@
+Derive reminder hour from IANA zones instead of a fixed offset table
+
+reminderHour looked the guest's zone up in a two-entry table and returned
+9 - undefined = NaN for anything else. The 4 guests in the dataset with a
+null timezone (ids 3, 6, 9, 12) were scheduled at hour NaN.
+
+The table was also wrong over time and over range: it pinned Europe/London
+to +1 year-round, which is only true under BST, and 9 - offset goes negative
+for zones east of +09:00.
+
+Offsets now come from Intl for the day in question, unknown or missing zones
+fall back to 09:00 UTC and are flagged on the schedule row as
+usesFallbackTimezone so the data gap stays visible.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.6.2
+
+**`customer-block` and `done-means-observed` are measured on their own.** With `PE_EVAL_SKILL` from 0.6.1, each
+was run alone against a fresh bare arm on the eight tasks (17 October, `claude-opus-5`, one run per task, 32 runs
+with the core skill alongside, $15.87). Each moved the metric its rule is about and not the other: the customer
+block went from 0 to 8 of 8 with `customer-block`, and the observation row from 1 to 6 of 8 with
+`done-means-observed`. Both drop their `measuredGap`; `release-notes` keeps its own, since no task writes release
+notes. The runs are in `evals/results-2026-10-17/` and the table is in `evals/RESULTS.md`.
+
+**`node evals/score.mjs` accepts an absolute directory.** It joined the argument to the working directory, so an
+absolute path failed with `ENOENT`.
+
 ## 0.6.1 (2026-10-16)
 
 **Measure one skill at a time.** `PE_EVAL_SKILL=customer-block sh evals/run.sh` installs only that skill in the

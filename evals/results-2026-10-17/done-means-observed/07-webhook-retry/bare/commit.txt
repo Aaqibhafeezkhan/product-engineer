@@ -1,0 +1,16 @@
+Retry the accounting webhook on transient failures
+
+A single failed call dropped the payout silently, so it never reached
+accounting and only turned up later during reconciliation.
+
+Retry up to 4 attempts with exponential backoff and jitter on network
+errors and transient statuses (408, 429, 5xx). Other 4xx are not retried
+since the request itself is the problem. Each attempt sends the same
+idempotency-key (the payout id) so a redelivery after a lost response
+doesn't double-post.
+
+notifyAccounting now returns whether delivery succeeded; it still does
+not throw, so callers are unchanged.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

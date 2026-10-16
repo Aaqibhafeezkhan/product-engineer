@@ -1,0 +1,12 @@
+Show count of notifications needing a person on the bell
+
+Reception wants to see outstanding work at a glance, so the bell now
+carries a count of notifications that need a person and have not been
+read. Read notifications are treated as handled and excluded, so the
+number reflects what is still outstanding rather than the total.
+
+The count is omitted entirely when nothing needs attention, and the
+button's aria-label repeats it for screen readers.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

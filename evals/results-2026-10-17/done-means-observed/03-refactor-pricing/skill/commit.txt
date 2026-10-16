@@ -1,0 +1,16 @@
+Split pricing into independent rules
+
+Every pricing change meant editing the one function that held all five
+rules, so each tweak risked the others. Rules now live in src/rules.js as
+a list of { name, applies, factor } entries; src/pricing.js multiplies the
+factors of the rules that fire. Adding or retiring a rule is appending or
+deleting one entry.
+
+Behaviour is unchanged: the tests check the new code against the previous
+implementation across every combination of base, date and guest shape.
+
+Also adds breakdown(), which reports which rules fired and what each did,
+for answering "why is this night priced like that".
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

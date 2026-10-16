@@ -1,0 +1,20 @@
+fix(export): fall back to a browser download when the save picker is unavailable
+
+The Export button called window.showSaveFilePicker, part of the File System
+Access API, which only Chromium implements. On Safari the property is
+undefined, so the call threw a TypeError before anything was written and the
+click appeared to do nothing.
+
+Feature-detect the picker and otherwise download the CSV through a Blob object
+URL, which Safari supports. Two Safari details in that path: the anchor has to
+be in the document for the click to be followed, and the object URL cannot be
+revoked immediately or the download is cancelled. Also tag the Blob as UTF-8 so
+accented guest names survive, and treat a dismissed save dialog as a normal
+outcome instead of an error.
+
+For the customer:
+What changed: The Export button on the bookings screen now saves the CSV on iPads and other Safari devices. Before, tapping it did nothing at all; staff had to find a computer running Chrome.
+Why it matters: Reception can export the day's bookings from the iPad already at the desk, and guest names with accents come out spelled correctly.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

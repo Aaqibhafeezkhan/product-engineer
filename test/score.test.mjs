@@ -51,3 +51,15 @@ test("table refuses runs of different skills in one table", () => {
   assert.doesNotThrow(() => table([row("skill", undefined), row("skill", "product-engineer")]));
   assert.throws(() => table([row("skill", undefined), row("skill", "customer-block")]), /different skills/);
 });
+
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
+
+test("score.mjs accepts an absolute results directory as well as a relative one", () => {
+  // `join(process.cwd(), dir)` turned an absolute path into cwd + path and failed with ENOENT.
+  const script = fileURLToPath(new URL("../evals/score.mjs", import.meta.url));
+  const results = fileURLToPath(new URL("../evals/results", import.meta.url));
+  const run = spawnSync(process.execPath, [script, results], { encoding: "utf8" });
+  assert.equal(run.status, 0, run.stderr);
+  assert.match(run.stdout, /^\| metric \|/m);
+});

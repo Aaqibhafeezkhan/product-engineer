@@ -39,9 +39,9 @@ To promote one: add a task under `evals/tasks/` that exercises the skill, run `s
 put the numbers in `evals/RESULTS.md`, then move the directory up and declare the metrics.
 
 What the eval covers today is narrower than the pack, and the gate does not pretend otherwise:
-`evals/run.sh` copies only `skills/product-engineer` into the work tree, so the other three are
-measured through the rules they share with it rather than on their own. `release-notes` is the
-weakest case and says so in its own `measuredGap`. A task that writes release notes is the most
+`evals/run.sh` installs `skills/product-engineer` by default, and `PE_EVAL_SKILL` installs one other
+skill instead; `customer-block` and `done-means-observed` were measured that way on 17 October.
+`release-notes` is the weakest case and says so in its own `measuredGap`. A task that writes release notes is the most
 useful contribution this repository could take.
 
 ## Translate

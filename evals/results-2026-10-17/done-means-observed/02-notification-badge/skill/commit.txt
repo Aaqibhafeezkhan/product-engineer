@@ -1,0 +1,8 @@
+Show count of notifications needing a person on the bell
+
+renderBell ignored its items argument. It now counts notifications with
+needsPerson that are still unread and renders the number in a badge, so
+the count drops as reception works through them. No badge at zero.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

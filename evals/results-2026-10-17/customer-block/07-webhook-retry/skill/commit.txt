@@ -1,0 +1,18 @@
+fix(payments): retry the accounting webhook on transient failures
+
+Retry up to 5 times with exponential backoff and jitter on network
+errors and retryable statuses (408, 425, 429, 5xx), honouring
+Retry-After when the server sends it. Permanent 4xx responses fail
+immediately rather than burning attempts.
+
+A failed call previously logged to stderr and resolved, so the payout
+was silently dropped; it now throws once attempts are exhausted so the
+caller can see the failure. Retry policy is injectable for tests.
+
+For the customer:
+What changed: When the accounting system is briefly unreachable or busy, a payout is now sent again a few times until it lands, instead of being dropped after one failed try.
+Why it matters: Payouts stop going missing from accounting, so the morning reconciliation matches without anyone hunting for the gaps.
+Automation effect: Short accounting outages are now ridden out on their own, so the payouts that used to be chased and re-entered by hand no longer need that.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

@@ -1,0 +1,14 @@
+Retry the accounting webhook and surface terminal failures
+
+Payouts were being lost when a single call failed: the only handling was
+a console.error, so the caller saw success either way.
+
+- Retry up to 4 attempts on network errors, 429 and 5xx, with exponential
+  backoff plus jitter.
+- Fail fast on other 4xx, which retrying cannot fix.
+- Throw once attempts are exhausted instead of swallowing the failure.
+- Send a stable idempotency-key header from the payout id so retries do
+  not create duplicate accounting entries.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

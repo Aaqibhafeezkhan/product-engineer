@@ -1,0 +1,7 @@
+Fix typo in invoice footer
+
+A guest reported "welcom" in the invoice footer text; corrected to
+"welcome".
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

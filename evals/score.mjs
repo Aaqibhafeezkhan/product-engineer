@@ -3,7 +3,7 @@
 // Markdown table. No dependencies. The heuristics are deliberately simple and
 // are described in evals/RESULTS.md together with what they miss.
 import { readFileSync, readdirSync, existsSync } from "node:fs";
-import { join, dirname } from "node:path";
+import { join, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "results");
@@ -187,7 +187,7 @@ export function failures(rows) {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const dir = process.argv.slice(2).find((a) => !a.startsWith("--"));
-  const rows = score(dir ? join(process.cwd(), dir) : root);
+  const rows = score(dir ? resolve(dir) : root);
   if (process.argv.includes("--failures")) {
     console.log(failures(rows));
   } else {

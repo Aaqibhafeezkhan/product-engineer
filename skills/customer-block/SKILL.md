@@ -7,7 +7,6 @@ metadata:
   version: 0.6.1
   source: https://github.com/Bubblegunn/product-engineer
   measuredBy: [customerBlock]
-  measuredGap: the run that moved this metric installed the core skill, not this one; the rule is measured, this extraction of it is not
 ---
 
 # customer-block

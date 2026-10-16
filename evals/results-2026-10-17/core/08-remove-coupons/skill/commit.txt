@@ -1,0 +1,24 @@
+Remove retired coupon code path from checkout
+
+Delete `applyCoupon` and drop the `code` parameter from `checkout`, so the
+SUMMER10 and WELCOME discounts are unreachable rather than merely hidden
+behind a removed form field. `checkout(cart)` now returns `total` equal to
+`subtotal`; the key is kept so callers reading `.total` keep working, and an
+extra argument from an old call site is ignored instead of discounting.
+
+Observed by running src/checkout.js directly on a 100-unit cart:
+checkout(cart), checkout(cart, "SUMMER10") and checkout(cart, "WELCOME") all
+return {subtotal: 100, total: 100}, and importing `applyCoupon` now fails
+with "does not provide an export named 'applyCoupon'". Not observed in
+production: this repo has no test suite (`node --test` collects zero tests)
+and no deploy or logs I can reach from here.
+
+For the customer:
+What changed: Old discount codes no longer work at checkout. Anyone who still
+remembers SUMMER10 or WELCOME and finds a way to send it is charged the full
+price shown in their cart.
+Why it matters: The price a shopper sees is the price they pay, and the
+retired promotion can no longer be revived by accident or on purpose.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

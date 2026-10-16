@@ -1,0 +1,11 @@
+fix(invoice): correct "welcom" to "welcome" in the footer
+
+For the customer:
+What changed: The closing line of every invoice now reads "We hope to welcome you again." Guests previously saw "welcom" misspelled on a document they keep.
+Why it matters: The invoice is often the last thing a guest reads, and a spelling mistake on it undercuts the care the rest of the stay took.
+
+Not shipped:
+- The unused vatNumber variable and the template-engine TODO in the same file: out of scope for a guest-reported typo; worth doing when the footer next changes for a real reason.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

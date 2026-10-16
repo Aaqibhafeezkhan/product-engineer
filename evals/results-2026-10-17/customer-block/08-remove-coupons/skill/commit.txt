@@ -1,0 +1,12 @@
+Remove retired coupon code path from checkout
+
+Coupons were retired in March and the input field was already hidden, but
+applyCoupon and the code parameter on checkout remained, so SUMMER10 and
+WELCOME still discounted any order that reached the function directly.
+
+For the customer:
+What changed: Old discount codes from the retired coupon program can no longer reduce an order total; every order is now charged its full price.
+Why it matters: Checkout charges what the cart says, with no way to shave money off an order using codes that were supposed to be gone.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

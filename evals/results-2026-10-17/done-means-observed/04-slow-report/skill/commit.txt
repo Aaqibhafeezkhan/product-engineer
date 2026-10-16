@@ -1,0 +1,17 @@
+Speed up monthly occupancy report
+
+The per-night loop re-parsed checkOut on every iteration and built each day
+key with toISOString, so a month's report paid a Date parse and a full date
+format for every occupied night.
+
+Parse each booking's endpoints once, count nights with integer UTC day
+arithmetic, and memoize the day keys so toISOString runs once per distinct
+calendar day instead of once per booking-night.
+
+Measured on randomized month-long booking sets: 12x faster at 5k and 50k
+bookings (16.9ms to 1.4ms, 170.8ms to 13.9ms), 7x at 100. Output is
+unchanged, including key insertion order; the added tests check the new
+implementation against the old one on edge cases and 500 random bookings.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

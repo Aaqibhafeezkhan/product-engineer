@@ -1,0 +1,46 @@
+fix(reminders): compute 09:00 local from the tz database, hold back unknown zones
+
+The reminder hour came from a two-entry hardcoded offset table
+({ Europe/Istanbul: 3, Europe/London: 1 }). Three defects followed:
+
+- Any zone outside the table returned `9 - undefined` = NaN. 4 of the 12
+  rows in data/customers.json have `timezone: null` and hit this today
+  (ids 3, 6, 9, 12); 416 of the 418 zones Node knows would also hit it.
+- The table's offsets were fixed, so they ignored daylight saving.
+  Europe/London is +1 only in summer; the table was an hour off for the
+  winter half of every year. 1 of the 2 zones it covered was affected.
+- `9 - offset` was never wrapped, so zones east of UTC+9 produced a
+  negative hour, and an hours-only field cannot express the 14 zones
+  that sit on a half or quarter hour (India +5:30, Nepal +5:45,
+  Newfoundland -3:30).
+
+Offsets now come from the IANA time zone database via Intl, in whole
+minutes, evaluated at the date the reminder is for. `reminderHour` becomes
+`reminderTimeUtc` returning `{ hourUtc, minuteUtc }`. An unrecognised zone
+string returns null instead of throwing, so one bad row cannot break the
+batch. `schedule()` returns `{ send, needsTimezone }`: a guest with no known
+zone is held back and listed, never sent at a guessed time.
+
+Counts above are from data/customers.json (all 12 rows) and
+Intl.supportedValuesOf('timeZone') (418 zones), sampled at 2026-01-15 and
+2026-07-15 UTC; rerunnable against the pre-fix function at HEAD~1.
+
+Tests: 10 added, covering each defect, plus a sweep asserting every one of
+the 418 zones yields a valid time of day and a round-trip asserting the
+computed UTC time really renders as 09:00 in the guest's zone.
+
+Not shipped: a fallback time zone for the 4 guests who have none. Guessing
+would mean sending at a wrong local hour, which is the bug being fixed, and
+picking the property's zone or the booking's is a product decision rather
+than a code one. They are reported in `needsTimezone` so the gap is visible.
+
+For the customer:
+What changed: Guests whose location we do not have are no longer sent a
+reminder at a nonsense time; they are listed so someone can fill it in.
+Everyone else gets it at 9am where they actually are, including after the
+clocks change and in places whose time is offset by half an hour.
+Why it matters: A reminder that lands in the middle of the night, or an hour
+late every winter, is worse than no reminder, and guests judge the stay by it.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

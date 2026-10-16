@@ -1,0 +1,23 @@
+Make each pricing rule a separate entry instead of one function
+
+Each of the five rules is now an object in src/rules.js with an id, a
+description, a multiplier and an applies() condition. price() reduces over
+that list, so adding or removing a rule means adding or deleting one entry
+and touching nothing else. All rules are multipliers, so list order does not
+change the result.
+
+Verified by replaying both implementations side by side over 43,920 input
+combinations (6 base prices x 4 loyalty tiers x 5 night counts x every day of
+2024): 0 differences. Tests cover each rule alone, the rules stacked, and
+adding and removing a rule.
+
+For the customer:
+What changed: Nothing about what a guest is charged - the same booking returns
+the same price to the cent. Pricing rules are now stored one by one instead of
+tangled together in a single calculation.
+Why it matters: When marketing asks for a new discount or wants a surcharge
+dropped, the change touches only that one rule, so the other four cannot break
+by accident and the change ships sooner with less risk to live prices.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

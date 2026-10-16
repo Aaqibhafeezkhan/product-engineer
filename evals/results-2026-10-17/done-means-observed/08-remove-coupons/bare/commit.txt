@@ -1,0 +1,12 @@
+Remove retired coupon code path from checkout
+
+Coupons were retired in March and the UI field was already hidden, but
+applyCoupon remained reachable by any caller passing a code. Drop the
+function and the checkout code parameter so the discounts can no longer
+be triggered.
+
+checkout() keeps returning { subtotal, total } for existing callers;
+total is now always equal to subtotal.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

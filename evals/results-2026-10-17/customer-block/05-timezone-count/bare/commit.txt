@@ -1,0 +1,20 @@
+Resolve reminder time zones with Intl instead of a fixed table
+
+reminderHour looked offsets up in a two-entry hardcoded map, which broke
+two ways:
+
+- A guest with no time zone (4 of the 12 in customers.json) missed the
+  map entirely, so `9 - undefined` returned NaN and the reminder could
+  not be scheduled at all.
+- Europe/London was pinned at +1, correct only during BST. From late
+  October to late March those guests would be reminded at 08:00 local.
+
+Offsets now come from Intl per send date, so DST is handled, and the
+target instant is resolved in two passes so a date that straddles a
+transition still lands on 09:00 local. An unresolvable time zone falls
+back to 09:00 UTC and sets `usedFallback` on the row rather than
+emitting NaN. Half-hour zones keep their offset via a new minuteUtc,
+and the hour is derived from the instant so far-east zones stay in 0-23.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

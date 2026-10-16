@@ -1,0 +1,8 @@
+fix(invoice): correct "welcom" typo in invoice footer
+
+For the customer:
+What changed: The closing line of the invoice now reads "We hope to welcome you again" instead of "welcom".
+Why it matters: Guests take the invoice home with them, and a misspelling on it looks careless.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

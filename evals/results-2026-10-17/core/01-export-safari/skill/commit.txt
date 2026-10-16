@@ -1,0 +1,35 @@
+Fall back to a plain download when the browser has no save picker
+
+exportBookings called window.showSaveFilePicker unconditionally. Only
+Chromium browsers implement it; in Safari it is undefined, so the call
+threw inside an async function and the rejected promise went unhandled.
+The tap produced no file and no error message, which is exactly the
+"does nothing" the reception desks described.
+
+Feature-detect the picker and otherwise hand the CSV to the browser's
+own download mechanism through a temporary object-URL link, which Safari
+supports. Chrome keeps the folder picker, so nobody loses the ability to
+choose where the file lands.
+
+Verified: node --test covers both paths — no picker produces one download
+click carrying a text/csv blob with the expected rows, and a present
+picker is used with no link created. Not verified on a real iPad: this
+repo holds no runnable app or UI, so the reported device cannot be
+reproduced here. Worth one check at a reception desk on either hotel's
+iPad before the ticket is closed.
+
+Not shipped: CSV escaping. Values are still joined with bare commas and
+no quoting, so a guest name containing a comma or a quote mark still
+breaks its row — on Safari and Chrome alike. That is a separate defect
+from the Safari failure reported here, so it is left for its own change.
+
+For the customer:
+What changed: The Export button on the bookings screen now works in
+Safari on iPads. Tapping it used to do nothing whatsoever; it now saves
+the day's bookings as a CSV file, the way it always has on Chrome.
+Why it matters: Reception staff at the two hotels that reported this can
+export the day's bookings from the iPad already on the desk, instead of
+going to find a computer running Chrome.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

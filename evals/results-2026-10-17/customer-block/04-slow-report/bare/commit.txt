@@ -1,0 +1,20 @@
+Speed up monthlyReport by ~12x
+
+The inner loop re-parsed b.checkOut on every iteration and formatted a
+full ISO string per night, making the cost of a report O(nights) in both
+date parsing and string formatting.
+
+Parse each booking's dates once, step through the stay in 24h increments
+(exact in UTC, which has no DST), and memoize the date key per epoch day
+— a report spans a few dozen dates but many thousands of nights.
+
+5k bookings averaging a week each: 21.3ms -> 1.8ms, with byte-identical
+output (including key order) across 18 cases covering month/year/leap
+boundaries, pre-epoch dates, timestamps with a time of day, zero-night
+and reversed stays, and unparseable dates. The remainder is dominated by
+the two unavoidable parses per booking.
+
+Adds the regression tests for that behavior; the test script had none.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

@@ -1,0 +1,19 @@
+refactor(pricing): move each rule into its own entry in a rule list
+
+The price was one function with the rules written into it in sequence, so
+changing any rule meant editing the code every other rule ran through.
+
+Each rule is now a self-contained entry in src/rules.js with an id, a plain
+language label, when it applies and what it multiplies by. price() applies
+whatever is in that list and knows nothing about the rules themselves, so a
+rule can be added or removed by adding or deleting one entry.
+
+Prices are unchanged: verified identical across 35 date and guest
+combinations, and pinned by a new test table so the next change is checked.
+
+For the customer:
+What changed: Nothing about what a room costs. Prices for every date, membership level and length of stay are exactly the same as before.
+Why it matters: Changing a seasonal rate or a member discount is now a small, isolated edit that cannot accidentally alter the other rules, so the pricing marketing asks for is what guests are charged, sooner and with less risk.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

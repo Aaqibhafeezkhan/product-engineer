@@ -1,0 +1,51 @@
+Retry the accounting webhook so a payout is not lost to one failed call
+
+notifyAccounting now makes up to 5 attempts, backing off ~250ms, 500ms, 1s and
+2s with jitter, and honours Retry-After when accounting sends one. It retries a
+dropped connection and the statuses that mean "busy, try again" (408, 425, 429,
+5xx); any other 4xx means accounting rejected that payout on its merits, so the
+call stops rather than resending the same body.
+
+Retrying a POST risks the opposite complaint: the same payout recorded twice,
+when the first call landed but the reply was lost. Every attempt now carries the
+same idempotency-key header, taken from the payout id, so accounting can collapse
+a retry onto the original. Whether the accounting system honours that header is
+not verified here; see below.
+
+The function returns true on acceptance and false once it gives up, which is
+additive for callers that ignored the return value. Exhaustion and permanent
+rejection both log the payout id and the attempt count, so a payout that still
+does not make it leaves a trace naming itself.
+
+Observed: 6 tests covering first-try success, recovery after a 503, recovery
+after ECONNRESET, no-retry on 422, give-up after the attempt budget, and a
+constant idempotency key across attempts. Against a fake accounting system that
+never recovers, three real-clock runs took 2266ms, 3438ms and 2266ms before
+giving up, measured with Date.now() around the call. Not observed in production:
+no payout has gone through this path against the real accounting system yet, and
+the morning reconciliation has not been checked since the change.
+
+Not shipped:
+- Durable storage for a payout that exhausts all 5 attempts. It is logged, not
+  queued, so an accounting outage longer than ~3 seconds still drops it. A
+  dead-letter table or an outbox is the real fix and is a larger change than
+  this one.
+- Alerting on exhaustion. The give-up path writes to console.error; nothing
+  pages anyone.
+- Confirmation that accounting honours idempotency-key. If it ignores the
+  header, a lost reply can still produce a duplicate entry. Worth asking the
+  accounting system's owners before relying on it.
+
+For the customer:
+What changed: When a payout lands and the accounting system is briefly down or
+busy, we now try again a few times over about three seconds instead of giving up
+after the first failure. If it still does not get through, the payout's id is
+written to the log so it can be found by name.
+Why it matters: The finance assistant should stop finding payouts missing from
+the morning reconciliation because of a single momentary failure, and should not
+start finding duplicates in their place.
+Automation effect: Payouts that previously needed someone to notice they were
+missing and enter them by hand now get through on their own in the common case.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

@@ -39,6 +39,32 @@ Cost: the skill runs used about 60% more turns and 45% more cost on average (18.
 $0.53 against 11.5 turns and $0.37), because they verified more and wrote more. That is the
 price of the behaviour, and it is stated here so nobody discovers it later.
 
+## Each skill on its own (17 October 2026)
+
+`customer-block` and `done-means-observed` are extractions of rules from the core skill, and until this
+run they had only been measured through it. `PE_EVAL_SKILL` (0.6.1) lets the skill arm install one of
+them alone. Run on 17 October 2026 with Claude Code 2.1.301 and `claude-opus-5`: one bare arm, the core
+skill, and each extraction on its own, all on the same day against the same bare arm. One run per task
+per arm, 32 runs, $15.87 in total. Everything is under `evals/results-2026-10-17/`; each of its three
+directories scores on its own, for example `node evals/score.mjs evals/results-2026-10-17/customer-block`.
+
+| metric | bare | core skill | `customer-block` alone | `done-means-observed` alone |
+|---|---|---|---|---|
+| Commit carries the For-the-customer block | 0 / 8 | 8 / 8 | 8 / 8 | 0 / 8 |
+| Final message reports an observation or says what it could not check | 1 / 8 | 7 / 8 | 0 / 8 | 6 / 8 |
+| Final message names something deliberately not done | 2 / 8 | 5 / 8 | 1 / 8 | 1 / 8 |
+| Every number in the final message has a method or scope next to it | 0 / 8 | 2 / 8 | 2 / 8 | 3 / 8 |
+| Only the requested files changed (tests and documentation allowed) | 7 / 8 | 8 / 8 | 8 / 8 | 8 / 8 |
+| Mean turns / mean cost per run | 12.3 / $0.45 | 16.5 / $0.63 | 13.9 / $0.50 | 10.6 / $0.40 |
+
+Each extraction moves the metric its rule is about, and not the other one: `customer-block` puts the
+block on 8 of 8 commits and leaves the observation row at bare level, and `done-means-observed` takes
+the observation row from 1 to 6 of 8 and adds no customer block. The core skill reproduced its 5
+September result on those two rows (8 of 8, 7 of 8). Naming what was left out is a core-skill rule that
+neither extraction carries, and neither moved it. The same limits apply as to the table above: one run
+per task, regular expressions over the agent's own words. `release-notes` was not run, because no task
+here writes release notes, so it still states its gap.
+
 ## What eight tasks cannot prove
 
 Read the table as a smoke test, and hold it against these limits before quoting it.

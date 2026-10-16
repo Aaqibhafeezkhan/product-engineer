@@ -1,0 +1,9 @@
+feat(notifications): show a count of items needing a person on the bell
+
+Count notifications that are flagged needsPerson and not yet read, and
+render it on the bell. The bell stays bare at zero rather than showing a 0.
+
+For the customer:
+What changed: The bell in the menu now carries a number showing how many notifications are still waiting on someone. Items nobody needs to touch, and ones a colleague has already opened, are left out of it.
+Why it matters: Front desk staff can see at a glance whether anything needs them, without opening the list to check.
+

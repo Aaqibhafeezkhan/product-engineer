@@ -1,0 +1,25 @@
+Split pricing into independent rules
+
+Every pricing rule lived in one function, so each change marketing asked
+for meant editing the same block of conditionals and re-reasoning about
+the rules around it.
+
+Each rule now lives in its own file under src/rules/ and exports
+`{ name, multiplier(context) }`, returning a factor to apply to the
+running price (1 = does not apply). Rules cannot see each other or the
+running total, so they can only be combined, never broken by one
+another. src/rules/index.js lists the active rules and is the only
+shared file: adding or retiring a rule is a file plus two lines there.
+
+price() keeps its signature and its results — verified bit-identical to
+the previous implementation across 72k combinations of date, tier,
+nights and base rate. Loyalty tier lookup now uses Object.hasOwn, so a
+tier named like an Object property ("constructor") is an unknown tier
+instead of poisoning the price.
+
+Adds test/pricing.test.js, which pins the current prices, exercises each
+rule in isolation, and asserts that dropping any one rule leaves the
+others intact.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

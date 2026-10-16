@@ -1,0 +1,25 @@
+fix(checkin): read reminder offsets from the time zone database
+
+reminderHour looked the guest's zone up in a two-entry table of fixed
+offsets. Guests whose record had no zone produced `9 - undefined`, i.e. a
+NaN reminder hour: 4 of the 12 guests on the roster (ids 3, 6, 9, 12).
+The table was also wrong in principle - Europe/London was pinned to +1,
+which is only correct in summer.
+
+Offsets now come from the IANA database via Intl at the moment the
+reminder is due, which covers DST and the half-hour zones, and the result
+is wrapped into a valid clock time so negative and large offsets cannot
+fall out of 0..23. A guest with a missing or unparseable zone is reminded
+at 09:00 UTC and flagged `fallback: true` rather than silently mistimed;
+guestsMissingTimezone() lists them for backfill.
+
+Minutes are now reported alongside the hour, since 09:00 local in
+Asia/Kolkata is 03:30 UTC and an hour-only schedule cannot express that.
+
+For the customer:
+What changed: Guests whose record was missing a time zone were getting a check-in reminder with no valid send time at all. Everyone now gets one, and guests in places that move their clocks for summer time, or that sit on a half-hour offset, get it at 09:00 their time instead of up to an hour off.
+Why it matters: A check-in reminder is only useful if it arrives on the morning of check-in at a reasonable hour; one that arrives at the wrong time, or not at all, means guests turn up unprepared and call the front desk instead.
+Automation effect: Guests with incomplete records are handled on their own now - the reminder goes out at 09:00 UTC and the guest is listed as needing a time zone, instead of needing someone to spot the missing field first.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

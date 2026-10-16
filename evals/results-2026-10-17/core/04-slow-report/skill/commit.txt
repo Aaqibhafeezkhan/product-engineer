@@ -1,0 +1,34 @@
+Speed up monthly occupancy report by 8-19x
+
+The per-night loop re-parsed checkOut and built a fresh date string on every
+iteration. Parse each booking's dates once, step the timestamp by whole UTC
+days, and reuse the date key per distinct day, so toISOString runs once per day
+in the report instead of once per occupied night.
+
+Output is byte-identical, key order included. Verified equivalent against the
+previous implementation on generated datasets and on 19 edge cases: month,
+leap-day and year boundaries, local DST transitions, check-in/check-out times,
+zero-night and reversed stays, unparseable and missing dates, and Date-object
+and epoch-millisecond inputs.
+
+Measured on this machine (node --test, 10 repetitions, mean ms per call):
+  1k bookings, up to 5 nights     1.88 ms -> 0.23 ms   (8.2x)
+  10k bookings, up to 5 nights   17.55 ms -> 2.24 ms   (7.8x)
+  10k bookings, up to 30 nights  82.01 ms -> 4.38 ms   (18.7x)
+The benchmark is scratch code and is not committed; src/report.test.js locks in
+the output and passes against both the old and new implementation.
+
+Not shipped: no change to how or when the report is sent, and no caching of
+rendered reports. If the owner's slowness is in mail delivery or in the query
+that loads bookings rather than in this calculation, this will not be the fix
+they feel -- worth confirming against a real run before closing it out.
+
+For the customer:
+What changed: The monthly occupancy report now does the same arithmetic far
+faster, so it finishes and lands in the owner's inbox sooner on the 1st. The
+numbers in it are exactly the same as before.
+Why it matters: Owners stop waiting on a report that felt slow, and large
+properties with many or long bookings see the biggest improvement.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

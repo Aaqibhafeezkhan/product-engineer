@@ -1,0 +1,22 @@
+feat(notifications): show how many notifications need a person on the bell
+
+renderBell now counts the items marked needsPerson and renders the number in
+a .bell-count badge, with an aria-label so it is announced, and no badge at all
+when the count is zero. A missing list renders the plain bell rather than
+throwing.
+
+`read` is deliberately not part of the count: reading an item records that
+someone saw it, not that the work happened, and the data has no done/handled
+field. If read items were excluded, clicking through the menu would empty the
+badge without any work being done.
+
+For the customer:
+What changed: The bell now carries a number showing how many notifications are waiting for someone to act, so reception can see at a glance how much is outstanding without opening the menu.
+Why it matters: Staff can tell a busy moment from a quiet one immediately, and nothing that needs a person sits unnoticed behind a closed menu.
+
+Not shipped:
+- A cap such as "9+" for large counts: the badge prints the number as-is; worth adding when a property carries enough open items that the number crowds the bell.
+- A way to mark an item handled: the data records only needsPerson and read, so there is nothing to clear the count with; worth it once an item can be resolved from the menu.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+
