@@ -1,6 +1,6 @@
 {
   "name": "product-engineer",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Your agent ships code. product-engineer makes it ship outcomes. Four agent skills plus a zero-dependency check for the For-the-customer block in commit messages and pull requests.",
   "type": "module",
   "bin": {

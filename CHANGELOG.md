@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.6.1
+## 0.6.1 (2026-10-16)
 
 **Measure one skill at a time.** `PE_EVAL_SKILL=customer-block sh evals/run.sh` installs only that skill in the
 skill arm, `meta.json` records which skill ran, and `evals/score.mjs` refuses to table runs of different skills
