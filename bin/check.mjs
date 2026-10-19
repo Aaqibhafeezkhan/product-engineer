@@ -10,11 +10,11 @@ import { readability } from "./readability.mjs";
 import { acceptedHeadings, preferredHeadings, shippedHeadings, isHeading, headingWithText, normalise } from "./headings.mjs";
 import { referenceFindings } from "./references.mjs";
 
-const HELP = `usage: product-engineer check [file|-|--stdin] [--pr <number>] [--warn] [--lang <code>] [--format text|github] [--comment]
+const HELP = `usage: product-engineer check [file|-|--stdin] [--pr <number>] [--warn] [--lang <code>] [--format text|github] [--comment]\n       product-engineer check --commits <range> [--warn] [--format text|github]
        product-engineer template [--lang <code>]
        product-engineer doctor
 
-Reads a commit message or pull request description and reports whether it
+With --commits <range>, checks each non-merge commit in the Git range and prefixes findings with its short SHA.\n\nReads a commit message or pull request description and reports whether it
 carries the "For the customer" block and whether the block reads the way the
 skill asks. With no file it reads .git/COMMIT_EDITMSG when present.
 
@@ -163,6 +163,29 @@ export function analyse(text, opts = {}) {
   // the path or run URL behind a claim usually sits in the technical body above it.
   for (const f of referenceFindings(text, { mode: opts.references, cwd: opts.cwd })) findings.push(f);
 
+  return { skipped: false, findings };
+}
+
+
+/** Check every non-merge commit in a Git revision range. */
+export function analyseCommitRange(range, opts = {}) {
+  if (!range || range.startsWith("-")) throw new Error("--commits needs a Git range such as main..HEAD");
+  const cwd = opts.cwd ?? process.cwd();
+  const shas = execFileSync("git", ["rev-list", "--no-merges", range], { cwd, encoding: "utf8" }).trim().split("\n").filter(Boolean);
+  const findings = [];
+  for (const sha of shas) {
+    const short = execFileSync("git", ["rev-parse", "--short", sha], { cwd, encoding: "utf8" }).trim();
+    const message = execFileSync("git", ["show", "-s", "--format=%B", sha], { cwd, encoding: "utf8" });
+    const result = analyse(message, { ...opts, cwd });
+    if (result.skipped) continue;
+    for (const finding of result.findings) {
+      findings.push({
+        ...finding,
+        level: opts.warn && finding.level === "error" ? "warn" : finding.level,
+        message: `${short}: ${finding.message}`,
+      });
+    }
+  }
   return { skipped: false, findings };
 }
 
