@@ -5,7 +5,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { mkdtempSync, writeFileSync, rmSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { analyse, exitCode, render, commentBody } from "../bin/check.mjs";
+import { analyse, analyseCommitRange, exitCode, render, commentBody } from "../bin/check.mjs";
 import { shippedHeadings } from "../bin/headings.mjs";
 
 const cli = join(dirname(fileURLToPath(import.meta.url)), "..", "bin", "check.mjs");
@@ -246,3 +246,63 @@ test("an unfilled template fails check, and passes once filled in", () => {
   assert.equal(exitCode(resFilled), 0, "filled template must pass check");
 });
 
+
+test("commit range checks each non-merge commit, prefixes failures with short SHAs, and honors --warn", () => {
+  const cwd = mkdtempSync(join(tmpdir(), "pe-commits-"));
+  try {
+    const git = (...args) => execFileSync("git", args, { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
+    git("init", "-b", "main");
+    git("config", "user.name", "Test User");
+    git("config", "user.email", "test@example.com");
+    writeFileSync(join(cwd, "tracked.txt"), "base\n");
+    git("add", ".");
+    git("commit", "-m", "chore: base [no-customer]");
+    const base = git("rev-parse", "HEAD");
+    writeFileSync(join(cwd, "tracked.txt"), "passing\n");
+    git("add", ".");
+    git("commit", "-m", "feat: export a report\n\nFor the customer:\nWhat changed: People can export the report.\nWhy it matters: They no longer copy it by hand.");
+    writeFileSync(join(cwd, "tracked.txt"), "failing\n");
+    git("add", ".");
+    git("commit", "-m", "feat: missing customer block");
+    const badSha = git("rev-parse", "--short", "HEAD");
+    const result = analyseCommitRange(`${base}..HEAD`, { cwd });
+    assert.equal(exitCode(result), 1);
+    assert.ok(result.findings.some((f) => f.level === "error" && f.message.startsWith(`${badSha}: `)), JSON.stringify(result.findings));
+    assert.ok(!result.findings.some((f) => f.level === "error" && f.message.includes("People can export")), "the passing commit should not fail");
+    const warned = analyseCommitRange(`${base}..HEAD`, { cwd, warn: true });
+    assert.equal(exitCode(warned), 0);
+    assert.ok(warned.findings.some((f) => f.level === "warn" && f.message.startsWith(`${badSha}: `)));
+    const cli = join(dirname(fileURLToPath(import.meta.url)), "..", "bin", "check.mjs");
+    const run = spawnSync("node", [cli, "check", "--commits", `${base}..HEAD`], { cwd, encoding: "utf8" });
+    assert.equal(run.status, 1, run.stdout + run.stderr);
+    assert.match(run.stdout, new RegExp(badSha + ": .*no .*block"));
+    const warnRun = spawnSync("node", [cli, "check", "--commits", `${base}..HEAD`, "--warn"], { cwd, encoding: "utf8" });
+    assert.equal(warnRun.status, 0, warnRun.stdout + warnRun.stderr);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
+
+test("commit-range exemptions match the commit hook", () => {
+  const cwd = mkdtempSync(join(tmpdir(), "pe-commit-exemptions-"));
+  try {
+    const git = (...args) => execFileSync("git", args, { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
+    git("init", "-b", "main");
+    git("config", "user.name", "Test User");
+    git("config", "user.email", "test@example.com");
+    writeFileSync(join(cwd, "tracked.txt"), "base\n");
+    git("add", ".");
+    git("commit", "-m", "chore: base [no-customer]");
+    const base = git("rev-parse", "HEAD");
+    for (const message of ["fixup! feat: change", "squash! feat: change", "Revert \"feat: change\"", "chore: generated [no-customer]"]) {
+      writeFileSync(join(cwd, "tracked.txt"), message + "\n");
+      git("add", ".");
+      git("commit", "-m", message);
+    }
+    const result = analyseCommitRange(`${base}..HEAD`, { cwd });
+    assert.equal(exitCode(result), 0, JSON.stringify(result.findings));
+    assert.equal(result.findings.length, 0);
+  } finally {
+    rmSync(cwd, { recursive: true, force: true });
+  }
+});
