@@ -1,0 +1,4 @@
+Add exponential backoff retries to accounting webhook
+
+Retries up to 3 times on transient failures (5xx errors and rate limits) to prevent payouts from being lost when the accounting service briefly fails.
+

@@ -1,0 +1,8 @@
+README.md
+src/pricing.js
+src/rules/index.js
+src/rules/long-stay.js
+src/rules/loyalty.js
+src/rules/summer.js
+src/rules/weekend.js
+test/pricing.test.js

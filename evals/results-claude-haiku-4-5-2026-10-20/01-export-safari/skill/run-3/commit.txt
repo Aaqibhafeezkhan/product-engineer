@@ -1,0 +1,4 @@
+Fix Export button on Safari and iPad
+
+The File System Access API (showSaveFilePicker) is not supported on Safari. Fall back to creating a blob and downloading via link element, which works across all browsers including Safari on iPad.
+

@@ -1,0 +1,4 @@
+Add retries to accounting webhook with exponential backoff
+
+Prevents payouts from being lost due to transient failures. Retries up to 3 times with exponential backoff (1s, 2s, 4s) on 5xx errors or network failures. Non-retryable 4xx errors fail immediately.
+

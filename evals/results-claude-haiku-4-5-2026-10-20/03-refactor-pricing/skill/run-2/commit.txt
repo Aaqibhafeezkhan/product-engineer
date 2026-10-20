@@ -1,0 +1,6 @@
+Refactor pricing into modular rule-based system
+
+Extracted pricing rules into individual, composable functions in a rules array.
+Each rule can now be added or removed without touching others, making it safe
+for frequent marketing requests to change pricing without risking other rules.
+

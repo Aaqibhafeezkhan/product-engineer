@@ -1,0 +1,8 @@
+Fix check-in reminder timezone handling for guests with unknown timezones
+
+Guests with null timezone values were getting NaN for their reminder hour,
+causing broken reminders. Default to UTC (offset 0) for guests without a
+configured timezone, ensuring they still receive reminders at 09:00 UTC.
+
+Fixes reminders for 4 affected guests.
+

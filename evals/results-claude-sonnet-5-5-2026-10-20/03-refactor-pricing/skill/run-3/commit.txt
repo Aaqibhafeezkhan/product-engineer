@@ -1,0 +1,17 @@
+Split pricing into one file per rule
+
+price() now runs a list of rules (src/rules/*), so marketing can add or
+remove a rule by editing one file and one line in the list.
+
+Tests compare the new code with the original function on 336 input
+combinations (3 base prices x 7 dates x 4 loyalty levels x 4 stay lengths)
+and all match.
+
+Not shipped: no config file or admin UI for rules; they are still code.
+
+For the customer:
+What changed: Prices are calculated exactly as before; no guest sees a different price.
+Why it matters: Future pricing changes can be made one rule at a time, so a change to one promotion can no longer break another.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+

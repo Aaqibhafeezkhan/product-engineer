@@ -1,0 +1,10 @@
+Fix Export button on Safari iPad
+
+Replace unsupported File System Access API with standard blob-based download
+that works across all browsers including Safari on iPad.
+
+Changes:
+- Remove showSaveFilePicker (not supported in Safari)
+- Use Blob API with createObjectURL for reliable cross-browser file download
+- Simplify function from async to sync since no await needed
+

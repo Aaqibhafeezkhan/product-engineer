@@ -1,0 +1,4 @@
+Optimize monthlyReport performance by caching checkOut date
+
+Avoid creating a new Date object on every loop iteration when checking the condition. Cache checkOut once before the loop to eliminate repeated expensive Date instantiation.
+

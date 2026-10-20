@@ -1,0 +1,1 @@
+Done. I've added retry logic with exponential backoff (3 retries: 100ms → 200ms → 400ms) to the accounting webhook. It now handles both HTTP errors and network failures, only logging after all retries are exhausted. The commit is ready on main.

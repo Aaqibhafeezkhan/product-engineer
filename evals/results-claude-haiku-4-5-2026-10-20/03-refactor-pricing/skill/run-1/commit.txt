@@ -1,0 +1,11 @@
+Restructure pricing rules as independent rule objects
+
+Each pricing rule is now a self-contained object that can be added or removed from the pricingRules array without touching other rules or the main price function. Marketing can now change rules safely without risking other logic.
+
+Rules can be easily:
+- Added: append a new rule object with name and apply function
+- Removed: delete the rule from the array
+- Modified: update only the specific rule's apply function
+
+Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>
+

@@ -1,0 +1,7 @@
+Fix bookings export on Safari by falling back to blob download
+
+Safari doesn't implement showSaveFilePicker, so the Export button threw
+and did nothing. Use it when available, otherwise download via an anchor.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+

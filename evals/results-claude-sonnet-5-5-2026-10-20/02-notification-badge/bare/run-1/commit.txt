@@ -1,0 +1,6 @@
+Show count of notifications needing action on the bell
+
+Counts notifications that need a person and are still unread.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+

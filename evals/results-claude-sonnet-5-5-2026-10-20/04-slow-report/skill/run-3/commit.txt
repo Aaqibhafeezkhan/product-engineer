@@ -1,0 +1,12 @@
+Speed up monthly occupancy report
+
+For the customer: the monthly occupancy report now builds about 15x faster
+on a synthetic set of 20,000 bookings (160 ms to 10 ms). The numbers in it
+are unchanged. Not measured on real owner data or on the email send.
+
+The loop built a Date and an ISO string for every booking-night. It now
+counts by integer day and formats each distinct day once. Keys come out in
+date order instead of booking order.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+

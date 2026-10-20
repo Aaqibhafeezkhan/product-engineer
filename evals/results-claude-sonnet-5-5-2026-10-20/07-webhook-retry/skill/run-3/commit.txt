@@ -1,0 +1,15 @@
+feat(webhook): retry accounting notifications on transient failures
+
+Retries network errors, 429 and 5xx up to 4 attempts with exponential
+backoff (500ms, 1s, 2s). Other 4xx are not retried. notifyAccounting now
+returns true/false instead of undefined.
+
+For the customer:
+What changed: A single failed call to accounting no longer loses a payout; the system tries again a few times before giving up.
+Why it matters: Fewer payouts go missing from accounting, so the finance assistant finds fewer gaps at reconciliation.
+Automation effect: Brief accounting outages are now absorbed without anyone re-sending payouts by hand.
+
+Not shipped: no persistent queue, so if accounting is down for longer than the retry window (about 3.5s) the payout is still only logged. Tests use a fake fetch; not observed against the real accounting endpoint.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+

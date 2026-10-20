@@ -1,0 +1,7 @@
+Fix bookings export on Safari by falling back to a download link
+
+showSaveFilePicker isn't available in Safari, so the Export button threw
+and did nothing on iPads. Use a Blob download when it's missing.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+

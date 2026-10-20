@@ -1,0 +1,7 @@
+Fix broken check-in reminders for guests with null timezone
+
+4 guests (IDs 3, 6, 9, 12) had null timezones, causing their reminder hour
+calculation to return NaN. Default to UTC (offset 0) for guests with missing
+timezone data instead of propagating undefined through the calculation.
+Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>
+

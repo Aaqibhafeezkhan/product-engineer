@@ -1,0 +1,9 @@
+Retry accounting webhook on transient failures
+
+Retry up to 4 attempts with exponential backoff (500ms base) on network
+errors, 429 and 5xx. Other 4xx fail immediately. After the final failure
+the error is thrown instead of only logged, so callers can see that a
+payout was not delivered.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+

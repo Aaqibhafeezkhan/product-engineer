@@ -1,0 +1,6 @@
+Add notification count badge to bell
+
+Display the count of notifications that need attention as a badge on the bell button, showing the front desk manager at a glance how many items require action.
+
+Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>
+

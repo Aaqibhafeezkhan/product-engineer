@@ -1,0 +1,4 @@
+Restructure pricing rules for independent configuration
+
+Changed from a monolithic price function to a composable rules array. Each pricing rule (weekend surcharge, loyalty discount, summer pricing, long-stay discount) is now isolated in its own function. Rules can be added, removed, or modified without touching others, making future pricing changes safer and less risky.
+

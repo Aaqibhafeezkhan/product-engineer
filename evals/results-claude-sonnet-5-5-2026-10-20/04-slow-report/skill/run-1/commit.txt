@@ -1,0 +1,17 @@
+Speed up monthly occupancy report
+
+Count booked days with plain millisecond arithmetic and cache each day's
+date string, instead of building a Date and formatting it for every
+booking-day. Output is identical (same keys, counts and key order).
+
+Measured with a throwaway script (not committed): 20,000 generated
+bookings of 1-14 nights, one run each on this machine, old vs new output
+compared with deepStrictEqual on entries: 115.1 ms -> 10.3 ms.
+Not checked: the real monthly email job or real owner data.
+
+For the customer:
+What changed: The monthly occupancy report is calculated much faster, with the same figures as before.
+Why it matters: Owners get their report without the long wait, and the numbers they see are unchanged.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+

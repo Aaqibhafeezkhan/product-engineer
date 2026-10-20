@@ -1,0 +1,5 @@
+Remove coupon code path from checkout
+
+Coupons were retired months ago. Remove the applyCoupon function and the code parameter from checkout to prevent coupon codes from being used.
+Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>
+

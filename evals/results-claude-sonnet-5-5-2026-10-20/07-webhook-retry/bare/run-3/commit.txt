@@ -1,0 +1,8 @@
+Retry accounting webhook on network errors, 429 and 5xx
+
+Previously a single failed call was logged and dropped, so payouts never
+reached accounting. Now retries up to 4 attempts with exponential backoff
+and throws if all fail so callers can handle it.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+

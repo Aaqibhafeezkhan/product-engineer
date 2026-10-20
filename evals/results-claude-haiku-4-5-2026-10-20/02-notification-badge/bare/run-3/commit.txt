@@ -1,0 +1,5 @@
+Add notification count badge to bell showing pending actions
+
+Display the number of notifications that require person action (needsPerson: true)
+on the bell UI element.
+

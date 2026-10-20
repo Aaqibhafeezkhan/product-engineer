@@ -1,0 +1,1 @@
+Done. I've restructured the pricing rules from tangled conditionals into an independent rule array. Now each rule is self-contained—Marketing can add, remove, or modify individual rules (weekend surcharge, loyalty discounts, seasonal peak, long stays) without risk of affecting the others. Each rule simply declares when it applies and its multiplier value.

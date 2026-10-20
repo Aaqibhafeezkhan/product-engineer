@@ -1,0 +1,6 @@
+Remove coupon code logic from checkout
+
+Coupons have been retired. Removed the applyCoupon function and the code parameter from checkout to prevent any coupon path from being triggered.
+
+Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>
+

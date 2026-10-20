@@ -1,0 +1,4 @@
+Optimize monthly report performance
+
+Pre-compute checkout date instead of creating a new Date object on every loop iteration. This significantly reduces garbage collection overhead and improves report generation speed.
+

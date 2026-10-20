@@ -1,0 +1,17 @@
+Split pricing into one file per rule
+
+Each pricing rule (weekend, loyalty, summer, long-stay) now lives in
+src/rules/ and is listed in src/rules/index.js; price() just multiplies
+the factors. Adding or removing a rule touches only that rule's file and
+one line in the index. Output is unchanged: a test compares the new code
+against a copy of the old function over 336 date/loyalty/stay/base combinations
+(7 dates x 4 loyalty values x 4 stay lengths x 3 base prices).
+
+For the customer:
+What changed: Pricing rules can now be added or removed one at a time without risk to the other rules. Prices quoted today are identical.
+Why it matters: Marketing's rule changes can ship faster and with less worry about breaking unrelated discounts or surcharges.
+
+Not shipped: rule ordering/priority and rule config from outside code; rules are multipliers, so order does not affect the result.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+

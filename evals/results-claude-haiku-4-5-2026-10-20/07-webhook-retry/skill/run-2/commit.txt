@@ -1,0 +1,4 @@
+Add retries to accounting webhook
+
+Retry transient failures (5xx, 408, 429) with exponential backoff to prevent payouts from being lost when the webhook call fails. Non-retryable errors (4xx except 408/429) fail immediately.
+

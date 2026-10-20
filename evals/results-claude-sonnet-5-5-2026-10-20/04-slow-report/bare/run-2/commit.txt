@@ -1,0 +1,7 @@
+Speed up monthlyReport by iterating over timestamps
+
+Avoid allocating a new Date for checkOut on every loop iteration and
+mutating a Date per day; use numeric millisecond arithmetic instead.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+

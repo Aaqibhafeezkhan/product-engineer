@@ -1,0 +1,1 @@
+Done. The issue was that the Export button used `showSaveFilePicker()`, which Safari doesn't support. I've added a fallback that creates a blob and triggers a download via a link element—a method that works across all browsers including Safari on iPad. The fix is committed.

@@ -1,0 +1,1 @@
+Done. Removed the `applyCoupon` function and the coupon code path from the `checkout` function. The checkout now only returns the subtotal without any coupon logic, preventing any expired coupon from being triggered. Committed as `4d1ed25`.

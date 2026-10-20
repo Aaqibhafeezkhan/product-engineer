@@ -1,0 +1,4 @@
+Restructure pricing rules as independent, composable rules
+
+Move pricing rules from conditional logic into a declarative rule array. Each rule is self-contained with its own condition and multiplier, so rules can be added or removed without touching others. This eliminates the risk of unintended side effects when marketing requests pricing changes.
+

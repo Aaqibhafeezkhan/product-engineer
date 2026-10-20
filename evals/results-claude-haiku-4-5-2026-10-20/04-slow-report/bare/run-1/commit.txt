@@ -1,0 +1,6 @@
+Optimize monthly report: avoid recreating Date objects in loop
+
+Move Date(b.checkOut) outside the inner loop to prevent creating
+thousands of Date objects per booking. Creates each once instead of
+once per day in the date range.
+

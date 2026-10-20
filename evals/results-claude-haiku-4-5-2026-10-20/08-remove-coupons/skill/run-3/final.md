@@ -1,0 +1,1 @@
+Done. I've removed the `applyCoupon` function and the `code` parameter from checkout. The function now returns the subtotal directly as the total with no coupon processing possible. Committed as 48123d6.

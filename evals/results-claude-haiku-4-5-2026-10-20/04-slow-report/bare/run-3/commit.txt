@@ -1,0 +1,6 @@
+Optimize monthly report performance by computing checkOut once per booking
+
+Move Date object creation outside the loop to avoid recreating it on every
+iteration. This eliminates redundant Date instantiation that was causing
+significant slowdown on bookings with many days.
+

@@ -1,0 +1,1 @@
+Done. The webhook now retries up to 3 times with exponential backoff (1s, 2s, 4s delays) when the accounting service returns retryable errors (5xx or 429 status codes). This ensures payouts won't be lost to temporary failures.

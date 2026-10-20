@@ -1,0 +1,6 @@
+Add notification count badge to bell icon
+
+Displays the number of unread notifications that need action from a person.
+
+Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>
+

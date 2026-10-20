@@ -1,0 +1,7 @@
+Split pricing into independent rules
+
+Each rule lives in src/rules/ and is registered in src/rules/index.js.
+price() just applies the list in order; output is unchanged.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+

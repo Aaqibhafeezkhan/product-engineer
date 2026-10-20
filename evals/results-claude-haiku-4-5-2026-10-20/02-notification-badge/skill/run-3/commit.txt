@@ -1,0 +1,5 @@
+Add notification count badge to bell
+
+Display the count of unread notifications requiring action on the notification bell, so the front desk manager can see at a glance how many tasks are pending.
+Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>
+

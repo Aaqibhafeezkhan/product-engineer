@@ -1,0 +1,5 @@
+Optimize monthly report by avoiding redundant Date construction
+
+Create the checkout date once outside the loop instead of constructing
+it on every iteration, eliminating wasteful Date object allocation.
+

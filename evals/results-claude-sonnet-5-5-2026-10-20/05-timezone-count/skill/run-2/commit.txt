@@ -1,0 +1,15 @@
+Fix check-in reminder time for guests without a time zone
+
+Guests with no time zone on file got an invalid reminder hour (NaN), and
+the hard-coded offsets ignored daylight saving. Offsets are now computed
+from the time zone name, and guests with no zone fall back to
+Europe/Istanbul.
+
+For the customer:
+What changed: Every guest now gets a check-in reminder at a valid time. Guests whose time zone we don't know get it at 09:00 Istanbul time, and London guests stay correct when the clocks change.
+Why it matters: No guest is left without a reminder or gets it at the wrong hour.
+
+Not shipped: collecting the missing time zones for the affected guests; the Istanbul fallback is a guess until we have them.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+

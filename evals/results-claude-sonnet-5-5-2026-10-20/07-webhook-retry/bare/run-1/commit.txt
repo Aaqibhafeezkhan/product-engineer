@@ -1,0 +1,7 @@
+Retry accounting webhook on transient failures
+
+Retry network errors, 429 and 5xx with exponential backoff (4 attempts),
+and throw after exhausting retries instead of silently logging.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+

@@ -1,0 +1,13 @@
+feat(notifications): show count of items needing a person on the bell
+
+Count = notifications with needsPerson true and read false. The badge is
+hidden when the count is zero.
+
+For the customer:
+What changed: The bell now shows a number: how many notifications still need a person to act on. Automatic items like the nightly backup are not counted, and neither are ones already read.
+Why it matters: Reception can tell at a glance whether anything needs them, without opening the list.
+
+Not shipped: no styling for the badge (class "badge" is unstyled), and no live update when a notification changes. "Done" is taken to mean "read"; there is no separate handled state in the data.
+
+Observed: rendered the bell with the sample data and got a badge of 2 (Room 12 checkout, Guest asked for late checkout). Not checked in a real browser or the live menu.
+

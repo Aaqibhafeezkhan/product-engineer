@@ -1,0 +1,4 @@
+Remove retired coupon code path from checkout
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+

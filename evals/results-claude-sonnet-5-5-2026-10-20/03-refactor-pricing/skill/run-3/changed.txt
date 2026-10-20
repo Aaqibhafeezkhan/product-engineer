@@ -1,0 +1,9 @@
+README.md
+fixtures/legacyPricing.js
+src/pricing.js
+src/rules/index.js
+src/rules/longStay.js
+src/rules/loyalty.js
+src/rules/summer.js
+src/rules/weekend.js
+test/pricing.test.js

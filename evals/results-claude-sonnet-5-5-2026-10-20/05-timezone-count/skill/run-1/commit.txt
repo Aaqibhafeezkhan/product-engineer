@@ -1,0 +1,13 @@
+fix(reminders): handle guests with no time zone and compute offsets with DST
+
+Guests with a null time zone produced an hour of NaN, so their reminder
+had no valid send time. Offsets were also hardcoded (London ignored
+daylight saving). Offsets now come from Intl; missing or unknown zones
+fall back to Europe/Istanbul.
+
+For the customer:
+What changed: Every guest now gets the check-in reminder at a real time; guests with no time zone on file get it at 09:00 hotel time (Istanbul).
+Why it matters: Those guests previously got a broken reminder or none at all.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+

@@ -1,0 +1,17 @@
+Split pricing into one file per rule
+
+Each rule (weekend, loyalty, summer, long stay) now lives in src/rules/
+and is listed in src/rules/index.js. price() just applies the list in
+order and rounds. Output is unchanged: a test compares it against the
+original function over 4 base prices x 12 months x 28 days x 4 loyalty
+tiers x 4 stay lengths.
+
+Not shipped: rule configuration outside code (e.g. a JSON/admin UI) and
+date-ranged promotions; adding a rule still means a small code change.
+
+For the customer:
+What changed: Prices come out exactly as before. Behind the scenes, each pricing rule is now separate, so marketing's changes touch only the rule they concern.
+Why it matters: Rule changes become small and safe, so new offers can go out faster with less risk of breaking other prices.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+

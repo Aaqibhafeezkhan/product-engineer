@@ -1,0 +1,7 @@
+Split pricing into independent rules
+
+Each rule is its own module in src/rules, registered in index.js.
+Behaviour is unchanged; a test compares against the original function.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+

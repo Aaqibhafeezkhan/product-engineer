@@ -1,0 +1,6 @@
+Remove retired coupon code path from checkout
+
+Coupons were retired months ago. Remove the applyCoupon function and the
+code parameter from the checkout function to prevent any code paths that
+trigger coupon processing.
+

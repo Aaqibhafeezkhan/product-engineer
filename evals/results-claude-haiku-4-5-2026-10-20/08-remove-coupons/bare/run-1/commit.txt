@@ -1,0 +1,2 @@
+Remove retired coupon code functionality from checkout.
+

@@ -1,0 +1,4 @@
+Add retries with exponential backoff to accounting webhook
+
+Transient failures now retry up to 3 times with exponential backoff (100ms, 200ms, 400ms). Client errors (4xx) fail immediately without retries. This prevents payouts from silently dropping when the accounting service experiences temporary issues.
+

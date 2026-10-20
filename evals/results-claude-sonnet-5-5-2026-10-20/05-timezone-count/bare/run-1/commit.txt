@@ -1,0 +1,8 @@
+Fix check-in reminder time zone handling
+
+Compute the 09:00 local hour with Intl (DST-aware) instead of a fixed
+offset table, and skip guests with a missing or invalid time zone
+instead of scheduling NaN.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+

@@ -1,0 +1,6 @@
+Remove retired coupon code path from checkout
+
+checkout() no longer accepts a code or applies discounts; total equals subtotal.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+

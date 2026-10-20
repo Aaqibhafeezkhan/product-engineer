@@ -1,0 +1,1 @@
+Done! I optimized the monthly report by moving the `Date` object creation outside the loop. The original code was creating a new checkout `Date` object on every iteration of the inner loop, which is extremely wasteful. Now it's created once per booking and reused, significantly reducing garbage collection overhead and improving performance.

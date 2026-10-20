@@ -1,0 +1,6 @@
+The accounting webhook now retries failed calls, and I committed the change (`96c1ff2`). The four new tests pass in `src/webhook.test.js`. They use a fake `fetch`, so nothing has run against the real accounting endpoint.
+
+- **What gets retried:** `notifyAccounting` makes up to 4 attempts, waiting 0.5s, 1s, then 2s between them. It retries network errors, 429 and 5xx responses. Other 4xx responses (like a 400) fail straight away, because resending the same payload won't help.
+- **A behavior change you should know about:** after the last attempt fails, it now throws. Before, it only logged the failure and returned as if nothing was wrong. I made that change because swallowing the error is how payouts went missing without anyone noticing.
+- **Callers:** nothing else in the repo calls `notifyAccounting`. Whatever code calls it elsewhere needs to catch the error and record that payout as undelivered. Otherwise a failed delivery will surface as an unhandled rejection.
+- **Duplicate deliveries:** if a request reaches accounting but the response is lost, the retry will send the same payout again. Accounting should ignore duplicates, for example by keying on the payout ID. I didn't check whether it does.

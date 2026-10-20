@@ -1,0 +1,9 @@
+Fix Export button on Safari for iPad bookings
+
+Replace File System Access API with blob-based download approach for
+cross-browser compatibility. The File System Access API is not supported
+on Safari/iOS, causing the export button to fail on iPads. Using the
+blob download pattern works reliably across all browsers including Safari.
+
+Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>
+

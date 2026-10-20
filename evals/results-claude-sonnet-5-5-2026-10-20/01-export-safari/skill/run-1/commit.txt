@@ -1,0 +1,12 @@
+fix(export): fall back to a download link when Safari has no save picker
+
+Safari does not implement showSaveFilePicker, so the call threw and the
+Export button silently did nothing. Use the picker where it exists and
+otherwise download bookings.csv via a Blob link.
+
+For the customer:
+What changed: Export on the bookings screen now saves the CSV on iPads using Safari; before, tapping it did nothing.
+Why it matters: Reception staff at both hotels can export the day's bookings from their iPads again.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+

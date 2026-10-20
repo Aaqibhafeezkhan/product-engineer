@@ -1,0 +1,1 @@
+Done! I've added a notification count badge to the bell that displays the number of unread notifications requiring action. The badge shows the count of notifications where `needsPerson` is true and `read` is false—those are the ones that still need someone to act on them. The change has been committed.

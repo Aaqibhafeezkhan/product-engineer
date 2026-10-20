@@ -1,0 +1,8 @@
+Speed up monthlyReport by avoiding per-day Date allocation
+
+Iterate over epoch milliseconds and cache the ISO date key per day
+instead of mutating a Date and calling toISOString for every night.
+Output is identical; ~10x faster on a 20k-booking benchmark.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+

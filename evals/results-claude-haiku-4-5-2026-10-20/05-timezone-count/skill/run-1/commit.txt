@@ -1,0 +1,7 @@
+Fix timezone handling for guests with null timezone values.
+
+Previously, guests without a configured timezone received null reminder times, causing broken reminders. Now defaults to UTC (9:00 local) for guests with missing timezone data.
+
+Fixes: 4 affected guests (IDs 3, 6, 9, 12)
+Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>
+

@@ -87,6 +87,8 @@ this skill installed in the repository. One run each, so a smoke test, not a stu
 harness, the fixtures and every transcript are in [`evals/`](evals/), and
 [`evals/RESULTS.md`](evals/RESULTS.md) explains the heuristics and what they miss.
 
+The skill has also been run on `claude-haiku-4-5` and `claude-sonnet-5-5`, three runs per task. On `claude-haiku-4-5` the customer-block effect was not shown (reading: no clear effect); [evals/RESULTS-models.md](evals/RESULTS-models.md) lists each model separately.
+
 | metric | bare | skill | delta |
 |---|---|---|---|
 | Commit carries the For-the-customer block | 0 / 8 | 8 / 8 | +8 |

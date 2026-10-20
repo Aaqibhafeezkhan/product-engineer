@@ -1,0 +1,1 @@
+Done. The monthly report was creating a new `Date` object for the checkout date on every loop iteration. I've optimized it by caching the `checkOut` date outside the loop, eliminating redundant allocations. This is especially impactful for bookings with long date ranges. Committed as `aa0d155`.

@@ -1,0 +1,4 @@
+Optimize monthly report by caching checkout date
+
+Move Date object creation outside the loop to avoid redundant allocations on each iteration. This significantly improves performance for bookings with long date ranges.
+

@@ -1,0 +1,16 @@
+Show count of notifications needing a person on the bell
+
+The bell now carries a badge with the number of unread notifications
+that need a person to act. The badge is hidden when the count is zero.
+
+Not shipped: no styling for .badge (markup only), and "handled" is
+taken to mean "read"; there is no separate done state in the data.
+
+For the customer:
+What changed: The bell shows a number for the notifications that still need someone to do something. With nothing waiting, no number appears.
+Why it matters: The front desk can see at a glance whether anything needs attention, without opening the list.
+
+Checked: rendered the bell from the sample notifications and saw the badge show 2 (Room 12 checkout, Guest asked for late checkout); the read invoice and the automatic backup are not counted. Not checked: the real menu in a browser, and the badge's look, since no CSS exists for it.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+

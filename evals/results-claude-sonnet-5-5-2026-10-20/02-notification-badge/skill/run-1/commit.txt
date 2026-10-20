@@ -1,0 +1,12 @@
+Show count of notifications needing a person on the bell
+
+For the customer:
+What changed: The bell now shows a number for notifications that still need a person to act on them. Notifications already read, or that need no one (like the nightly backup), are not counted. With nothing to do, no number shows.
+Why it matters: The front desk manager can tell at a glance whether anything is waiting on them, without opening the list.
+
+Observed: rendered the bell from the sample data in src/notifications.js; it showed 2 (Room 12 checkout, late checkout request). Not checked in a browser or on the real menu, since this repo has no page that mounts the bell, and the badge has no styling yet.
+
+Not shipped: badge styling (no stylesheet in this repo); the number does not update live, it reflects the list at render time.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+

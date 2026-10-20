@@ -1,0 +1,1 @@
+Done! I've updated the bell to display a count of notifications that need action. The `renderBell` function now filters notifications where `needsPerson: true` and displays that count in a span (showing "3" in this case, for the room checkout, guest late checkout request, and invoice that need attention). The change has been committed to main.

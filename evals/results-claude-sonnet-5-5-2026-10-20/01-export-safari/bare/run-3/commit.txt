@@ -1,0 +1,7 @@
+Fix bookings export on Safari with download fallback
+
+Safari lacks showSaveFilePicker, so the export threw and did nothing.
+Fall back to a Blob download when the API is unavailable.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+

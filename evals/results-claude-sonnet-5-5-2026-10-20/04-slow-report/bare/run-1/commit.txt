@@ -1,0 +1,7 @@
+Speed up monthly report day counting
+
+Parse each booking's dates once and step by integer ms instead of
+re-creating Date objects every iteration; cache ISO day keys.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+

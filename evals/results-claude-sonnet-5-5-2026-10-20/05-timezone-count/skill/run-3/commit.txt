@@ -1,0 +1,8 @@
+fix(reminders): handle guests with no time zone and use real daylight saving rules
+
+For the customer:
+What changed: Guests with no time zone on file used to get a broken check-in reminder time; they now get the reminder at 09:00 Istanbul time. London guests also get 09:00 correctly in winter, not an hour early.
+Why it matters: Every guest receives the reminder at a sensible morning hour instead of a broken or wrong one.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+

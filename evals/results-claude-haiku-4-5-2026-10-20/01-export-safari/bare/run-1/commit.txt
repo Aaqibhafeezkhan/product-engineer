@@ -1,0 +1,5 @@
+Fix Export button not working on Safari on iPad
+
+Safari doesn't support the File System Access API. Add a fallback
+that uses Blob download for browsers without showSaveFilePicker support.
+

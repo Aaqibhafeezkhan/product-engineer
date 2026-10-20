@@ -1,0 +1,1 @@
+Done! The issue was that `new Date(b.checkOut)` was being created on every loop iteration instead of once per booking. This caused massive slowdown for bookings spanning many days. The fix moves the Date creation outside the loop, eliminating redundant object instantiation. Committed as `7d646ce`.

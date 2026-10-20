@@ -1,0 +1,10 @@
+Fix check-in reminder timezone handling for guests with missing timezone
+
+4 guests (IDs 3, 6, 9, 12) had null timezone values, which resulted in NaN reminder hours.
+Now using Europe/London as a sensible default for guests without a specified timezone.
+
+All guests now receive valid reminder times:
+- Istanbul guests: 09:00 local (06:00 UTC)
+- Default/London guests: 09:00 local (08:00 UTC)
+Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>
+

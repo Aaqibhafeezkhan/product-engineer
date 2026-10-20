@@ -1,0 +1,1 @@
+Done. I optimized the monthly report by caching the `checkOut` date instead of creating a new Date object on every loop iteration. This eliminates expensive repeated Date instantiation and parsing, which should significantly speed up the report. Committed as `c07b0cf`.

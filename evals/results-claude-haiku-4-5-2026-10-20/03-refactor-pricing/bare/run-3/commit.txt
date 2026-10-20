@@ -1,0 +1,6 @@
+Refactor pricing rules into independent, composable rule objects
+
+Each pricing rule is now a self-contained object in an array, making it safe
+to add or remove rules without touching the main price calculation logic.
+Rules can be modified, disabled, or extended without side effects.
+

@@ -1,0 +1,5 @@
+Fix timezone handling for guests with null timezone
+
+4 guests (IDs 3, 6, 9, 12) had null timezone values, causing reminderHour() to return NaN and breaking reminder scheduling. Added null checks and fallback to UTC (offset 0) for missing timezones to ensure all guests receive working reminders.
+Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>
+

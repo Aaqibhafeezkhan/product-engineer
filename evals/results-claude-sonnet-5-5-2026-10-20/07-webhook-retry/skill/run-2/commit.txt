@@ -1,0 +1,22 @@
+Retry the accounting webhook on transient failures
+
+notifyAccounting made a single attempt and only logged a failure, so one
+network blip or 5xx dropped a payout from accounting. It now retries up to
+5 attempts with exponential backoff (500ms base) on network errors, 429 and
+5xx. Other 4xx fail immediately. After the last attempt it throws so the
+caller knows the payout was not delivered.
+
+Not shipped: durable queue / retry across restarts, and idempotency keys.
+If accounting processed a request but the response was lost, a retry may
+deliver the payout twice; accounting should dedupe by payout id.
+
+Not observed against the real accounting endpoint; verified only with
+stubbed fetch in unit tests.
+
+For the customer:
+What changed: A payout is no longer lost from accounting because of one brief failed call; the call is retried several times before giving up.
+Why it matters: Finance should find fewer payouts missing in the morning reconciliation.
+Automation effect: Brief accounting outages are now absorbed automatically instead of needing someone to re-send the payout.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+

@@ -1,0 +1,7 @@
+Fix check-in reminder time for guests with missing time zone
+
+Guests with a null timezone got a NaN reminder hour. Skip them instead,
+and compute offsets with Intl so London DST is handled correctly.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+

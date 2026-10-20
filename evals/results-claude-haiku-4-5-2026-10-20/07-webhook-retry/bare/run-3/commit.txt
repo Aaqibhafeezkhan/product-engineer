@@ -1,0 +1,9 @@
+Add retries to accounting webhook
+
+Retry failed webhook calls up to 3 times with exponential backoff to handle transient failures. This ensures payouts reliably reach accounting even if the service is temporarily unavailable.
+
+- Retries on network errors and 5xx responses
+- Skips retries for 4xx client errors
+- Uses exponential backoff (1s, 2s, 4s) between attempts
+Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>
+

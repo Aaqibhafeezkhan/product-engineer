@@ -1,0 +1,7 @@
+Refactor pricing rules into modular rule array
+
+Replace monolithic pricing function with a rules-based system. Each rule
+is now a separate object that can be added, removed, or modified without
+touching other rules. This makes it safe for marketing to request pricing
+changes without risk of inadvertently breaking other rules.
+

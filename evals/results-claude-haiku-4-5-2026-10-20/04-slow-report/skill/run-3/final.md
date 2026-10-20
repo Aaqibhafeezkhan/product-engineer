@@ -1,0 +1,1 @@
+Done! I've optimized the monthly report by eliminating redundant `Date` object construction in the loop. The issue was creating a new `Date(b.checkOut)` on every iteration—now it's created once outside the loop, making the function much faster for large datasets.

@@ -1,0 +1,1 @@
+Done. The issue was that `new Date(b.checkOut)` was being created on every iteration of the inner loop—potentially thousands of times per booking. I moved it outside to be created once per booking, which should dramatically speed up the report generation.

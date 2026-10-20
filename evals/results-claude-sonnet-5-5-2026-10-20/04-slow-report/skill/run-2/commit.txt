@@ -1,0 +1,10 @@
+Speed up monthly report by avoiding per-night Date allocations
+
+Iterate over millisecond timestamps instead of creating and mutating Date
+objects per night, and cache the ISO date key per day. Output (including
+key order) is identical to the previous implementation.
+
+On 20,000 synthetic bookings: ~190 ms -> ~11 ms.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+
