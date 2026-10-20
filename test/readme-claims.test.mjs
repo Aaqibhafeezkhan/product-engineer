@@ -4,7 +4,8 @@
 // tables for the same model on 2026-10-20.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync, statSync } from "node:fs";
+import { execFileSync } from "node:child_process";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -60,4 +61,37 @@ test("llms.txt points at the per-model results and says the result depends on th
   const t = read("llms.txt");
   assert.ok(t.includes("evals/RESULTS-models.md"));
   assert.match(t, /depend[s]? on the model/);
+});
+
+const ALLOWED_TYPED = [
+  "cat msg.txt",
+  "product-engineer check msg.txt --diff",
+  "git add test/total.test.js",
+];
+
+test("the tape records only the three named commands after Show, and the GIF is small", () => {
+  const tape = read("docs/demo-diff.tape");
+  assert.match(tape, /^Output docs\/demo-diff\.gif$/m);
+  const shown = tape.split(/^Show$/m)[1];
+  assert.ok(shown, "tape has no Show line");
+  const typed = [...shown.matchAll(/^Type "(.*)" Enter$/gm)].map((m) => m[1]);
+  assert.ok(typed.length >= 3);
+  for (const t of typed) assert.ok(ALLOWED_TYPED.includes(t), `tape types a command that is not allowed: ${t}`);
+  const size = statSync(join(root, "docs/demo-diff.gif")).size;
+  assert.ok(size > 10_000 && size < 400_000, `docs/demo-diff.gif is ${size} bytes`);
+});
+
+test("the recorded commands do what the recording shows, in a fresh repository", { skip: process.platform === "win32" && "needs git and a POSIX shell script" }, () => {
+  const dir = execFileSync("sh", [join(root, "scripts/demo-setup.sh")], { encoding: "utf8" }).trim();
+  const check = () => {
+    try {
+      return execFileSync("node", [join(root, "bin/check.mjs"), "check", "msg.txt", "--diff"], { cwd: dir, encoding: "utf8" });
+    } catch (e) {
+      return /** @type {{stdout: string}} */ (e).stdout;
+    }
+  };
+  assert.match(check(), /the message says tests were added; no test file gains a line/);
+  execFileSync("git", ["add", "test/total.test.js"], { cwd: dir });
+  assert.doesNotMatch(check(), /the message says tests were added/);
+  assert.match(check(), /no errors, 0 warnings/);
 });
