@@ -3,8 +3,9 @@
 // test is what pins the exact exit codes, which a composite step's outcome does not expose.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
+import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -29,10 +30,11 @@ function runBlock(yaml) {
 const script = runBlock(action);
 const fixture = (f) => join(root, "test", "fixtures", f);
 
-function run(env) {
+function run(env, opts = {}) {
   return spawnSync("bash", ["--noprofile", "--norc", "-eo", "pipefail", "-c", script], {
     encoding: "utf8",
-    env: { ...process.env, ACTION_PATH: root, PR_NUMBER: "", BODY_FILE: "", WARN: "false", COMMENT: "false", GITHUB_TOKEN: "", ...env },
+    cwd: opts.cwd,
+    env: { ...process.env, ACTION_PATH: root, PR_NUMBER: "", BODY_FILE: "", WARN: "false", COMMENT: "false", GITHUB_TOKEN: "", DIFF: "", REFERENCES: "", SKIP_AUTHORS: "", PR_AUTHOR: "", ...env },
   });
 }
 
@@ -52,7 +54,7 @@ test("no unquoted value contains ': ', which YAML reads as a second mapping and 
 });
 
 test("the step maps every input it reads into its environment", () => {
-  for (const [envName, input] of [["PR_NUMBER", "pr"], ["WARN", "warn"], ["COMMENT", "comment"], ["BODY_FILE", "body-file"], ["GITHUB_TOKEN", "token"]]) {
+  for (const [envName, input] of [["PR_NUMBER", "pr"], ["WARN", "warn"], ["COMMENT", "comment"], ["BODY_FILE", "body-file"], ["GITHUB_TOKEN", "token"], ["DIFF", "diff"], ["REFERENCES", "references"], ["SKIP_AUTHORS", "skip-authors"], ["PR_AUTHOR", "author"]]) {
     assert.match(action, new RegExp(`^  ${input}:\\n`, "m"), `input ${input} is not declared`);
     assert.match(action, new RegExp(`^        ${envName}: \\$\\{\\{ inputs\\.${input} \\}\\}$`, "m"), `${envName} is not mapped from inputs.${input}`);
   }
@@ -95,4 +97,89 @@ test("action.yml's name and description fit what GitHub Marketplace accepts", ()
   assert.ok(name.length > 0 && description.length > 0, "action.yml needs a top-level name and description on one line each");
   assert.ok(description.length < 125, `description is ${description.length} characters; Marketplace needs fewer than 125`);
   assert.notEqual(name, "workproof", "a GitHub user is called workproof, so Marketplace refuses that name");
+});
+
+// The three inputs added for #27 and #28. A stand-in bin/check.mjs prints the arguments it was given, so
+// these tests see exactly what the step passes on without running the checker.
+// Every test below spawns the step with bash, so they are skipped on win32 (the step's path and
+// glob behaviour differ there, and the step is run on Windows only by the CI test matrix's own npm test).
+const SHELL_ONLY = process.platform === "win32" ? { skip: "spawns the action's bash step; Windows path and glob handling differ, covered on ubuntu and macos" } : {};
+function echoingAction() {
+  const dir = mkdtempSync(join(tmpdir(), "pe-action-"));
+  mkdirSync(join(dir, "bin"));
+  writeFileSync(join(dir, "bin", "check.mjs"), "console.log(JSON.stringify(process.argv.slice(2)));\n");
+  return dir;
+}
+const args = (r) => JSON.parse(r.stdout.trim().split("\n").pop());
+
+test("diff is passed on as --diff <range>, and left out when empty", SHELL_ONLY, () => {
+  const action = echoingAction();
+  const given = run({ ACTION_PATH: action, BODY_FILE: fixture("with-block.txt"), DIFF: "origin/main...HEAD" });
+  assert.equal(given.status, 0, given.stderr);
+  const a = args(given);
+  assert.equal(a[a.indexOf("--diff") + 1], "origin/main...HEAD");
+  const none = run({ ACTION_PATH: action, BODY_FILE: fixture("with-block.txt") });
+  assert.ok(!args(none).includes("--diff"));
+});
+
+test("diff that is not a plain revision range exits 2 before anything runs", SHELL_ONLY, () => {
+  const action = echoingAction();
+  for (const diff of ["--stat", "-x", "main; ls", "$(id)", "a b", "`id`", "main|cat"]) {
+    const r = run({ ACTION_PATH: action, BODY_FILE: fixture("with-block.txt"), DIFF: diff });
+    assert.equal(r.status, 2, `diff ${diff}: ${r.stdout}${r.stderr}`);
+    assert.match(r.stderr, /diff must be a git revision range/);
+    assert.equal(r.stdout, "", `diff ${diff} reached the checker`);
+  }
+});
+
+test("references accepts off, warn and error, passes them on, and refuses anything else", SHELL_ONLY, () => {
+  const action = echoingAction();
+  for (const mode of ["off", "warn", "error"]) {
+    const a = args(run({ ACTION_PATH: action, BODY_FILE: fixture("with-block.txt"), REFERENCES: mode }));
+    assert.equal(a[a.indexOf("--references") + 1], mode);
+  }
+  assert.ok(!args(run({ ACTION_PATH: action, BODY_FILE: fixture("with-block.txt") })).includes("--references"));
+  const bad = run({ ACTION_PATH: action, BODY_FILE: fixture("with-block.txt"), REFERENCES: "strict" });
+  assert.equal(bad.status, 2);
+  assert.match(bad.stderr, /references must be off, warn or error/);
+});
+
+test("diff and references reach the real checker and a description that passes still exits 0", SHELL_ONLY, () => {
+  const r = run({ BODY_FILE: fixture("with-block.txt"), DIFF: "HEAD", REFERENCES: "error" });
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+});
+
+test("a pull request opened by a listed bot is skipped with one notice line, and a human's is checked", SHELL_ONLY, () => {
+  const bot = run({ BODY_FILE: fixture("without-block.txt"), PR_AUTHOR: "dependabot[bot]", SKIP_AUTHORS: "dependabot[bot],renovate[bot]" });
+  assert.equal(bot.status, 0, bot.stdout + bot.stderr);
+  assert.match(bot.stdout, /^::notice title=product-engineer::skipped, the pull request was opened by dependabot\[bot\], which is in skip-authors$/m);
+  assert.doesNotMatch(bot.stdout, /::error/);
+  const human = run({ BODY_FILE: fixture("without-block.txt"), PR_AUTHOR: "someone", SKIP_AUTHORS: "dependabot[bot],renovate[bot]" });
+  assert.equal(human.status, 1, human.stdout + human.stderr);
+});
+
+test("an empty skip-authors turns skipping off, and spaces around a login are ignored", SHELL_ONLY, () => {
+  const off = run({ BODY_FILE: fixture("without-block.txt"), PR_AUTHOR: "dependabot[bot]", SKIP_AUTHORS: "" });
+  assert.equal(off.status, 1);
+  const spaced = run({ BODY_FILE: fixture("without-block.txt"), PR_AUTHOR: "renovate[bot]", SKIP_AUTHORS: "dependabot[bot] , renovate[bot]" });
+  assert.equal(spaced.status, 0, spaced.stdout + spaced.stderr);
+});
+
+test("no author (a push event) is never skipped", SHELL_ONLY, () => {
+  const r = run({ BODY_FILE: fixture("without-block.txt"), PR_AUTHOR: "", SKIP_AUTHORS: "dependabot[bot]" });
+  assert.equal(r.status, 1);
+});
+
+test("a login is compared as text, not as a glob: a file called dependabott does not make dependabott a bot", SHELL_ONLY, () => {
+  const cwd = mkdtempSync(join(tmpdir(), "pe-glob-"));
+  writeFileSync(join(cwd, "dependabott"), "");
+  const imposter = run({ BODY_FILE: fixture("without-block.txt"), PR_AUTHOR: "dependabott", SKIP_AUTHORS: "dependabot[bot]" }, { cwd });
+  assert.equal(imposter.status, 1, imposter.stdout + imposter.stderr);
+  const real = run({ BODY_FILE: fixture("without-block.txt"), PR_AUTHOR: "dependabot[bot]", SKIP_AUTHORS: "dependabot[bot]" }, { cwd });
+  assert.equal(real.status, 0, real.stdout + real.stderr);
+});
+
+test("a bad pr number is still exit 2 when the author would have been skipped", SHELL_ONLY, () => {
+  const r = run({ PR_NUMBER: "12a", BODY_FILE: fixture("with-block.txt"), PR_AUTHOR: "dependabot[bot]", SKIP_AUTHORS: "dependabot[bot]" });
+  assert.equal(r.status, 2);
 });

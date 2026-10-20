@@ -25,6 +25,22 @@ inputs:
     description: Path to a file to check instead of the pull request description. Nothing is fetched and no comment is posted. Exists so this repository's CI can run the Action on fixed text; `pr` is still validated when given.
     required: false
     default: ""
+  diff:
+    description: "A git revision range, for example origin/main...HEAD. When set, the message is also checked against the change itself (check --diff). The checkout needs fetch-depth: 0 so the range can be read. Empty turns it off."
+    required: false
+    default: ""
+  references:
+    description: "How to treat a file path or run URL the description cites that does not resolve: off, warn or error. Empty keeps the tool's own default, warn."
+    required: false
+    default: ""
+  skip-authors:
+    description: "Comma-separated logins whose pull requests are not checked, so dependency bots do not turn the check red. An empty string turns skipping off."
+    required: false
+    default: "dependabot[bot],renovate[bot]"
+  author:
+    description: Login to treat as the pull request author. Defaults to the event's pull request author. Exists so this repository's CI can exercise skip-authors on a push event.
+    required: false
+    default: ${{ github.event.pull_request.user.login }}
 runs:
   using: composite
   steps:
@@ -37,16 +53,47 @@ runs:
         WARN: ${{ inputs.warn }}
         COMMENT: ${{ inputs.comment }}
         BODY_FILE: ${{ inputs.body-file }}
+        DIFF: ${{ inputs.diff }}
+        REFERENCES: ${{ inputs.references }}
+        SKIP_AUTHORS: ${{ inputs.skip-authors }}
+        PR_AUTHOR: ${{ inputs.author }}
       run: |
         case "$PR_NUMBER" in
           '') [ -n "$BODY_FILE" ] || { echo "pr must be a number, got: (empty)" >&2; exit 2; } ;;
           *[!0-9]*) echo "pr must be a number, got: $PR_NUMBER" >&2; exit 2 ;;
         esac
+        case "$DIFF" in
+          '') ;;
+          -*|*[!A-Za-z0-9._/@^~:+-]*) echo "diff must be a git revision range such as origin/main...HEAD, got: $DIFF" >&2; exit 2 ;;
+        esac
+        case "$REFERENCES" in
+          ''|off|warn|error) ;;
+          *) echo "references must be off, warn or error, got: $REFERENCES" >&2; exit 2 ;;
+        esac
+        # A pull request opened by a listed login (a dependency bot) is not checked. Globbing is off
+        # while the list is split, because dependabot[bot] is a glob pattern that would otherwise
+        # match a file called dependabott in the workspace.
+        if [ -n "$PR_AUTHOR" ] && [ -n "$SKIP_AUTHORS" ]; then
+          set -f
+          old_ifs=$IFS
+          IFS=,
+          for entry in $SKIP_AUTHORS; do
+            entry=$(printf '%s' "$entry" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')
+            if [ -n "$entry" ] && [ "$entry" = "$PR_AUTHOR" ]; then
+              echo "::notice title=product-engineer::skipped, the pull request was opened by $entry, which is in skip-authors"
+              exit 0
+            fi
+          done
+          IFS=$old_ifs
+          set +f
+        fi
         if [ -n "$BODY_FILE" ]; then
           set -- check "$BODY_FILE" --format github
         else
           set -- check --pr "$PR_NUMBER" --format github
           [ "$COMMENT" != "false" ] && set -- "$@" --comment
         fi
+        [ -n "$DIFF" ] && set -- "$@" --diff "$DIFF"
+        [ -n "$REFERENCES" ] && set -- "$@" --references "$REFERENCES"
         [ "$WARN" = "true" ] && set -- "$@" --warn
         node "$ACTION_PATH/bin/check.mjs" "$@"

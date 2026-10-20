@@ -94,6 +94,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 0 # the diff input reads a revision range
       - name: A description with the block passes
         id: with-block
         continue-on-error: true
@@ -124,15 +125,63 @@ jobs:
           pr: "12a"
           body-file: test/fixtures/with-block.txt
           comment: "false"
+      - name: A pull request opened by a dependency bot is skipped
+        id: bot
+        continue-on-error: true
+        uses: ./ # zizmor: ignore[self-repository] GitHub documents $/path/to/action, not $/ for an action.yml at the root
+        with:
+          body-file: test/fixtures/without-block.txt
+          author: "dependabot[bot]"
+          comment: "false"
+      - name: A pull request opened by a person is still checked
+        id: human
+        continue-on-error: true
+        uses: ./ # zizmor: ignore[self-repository] GitHub documents $/path/to/action, not $/ for an action.yml at the root
+        with:
+          body-file: test/fixtures/without-block.txt
+          author: someone
+          comment: "false"
+      - name: The diff and references inputs are accepted
+        id: inputs-ok
+        continue-on-error: true
+        uses: ./ # zizmor: ignore[self-repository] GitHub documents $/path/to/action, not $/ for an action.yml at the root
+        with:
+          body-file: test/fixtures/with-block.txt
+          diff: HEAD~1...HEAD
+          references: error
+          comment: "false"
+      - name: A diff that is a flag is refused
+        id: bad-diff
+        continue-on-error: true
+        uses: ./ # zizmor: ignore[self-repository] GitHub documents $/path/to/action, not $/ for an action.yml at the root
+        with:
+          body-file: test/fixtures/with-block.txt
+          diff: "--stat"
+          comment: "false"
+      - name: An unknown references mode is refused
+        id: bad-references
+        continue-on-error: true
+        uses: ./ # zizmor: ignore[self-repository] GitHub documents $/path/to/action, not $/ for an action.yml at the root
+        with:
+          body-file: test/fixtures/with-block.txt
+          references: strict
+          comment: "false"
       - name: Each step ended the way it should
         env:
           WITH_BLOCK: ${{ steps.with-block.outcome }}
           WITHOUT_BLOCK: ${{ steps.without-block.outcome }}
           WARNED: ${{ steps.warned.outcome }}
           BAD_PR: ${{ steps.bad-pr.outcome }}
+          BOT: ${{ steps.bot.outcome }}
+          HUMAN: ${{ steps.human.outcome }}
+          INPUTS_OK: ${{ steps.inputs-ok.outcome }}
+          BAD_DIFF: ${{ steps.bad-diff.outcome }}
+          BAD_REFERENCES: ${{ steps.bad-references.outcome }}
         run: |
           echo "with-block: $WITH_BLOCK (want success)  without-block: $WITHOUT_BLOCK (want failure)  warned: $WARNED (want success)  bad-pr: $BAD_PR (want failure)"
+          echo "bot: $BOT (want success)  human: $HUMAN (want failure)  inputs-ok: $INPUTS_OK (want success)  bad-diff: $BAD_DIFF (want failure)  bad-references: $BAD_REFERENCES (want failure)"
           test "$WITH_BLOCK" = success && test "$WITHOUT_BLOCK" = failure && test "$WARNED" = success && test "$BAD_PR" = failure
+          test "$BOT" = success && test "$HUMAN" = failure && test "$INPUTS_OK" = success && test "$BAD_DIFF" = failure && test "$BAD_REFERENCES" = failure
   ci-ok:
     # The one check the branch ruleset requires; it fails if any job above failed or was cancelled.
     if: always()
