@@ -1,25 +1,66 @@
-<p align="center"><img src="assets/wordmark.svg" width="520" alt="product-engineer"></p>
+# My coding agent's commit message says it added tests, and the change has none.
 
-<p align="center"><a href="https://bubblegunn.github.io/product-engineer/">bubblegunn.github.io/product-engineer</a></p>
-<p align="center">English | <a href="README.tr.md">Türkçe</a> | <a href="README.zh-CN.md">简体中文</a></p>
+product-engineer is an agent skill and command-line checker that makes AI coding agents explain each commit and pull request in plain language, and warns when the message contradicts the diff.
 
-<p align="center"><em>Your agent ships code. product-engineer makes it ship outcomes.</em></p>
+```
+npx product-engineer check msg.txt --diff
+```
 
-<p align="center">
-  <img src="https://img.shields.io/github/stars/Bubblegunn/product-engineer?style=flat-square&color=111111" alt="stars">
+`msg.txt` holds the commit message and the change is what you staged with `git add`. For a pull request: `npx product-engineer check --pr 12 --diff main...HEAD` (needs `gh`). To make the agent write the plain-language block in the first place: `npx skills add Bubblegunn/product-engineer`.
+
+![The check warns that the message says tests were added and the change has none, then passes once a test file is staged](docs/demo-diff.gif)
+
+The recording is real output, made with [vhs](https://github.com/charmbracelet/vhs) from [`docs/demo-diff.tape`](docs/demo-diff.tape). `--diff` prints warnings and exits 0, so it never blocks a commit by itself. It checks four kinds of mismatch (listed [below](#does-the-message-match-the-change)) and it cannot read operation verbs, so "added" against "removed" goes unnoticed. On 59 real commits from this repository's own history it raised 0 false alarms ([`evals/baseline/RESULTS.md`](evals/baseline/RESULTS.md)).
+
+English | [Türkçe](README.tr.md) | [简体中文](README.zh-CN.md)
+
+<p>
   <img src="https://img.shields.io/badge/dependencies-0-111111?style=flat-square" alt="zero dependencies">
   <img src="https://img.shields.io/badge/skills-4-111111?style=flat-square" alt="four skills">
   <img src="https://img.shields.io/github/actions/workflow/status/Bubblegunn/product-engineer/ci.yml?style=flat-square&color=111111&label=ci" alt="ci">
   <img src="https://img.shields.io/badge/license-MIT-111111?style=flat-square" alt="MIT">
-  <a href="https://doi.org/10.5281/zenodo.22395211"><img src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.22395211-111111?style=flat-square" alt="DOI"></a>
   <a href="https://github.com/marketplace/actions/product-engineer-check"><img src="https://img.shields.io/badge/GitHub_Marketplace-product--engineer--check-111111?style=flat-square&logo=github" alt="GitHub Marketplace"></a>
 </p>
 
-An agent skill that makes an AI coding agent think like a product engineer instead of a
-code printer. Before building, it restates the work as a customer outcome. In every commit
-and pull request, it writes a plain-language "For the customer" block. It refuses to call
-unobserved work done, names what it deliberately did not build, and never prints a number
-it did not count.
+## Does the skill part work?
+
+It depends on the model. The skill is four text files that tell an agent to write a plain-language "For the customer" block in each commit, say what it observed, and name what it did not build. It was run on the same eight small tasks, bare and with the skill, on three models. The row below is the commit carrying the block.
+
+| model | without the skill | with the skill | reading |
+|---|---|---|---|
+| claude-opus-5 | 0 / 8 | 8 / 8 | not computed, one run per task |
+| claude-sonnet-5-5 | 0 / 24 | 13 / 24 | worked |
+| claude-haiku-4-5 | 0 / 24 | 0 / 24 | no clear effect |
+
+On claude-haiku-4-5 all five measures read "no clear effect". The reading rule was written before any data existed ([`evals/MODELS-DESIGN.md`](evals/MODELS-DESIGN.md)). The checks are regular expressions over the agent's own words, so they reward saying the right thing ([`evals/RESULTS.md`](evals/RESULTS.md) lists what they miss). The skill also costs more on the largest model: $0.45 per run bare and $0.63 with the skill on claude-opus-5. Every number, cost and transcript: [`evals/RESULTS-models.md`](evals/RESULTS-models.md).
+
+## How this differs
+
+The checker and the skill were run on the same inputs as other tools on 2026-10-20 (product-engineer 0.6.2). The generated tables, the pinned competitor versions and the commands to repeat them are in [`docs/COMPARISON.md`](docs/COMPARISON.md). Rows where product-engineer loses are in that file. The tables here show only rows it wins or ties.
+
+**Against commitlint 21.2.4**, which checks the Conventional Commits shape, which product-engineer does not. They run together: product-engineer ships a commitlint plugin (`product-engineer/commitlint`). Same message text given to both:
+
+| message | product-engineer | commitlint |
+|---|---|---|
+| A full customer block | passed | passed |
+| No customer block | flagged | passed |
+| Passing tests offered as the evidence | flagged | passed |
+| A number with no method or scope | flagged | passed |
+| Says tests were added; the change has none | flagged | cannot |
+
+"cannot" means commitlint is never shown the change. Page: [`docs/vs-commitlint.md`](docs/vs-commitlint.md).
+
+**Against two other agent skills**, on the eight tasks, claude-opus-5, one run per task (commits in the first row: how many of eight carried the block). The measures were written for product-engineer's own rules, so a skill that aims elsewhere scores low on them by design. [`verification-before-completion`](docs/vs-verification-before-completion.md) is from obra/superpowers (MIT); [`changelog-generator`](docs/vs-changelog-generator.md) is from ComposioHQ/awesome-claude-skills (no licence detected, run only):
+
+| measure | product-engineer | verification-before-completion | changelog-generator |
+|---|---|---|---|
+| Commit carries the For-the-customer block | 8 / 8 | 0 / 8 | 0 / 8 |
+| Final message reports an observation or says what it could not check | 7 / 8 | 0 / 8 | 0 / 8 |
+| Final message names something deliberately not done | 5 / 8 | 0 / 8 | 1 / 8 |
+| Every number in the final message has a method or scope next to it | 2 / 8 | 1 / 8 | 2 / 8 |
+| Only the requested files changed (tests and documentation allowed) | 8 / 8 | 7 / 8 | 7 / 8 |
+
+The headline feature of `changelog-generator`, writing a changelog from commits, was not measured. None of the eight tasks asks for one.
 
 ## See it
 
@@ -79,36 +120,6 @@ rather than a skill is in [`docs/cursor.md`](docs/cursor.md).
 
 The skills are text files and need nothing installed. The `product-engineer` command (`check`,
 `doctor`, the pre-commit entry) needs Node 22 or newer; the commit-msg hook itself is POSIX sh.
-
-## Measured
-
-Eight small tasks, each run twice with Claude Code in headless mode: once bare, once with
-this skill installed in the repository. One run each, so a smoke test, not a study. The
-harness, the fixtures and every transcript are in [`evals/`](evals/), and
-[`evals/RESULTS.md`](evals/RESULTS.md) explains the heuristics and what they miss.
-
-| metric | bare | skill | delta |
-|---|---|---|---|
-| Commit carries the For-the-customer block | 0 / 8 | 8 / 8 | +8 |
-| Final message reports an observation or says what it could not check | 1 / 8 | 7 / 8 | +6 |
-| Final message names something deliberately not done | 2 / 8 | 7 / 8 | +5 |
-| Every number in the final message has a method or scope next to it | 1 / 8 | 1 / 8 | +0 |
-| Only the requested files changed (tests and documentation allowed) | 8 / 8 | 8 / 8 | +0 |
-
-The skill has also been run on `claude-haiku-4-5` and `claude-sonnet-5-5`, three runs per task. On `claude-haiku-4-5` the customer-block effect was not shown (reading: no clear effect); [evals/RESULTS-models.md](evals/RESULTS-models.md) lists each model separately.
-
-The table above is that evaluation, which installed the core skill and nothing else. On 17 October `customer-block` and
-`done-means-observed` were each measured on their own against a fresh bare arm, and each moved
-the metric its rule is about and not the other (customer block 0 to 8 of 8, and observation 1 to
-6 of 8; `evals/RESULTS.md` has the table). `release-notes` has no task at all, because none of the
-eight writes release notes, and it states that gap in its own metadata.
-
-Two rows did not move and are printed anyway: the number heuristic scores 1 of 8 in both
-conditions, and every file change in both conditions stayed within the task once
-documentation edits were allowed for. The heuristics were corrected on 5 September and the
-transcripts rescored; [`evals/RESULTS.md`](evals/RESULTS.md) says what changed. The skill
-runs took about 60% more turns and cost about 45% more, because they verified more and
-wrote more.
 
 ## What the diff check costs
 
@@ -227,17 +238,7 @@ only read as a file count when its sentence also carries a verb of changing. Not
 reports an error, so a run that passed yesterday cannot fail today; without `--diff` the
 output is byte-identical to before.
 
-**The paths a message cites are checked against the working tree.** A message that says the fix is
-in `src/gate.ts:120` is claiming something a reader will act on, and the line number is the part that
-rots while the sentence stays still. Every `path/to/file.ext` and every GitHub Actions run URL in the
-message is resolved: a missing file, a directory, or a line past the end of a real file is a warning,
-`--references error` makes it an error and `--references off` turns it off. A message that cites
-nothing is reported as citing nothing, at info level, and passes in every mode. That is deliberate:
-a check that demanded a link would be satisfied by a link typed from memory, and the first person to
-learn it was wrong would be the reader who followed it. Suggested by
-[@raju_dandigam](https://dev.to/raju_dandigam), who asked for machine-checkable evidence without the
-block turning into boilerplate. Nothing here makes a network request, so a run URL is checked for
-shape only and says so.
+**Cited paths are checked too.** Every file path and GitHub Actions run URL the message cites is resolved against the working tree. A missing path or a line past the end of a file is a warning. The modes, and the reason a message that cites nothing still passes, are in [`docs/check-reference.md`](docs/check-reference.md#cited-paths).
 
 Write the block in the language your team writes. English, Turkish, Japanese and Chinese
 headings are accepted with no configuration, and a heading for any other language goes in
@@ -245,14 +246,7 @@ headings are accepted with no configuration, and a heading for any other languag
 [`skills/product-engineer/references/headings.md`](skills/product-engineer/references/headings.md),
 and the commit-msg hook is generated from it so the two cannot disagree.
 
-The block also gets a readability line, Flesch (1948) for English or Ateşman (1997) with
-`--lang tr`, plus LIX (Björnsson, 1968), as information only. All three count syllables or
-word lengths in the Latin alphabet, so for a block written in any other script the tool names
-the script, says it is not scoring and why, and prints no number. Japanese, Chinese, Korean,
-Arabic, Hebrew and Thai each get their own reason; Cyrillic, Greek and Devanagari are refused
-because no calibration for them is implemented here, not because the language resists one; and
-a script the tool cannot name is still refused. Before that, a block in Hindi, Tamil, Greek or
-Amharic came back Flesch 0, graded hard, which is a number nobody counted. Exit 1 on a missing block, 0 with `--warn`. `--format github` turns the findings into run annotations, and `--format json` prints them as one JSON object, `{ ok, findings: [{ level, code, message }], readability }`, for editors and dashboards. As a CI step
+The block also gets a readability line (Flesch for English, Ateşman with `--lang tr`, and LIX), as information only. For scripts these formulas do not suit, the tool names the script, says it is not scoring and prints no number: [`docs/check-reference.md`](docs/check-reference.md#readability). Exit 1 on a missing block, 0 with `--warn`. `--format github` turns the findings into run annotations, and `--format json` prints them as one JSON object, `{ ok, findings: [{ level, code, message }], readability }`, for editors and dashboards. As a CI step
 (needs `pull-requests: write` for the comment, see [`docs/install.md`](docs/install.md)):
 
 ```yaml
@@ -291,9 +285,5 @@ That is the **concept** DOI: it always resolves to the newest version. To cite t
 version you ran, open that page, pick the version in the sidebar, and use the DOI shown
 there. `CITATION.cff` in this repository carries the same identifier, so GitHub's "Cite this
 repository" button produces correct BibTeX and APA without any copying by hand.
-
-## Stars
-
-<a href="https://star-history.com/#Bubblegunn/product-engineer&Date"><img src="https://api.star-history.com/svg?repos=Bubblegunn/product-engineer&type=Date" width="520" alt="Star history"></a>
 
 MIT.

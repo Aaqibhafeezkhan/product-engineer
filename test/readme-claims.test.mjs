@@ -95,3 +95,75 @@ test("the recorded commands do what the recording shows, in a fresh repository",
   assert.doesNotMatch(check(), /the message says tests were added/);
   assert.match(check(), /no errors, 0 warnings/);
 });
+
+const PAIN = "My coding agent's commit message says it added tests, and the change has none.";
+
+test("the README opens with the pain sentence as its first line", () => {
+  assert.equal(read("README.md").split("\n")[0], `# ${PAIN}`);
+});
+
+test("no star or download badge and no star history on any README", () => {
+  for (const f of ["README.md", "README.tr.md", "README.zh-CN.md"]) {
+    assert.doesNotMatch(read(f), /shields\.io\/github\/stars|star-history|shields\.io\/npm\/d[mwy]|\/downloads/i, f);
+  }
+});
+
+test("the model table is the customer-block row of evals/RESULTS-models.md, Haiku included", () => {
+  const md = read("evals/RESULTS-models.md");
+  const readme = read("README.md");
+  const sections = md.split(/^## /m).slice(1).filter((s) => s.startsWith("claude-"));
+  assert.equal(sections.length, 3, "evals/RESULTS-models.md must have three model sections");
+  for (const sec of sections) {
+    const lines = sec.split("\n");
+    const model = lines[0].trim();
+    const row = lines.find((l) => l.startsWith("| Commit carries the For-the-customer block"));
+    assert.ok(row, `${model}: no customer-block row`);
+    const c = row.split("|").map((x) => x.trim());
+    const expected = `| ${model} | ${c[2]} | ${c[3]} | ${c[6]} |`;
+    assert.ok(readme.includes(expected), `README.md must contain: ${expected}`);
+  }
+  const haiku = sections.find((s) => s.startsWith("claude-haiku-4-5"));
+  const metricRows = /** @type {string} */ (haiku).split("\n").filter((l) => /^\| (Commit|Final|Every|Only)/.test(l));
+  assert.equal(metricRows.length, 5);
+  for (const r of metricRows) assert.ok(r.trim().endsWith("| no clear effect |"), `Haiku row is not "no clear effect": ${r}`);
+  assert.ok(readme.includes('all five measures read "no clear effect"'));
+});
+
+test("the rival-skill table is skills-results.json, and product-engineer wins or ties every row it shows", () => {
+  const readme = read("README.md");
+  const pe = arm("product-engineer");
+  const vbc = arm("verification-before-completion");
+  const cg = arm("changelog-generator");
+  for (const m of skills.metrics) {
+    const k = m.key;
+    assert.ok(pe.counts[k] >= vbc.counts[k] && pe.counts[k] >= cg.counts[k], `${m.title}: product-engineer loses a row; remove it from the README table and list it as a loss`);
+    const row = `| ${m.title} | ${pe.counts[k]} / ${pe.n} | ${vbc.counts[k]} / ${vbc.n} | ${cg.counts[k]} / ${cg.n} |`;
+    assert.ok(readme.includes(row), `README.md must contain: ${row}`);
+  }
+});
+
+test("the commitlint table is rows of checker-results.json that product-engineer wins or ties", () => {
+  const readme = read("README.md");
+  const results = JSON.parse(read("evals/comparison/checker-results.json"));
+  for (const id of ["block-present", "block-missing", "tests-as-evidence", "bare-number", "diff-tests-claim"]) {
+    const r = results.rows.find((/** @type {{id: string}} */ x) => x.id === id);
+    assert.ok(r, id);
+    assert.ok(r.verdict === "ours wins" || r.verdict === "tie", `${id} is a loss; it may not be in the README table`);
+    const row = `| ${r.title} | ${r.ours.outcome} | ${r.theirs.outcome} |`;
+    assert.ok(readme.includes(row), `README.md must contain: ${row}`);
+  }
+});
+
+test("the README links the comparison file, says where product-engineer loses and what was not measured", () => {
+  const readme = read("README.md");
+  assert.ok(readme.includes("](docs/COMPARISON.md)"));
+  assert.ok(readme.includes("Rows where product-engineer loses are in that file."));
+  assert.ok(readme.includes("writing a changelog from commits, was not measured"));
+  assert.ok(readme.includes("checks the Conventional Commits shape, which product-engineer does not"));
+});
+
+test("the README says --diff warns and never blocks, and names its blind spot", () => {
+  const readme = read("README.md");
+  assert.ok(readme.includes("prints warnings and exits 0"));
+  assert.ok(readme.includes("it cannot read operation verbs"));
+});

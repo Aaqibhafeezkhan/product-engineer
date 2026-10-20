@@ -5,7 +5,6 @@
 <p align="center"><em>Ajanınız kod gönderiyor. product-engineer sonuç göndermesini sağlar.</em></p>
 
 <p align="center">
-  <img src="https://img.shields.io/github/stars/Bubblegunn/product-engineer?style=flat-square&color=111111" alt="stars">
   <img src="https://img.shields.io/badge/dependencies-0-111111?style=flat-square" alt="zero dependencies">
   <img src="https://img.shields.io/badge/license-MIT-111111?style=flat-square" alt="MIT">
   <a href="https://github.com/marketplace/actions/product-engineer-check"><img src="https://img.shields.io/badge/GitHub_Marketplace-product--engineer--check-111111?style=flat-square&logo=github" alt="GitHub Marketplace"></a>
@@ -109,9 +108,5 @@ Her sürüm Zenodo'da bir DOI ile arşivleniyor.
 
 Bu **kavram** DOI'si: her zaman en yeni sürüme çözümlenir. Belirli bir sürümü atıflamak için
 o sayfada yan çubuktan sürümü seçin. Depodaki `CITATION.cff` aynı tanımlayıcıyı taşıyor.
-
-## Yıldızlar
-
-<a href="https://star-history.com/#Bubblegunn/product-engineer&Date"><img src="https://api.star-history.com/svg?repos=Bubblegunn/product-engineer&type=Date" width="520" alt="Star history"></a>
 
 MIT.

@@ -5,7 +5,6 @@
 <p align="center"><em>你的智能体在交付代码。product-engineer 让它交付结果。</em></p>
 
 <p align="center">
-  <img src="https://img.shields.io/github/stars/Bubblegunn/product-engineer?style=flat-square&color=111111" alt="stars">
   <img src="https://img.shields.io/badge/dependencies-0-111111?style=flat-square" alt="zero dependencies">
   <img src="https://img.shields.io/badge/license-MIT-111111?style=flat-square" alt="MIT">
   <a href="https://github.com/marketplace/actions/product-engineer-check"><img src="https://img.shields.io/badge/GitHub_Marketplace-product--engineer--check-111111?style=flat-square&logo=github" alt="GitHub Marketplace"></a>
@@ -106,9 +105,5 @@ Not shipped:
 
 这是**概念** DOI，始终解析到最新版本。要引用某个具体版本，请在该页面的侧栏中选择版本并使用那里显示的
 DOI。仓库中的 `CITATION.cff` 带有同一标识符。
-
-## Star 数
-
-<a href="https://star-history.com/#Bubblegunn/product-engineer&Date"><img src="https://api.star-history.com/svg?repos=Bubblegunn/product-engineer&type=Date" width="520" alt="Star history"></a>
 
 MIT.
