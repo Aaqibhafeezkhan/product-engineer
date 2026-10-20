@@ -8,6 +8,10 @@ Four skills (product-engineer, customer-block, done-means-observed, release-note
 ## Docs
 
 - [README](README.md): the problem, one command, a recording, results per model, how this differs from other tools
+- [FAQ](docs/FAQ.md): questions developers ask, with short answers
+- [product-engineer vs commitlint](docs/vs-commitlint.md)
+- [product-engineer vs verification-before-completion](docs/vs-verification-before-completion.md)
+- [product-engineer vs changelog-generator](docs/vs-changelog-generator.md)
 - [Comparison with other tools](docs/COMPARISON.md): generated tables, pinned competitor versions, rows where product-engineer loses
 - [Check reference](docs/check-reference.md): cited paths and readability
 - [SKILL.md](skills/product-engineer/SKILL.md): the skill text agents load; the three subset skills are beside it under skills/

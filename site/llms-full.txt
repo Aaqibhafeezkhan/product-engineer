@@ -8,6 +8,10 @@ Four skills (product-engineer, customer-block, done-means-observed, release-note
 ## Docs
 
 - [README](https://github.com/Bubblegunn/product-engineer/blob/main/README.md): the problem, one command, a recording, results per model, how this differs from other tools
+- [FAQ](https://github.com/Bubblegunn/product-engineer/blob/main/docs/FAQ.md): questions developers ask, with short answers
+- [product-engineer vs commitlint](https://github.com/Bubblegunn/product-engineer/blob/main/docs/vs-commitlint.md)
+- [product-engineer vs verification-before-completion](https://github.com/Bubblegunn/product-engineer/blob/main/docs/vs-verification-before-completion.md)
+- [product-engineer vs changelog-generator](https://github.com/Bubblegunn/product-engineer/blob/main/docs/vs-changelog-generator.md)
 - [Comparison with other tools](https://github.com/Bubblegunn/product-engineer/blob/main/docs/COMPARISON.md): generated tables, pinned competitor versions, rows where product-engineer loses
 - [Check reference](https://github.com/Bubblegunn/product-engineer/blob/main/docs/check-reference.md): cited paths and readability
 - [SKILL.md](https://github.com/Bubblegunn/product-engineer/blob/main/skills/product-engineer/SKILL.md): the skill text agents load; the three subset skills are beside it under skills/
@@ -405,6 +409,80 @@ None of the eight tasks asks an agent to write release notes or a changelog, so 
 
 ---
 
+# FILE: docs/FAQ.md
+
+# product-engineer: questions and answers
+
+product-engineer is an agent skill and command-line checker that makes AI coding agents explain each commit and pull request in plain language, and warns when the message contradicts the diff.
+
+## What does product-engineer do?
+
+It has two parts. The skill is four text files that tell a coding agent to write a plain-language "For the customer" block in every commit and pull request, say what it observed and what it could not check, and name what it deliberately did not build. The checker is a command, `product-engineer check`, that reads a commit message or pull request description and reports whether the block is there and whether it reads the way the skill asks. The checker needs Node 22 or newer and has no dependencies.
+
+## How do I find out that my AI agent's commit message claims tests that it did not add?
+
+Run `npx product-engineer check msg.txt --diff`, where `msg.txt` holds the message and the change is what you staged with `git add`. If the message says tests were added and no test file gains a line, it prints a warning with the file counts. Without a file name it reads `.git/COMMIT_EDITMSG`. For a pull request: `npx product-engineer check --pr 12 --diff main...HEAD`, which needs `gh`.
+
+## Which mismatches does `check --diff` catch?
+
+Four: the message says tests were added and no test file gains a line; the message says documentation only and a source or test file changed; the message states a file count and the number is different; the message names a path that is in neither the change nor the repository. It cannot read operation verbs, so "added" against "removed" goes unnoticed. That blind spot is printed as a 0% recall row in [`evals/baseline/RESULTS.md`](../evals/baseline/RESULTS.md).
+
+## Does `check --diff` block a commit or fail a build?
+
+No. It reports warnings and exits 0. A missing "For the customer" block is an error and exits 1, or exits 0 with `--warn`. The git hook (`sh scripts/install-hook.sh`) and the GitHub Action are the parts that enforce anything.
+
+## How often does `check --diff` raise a false alarm?
+
+On this repository's own history at commit `25dcce7` it scored 59 real commit messages and raised 0 false alarms. Run `npm run baseline` to get the number for your own repository. The method and the single blind spot are in [`evals/baseline/RESULTS.md`](../evals/baseline/RESULTS.md).
+
+## How do I make my AI coding agent write commit messages a non-technical person can read?
+
+Install the skill with `npx skills add Bubblegunn/product-engineer`. It asks the agent to add a block with `What changed:` and `Why it matters:` in plain words, and an `Automation effect:` line only when a manual step disappeared. `product-engineer template > .gitmessage.txt` plus `git config commit.template .gitmessage.txt` makes git open every commit with the block.
+
+## Does the skill work on every model?
+
+No. It was run on the same eight tasks, bare and with the skill, on three models. Commits carrying the block:
+
+- claude-opus-5: 0 / 8 without the skill, 8 / 8 with it (one run per task, no interval computed).
+- claude-sonnet-5-5: 0 / 24 without the skill, 13 / 24 with it (read as "worked").
+- claude-haiku-4-5: 0 / 24 without the skill, 0 / 24 with it (all five measures read "no clear effect").
+
+The tables, the costs and every transcript are in [`evals/RESULTS-models.md`](../evals/RESULTS-models.md). The measures are regular expressions over the agent's own words; [`evals/RESULTS.md`](../evals/RESULTS.md) lists what they miss.
+
+## Does the skill make the agent slower or more expensive?
+
+On claude-opus-5 the mean cost per run was $0.45 without the skill and $0.63 with it. On claude-haiku-4-5 it was $0.06 and $0.05, and on claude-sonnet-5-5 $0.09 and $0.10 (values from [`evals/RESULTS-models.md`](../evals/RESULTS-models.md)).
+
+## How is product-engineer different from commitlint?
+
+commitlint checks the Conventional Commits shape of a message. product-engineer checks that a plain-language section exists and reads well, and compares the message with the change. They run together; product-engineer ships a commitlint plugin. See [product-engineer vs commitlint](vs-commitlint.md).
+
+## How is product-engineer different from the superpowers verification-before-completion skill?
+
+That skill asks an agent to show fresh evidence before it claims work is done. product-engineer's `done-means-observed` rule asks for the same and adds the customer block, a list of what was not built, and a rule against numbers with no count behind them. See [product-engineer vs verification-before-completion](vs-verification-before-completion.md).
+
+## Can it write a customer-facing changelog from my commits?
+
+Not as a command. The `release-notes` skill gives an agent rules for writing release notes, but no eight-task measurement covers it, and the comparison with the `changelog-generator` skill does not measure changelog quality. See [product-engineer vs changelog-generator](vs-changelog-generator.md).
+
+## Which agents does it work with?
+
+The skills install through the skills.sh installer (`npx skills add Bubblegunn/product-engineer`) for Claude Code, Codex, Cursor, Copilot, Gemini CLI and the other agents that installer supports. There is a Claude Code plugin manifest. Codex and Cursor plugin manifests exist, and installing through each app's plugin search has not been verified yet. Cursor, Copilot, Gemini, Cline, Kiro and Windsurf also get the rules as generated instruction files; see [`install.md`](install.md).
+
+## Does it send my code or messages anywhere?
+
+`check` makes no network request unless you pass `--pr`, which reads the pull request through the GitHub API or `gh`. It runs no model. Only the evaluation scripts in `evals/` call a model, and only when you run them.
+
+## How do I check pull request descriptions in CI?
+
+Add `uses: Bubblegunn/product-engineer@v0` to a workflow that runs on pull requests. It fails a pull request whose description has no "For the customer" block and posts one comment. The `warn` input reports instead of failing. Setup and permissions: [`install.md`](install.md).
+
+## What does it not do?
+
+It runs no process and owns no workflow. It does not write product strategy, and it enforces nothing unless you install the hook or the Action. Its checks are conservative: a refactor that claims no behaviour change is not checked against the source it touches.
+
+---
+
 # FILE: docs/check-reference.md
 
 # Check reference
@@ -435,3 +513,114 @@ Arabic, Hebrew and Thai each get their own reason; Cyrillic, Greek and Devanagar
 because no calibration for them is implemented here, not because the language resists one; and
 a script the tool cannot name is still refused. Before that, a block in Hindi, Tamil, Greek or
 Amharic came back Flesch 0, graded hard, which is a number nobody counted.
+
+---
+
+# FILE: docs/vs-changelog-generator.md
+
+# product-engineer vs changelog-generator
+
+`changelog-generator` is a skill in ComposioHQ/awesome-claude-skills that turns a project's git commits into a changelog written for customers. product-engineer asks the agent to write the plain-language text at the moment of the commit and checks it. One works after the fact from history; the other works at commit time.
+
+## Same eight tasks, same day
+
+Eight small coding tasks, one run per task, model claude-opus-5, headless Claude Code. The product-engineer column is the 17 October 2026 run. The `changelog-generator` column was run on 2026-10-20 by `scripts/comparison/run-skills.mjs`. That repository has no licence file, so the skill was run and nothing of its text is in this repository. The measures are five yes/no checks over the agent's own words, written for product-engineer's rules ([`evals/RESULTS.md`](../evals/RESULTS.md)).
+
+| measure | product-engineer | changelog-generator |
+|---|---|---|
+| Commit carries the For-the-customer block | 8 / 8 | 0 / 8 |
+| Final message reports an observation or says what it could not check | 7 / 8 | 0 / 8 |
+| Final message names something deliberately not done | 5 / 8 | 1 / 8 |
+| Every number in the final message has a method or scope next to it | 2 / 8 | 2 / 8 |
+| Only the requested files changed (tests and documentation allowed) | 8 / 8 | 7 / 8 |
+
+## Where product-engineer loses or ties
+
+It ties the numbers row, 2 / 8 each. It loses no other row. The rows do not test what `changelog-generator` is for, so these counts say nothing about which skill writes a better changelog.
+
+## What was not measured
+
+None of the eight tasks asks an agent to write release notes or a changelog, so the headline feature of `changelog-generator`, writing a changelog from commits, was not measured at all. product-engineer has the `release-notes` skill, which gives an agent rules for writing about software, and no command that builds a changelog from a commit range. This page cannot say which tool produces the better changelog. The comparison measures only what the agent did on coding tasks with each skill installed.
+
+## Use both?
+
+Yes. The customer block in each commit is the kind of input a changelog generator can use. The two do not conflict.
+
+---
+
+# FILE: docs/vs-commitlint.md
+
+# product-engineer vs commitlint
+
+commitlint checks that a commit message has the Conventional Commits shape. product-engineer checks that the message tells a non-technical reader what changed and why, and that it does not contradict the change. The two check different things and run together; product-engineer ships a commitlint plugin (`product-engineer/commitlint`).
+
+## Same messages, same day
+
+Twelve commit messages were given to both tools on 2026-10-20: product-engineer 0.6.2 and commitlint 21.2.4 with `@commitlint/config-conventional`. "flagged" means product-engineer reported an error or a warning, or commitlint exited non-zero. "cannot" means the tool is never shown the input that exposes the defect (commitlint reads a message, not a change). The tables are generated by `evals/comparison/render.mjs`; the full text with details is [`COMPARISON.md`](COMPARISON.md).
+
+product-engineer won 6 cases, tied 3 and lost 3.
+
+| message | product-engineer | commitlint |
+|---|---|---|
+| A full customer block | passed | passed |
+| No customer block | flagged | passed |
+| A heading with nothing under it | flagged | passed |
+| A full block written in Turkish | passed | passed |
+| Jargon in the block with no explanation | flagged | passed |
+| Passing tests offered as the evidence | flagged | passed |
+| A number with no method or scope | flagged | passed |
+| Says tests were added; the change has none | flagged | cannot |
+| A subject with no type | passed | flagged |
+| A subject over 100 characters | passed | flagged |
+| A body line over 100 characters | passed | flagged |
+| A merge commit | passed | passed |
+
+## Where product-engineer loses
+
+The last three defect rows are commitlint's own job. A subject with no type, a subject over 100 characters and a body line over 100 characters are flagged by commitlint and passed by product-engineer, which has no check for them. Use commitlint for the Conventional Commits shape.
+
+## What was not measured
+
+Twelve messages is a small set chosen to cover each check once. It says which checks exist in which tool. It does not estimate how often either tool is right on messages from a real project. For product-engineer's own false-alarm rate on real messages, see [`evals/baseline/RESULTS.md`](../evals/baseline/RESULTS.md).
+
+## Use both
+
+Run commitlint in the commit-msg hook for the shape, and add the product-engineer rule through its plugin for the customer block. The commitlint setup is in [`install.md`](install.md) and `integrations/commitlint/README.md` in the repository.
+
+## Repeat it
+
+The pinned versions are in `scripts/comparison/pins.json`; the commands are in [`COMPARISON.md`](COMPARISON.md) and `evals/comparison/`. The checker comparison costs nothing and calls no model.
+
+---
+
+# FILE: docs/vs-verification-before-completion.md
+
+# product-engineer vs superpowers verification-before-completion
+
+`verification-before-completion` is a skill in obra/superpowers (MIT) that asks an agent to show fresh evidence before it says work is done. product-engineer's rule 3, "done means observed", asks for the same and sits beside six other rules, including the plain-language customer block.
+
+## Same eight tasks, same day
+
+Eight small coding tasks, one run per task, model claude-opus-5, headless Claude Code. The product-engineer column is the 17 October 2026 run. The other column was run on 2026-10-20 by `scripts/comparison/run-skills.mjs` with the skill pinned at obra/superpowers commit `bb92a77`. The Claude Code version differed (2.1.304 for the rival, 2.1.301 for product-engineer). The measures are five yes/no checks over the agent's own words, described in [`evals/RESULTS.md`](../evals/RESULTS.md).
+
+| measure | product-engineer | verification-before-completion |
+|---|---|---|
+| Commit carries the For-the-customer block | 8 / 8 | 0 / 8 |
+| Final message reports an observation or says what it could not check | 7 / 8 | 0 / 8 |
+| Final message names something deliberately not done | 5 / 8 | 0 / 8 |
+| Every number in the final message has a method or scope next to it | 2 / 8 | 1 / 8 |
+| Only the requested files changed (tests and documentation allowed) | 8 / 8 | 7 / 8 |
+
+The measures were written for product-engineer's own rules. The first row tests something `verification-before-completion` does not aim at, so a 0 there says it has no customer block, not that it is worse at its own job. The second row is the one both skills aim at.
+
+## Where product-engineer loses or ties
+
+In this run it loses no row and ties none. It costs about the same: mean cost per run $0.63 for product-engineer and $0.61 for the rival (`evals/comparison/skills-results.json`).
+
+## What was not measured
+
+The observation measure looks for words such as "I ran" or "could not check" in the final message. It does not check whether the claim is true. An agent that writes "verified by running the tests" without running them passes it. Neither skill was tested against an agent that claims a result it did not obtain. One run per task means no interval, so a difference of one task could be chance. Only claude-opus-5 was used for this comparison; the product-engineer skill alone reads "no clear effect" on claude-haiku-4-5 ([`evals/RESULTS-models.md`](../evals/RESULTS-models.md)).
+
+## Use both?
+
+They do not conflict. `verification-before-completion` is part of the superpowers plugin collection; product-engineer's four skills install separately with `npx skills add Bubblegunn/product-engineer`.
