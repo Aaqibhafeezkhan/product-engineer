@@ -84,15 +84,16 @@ export function referenceFindings(text, opts = {}) {
   if (mode === "off") return [];
   const refs = resolveReferences(findReferences(text), opts);
   if (refs.length === 0) {
-    return [{ level: "info", message: "no file or run reference to resolve; the block is judged on what it says" }];
+    return [{ level: "info", message: "no file or run reference to resolve; the block is judged on what it says", code: "references-none" }];
   }
   const broken = refs.filter((r) => !r.resolved);
   if (broken.length === 0) {
     const one = refs.length === 1;
-    return [{ level: "ok", message: `${refs.length} reference${one ? "" : "s"} resolve${one ? "s" : ""}` }];
+    return [{ level: "ok", message: `${refs.length} reference${one ? "" : "s"} resolve${one ? "s" : ""}`, code: "references-resolved" }];
   }
   return broken.map((r) => ({
     level: mode === "error" ? "error" : "warn",
     message: `cites ${r.raw}, which does not resolve: ${r.why}`,
+    code: "references-broken",
   }));
 }

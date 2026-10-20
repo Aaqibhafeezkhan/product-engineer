@@ -95,7 +95,7 @@ const sentencesWith = (text, re) =>
  */
 export function crossCheck(text, diff, { cwd = process.cwd() } = {}) {
   const findings = [];
-  const add = (level, message) => findings.push({ level, message });
+  const add = (level, message, code) => findings.push({ level, message, code });
   const files = diff.files;
   // A phrase inside backticks or quotation marks is being named, not asserted. Without this,
   // a message describing the checks ("reports \"documentation only\" over a source change")
@@ -109,23 +109,23 @@ export function crossCheck(text, diff, { cwd = process.cwd() } = {}) {
     .replace(/"[^"\n]{0,120}"|\u201c[^\u201d\n]{0,120}\u201d/g, " ");
 
   if (!files.length) {
-    add("info", `the change at ${diff.range} touches no files, so nothing was cross-checked`);
+    add("info", `the change at ${diff.range} touches no files, so nothing was cross-checked`, "diff-empty");
     return findings;
   }
 
   const tests = files.filter((f) => isTestPath(f.path));
   const docs = files.filter((f) => isDocPath(f.path));
   const source = files.filter((f) => !isTestPath(f.path) && !isDocPath(f.path));
-  add("info", `cross-checked against ${files.length} file${files.length === 1 ? "" : "s"} at ${diff.range}: ${source.length} source, ${tests.length} test, ${docs.length} documentation`);
+  add("info", `cross-checked against ${files.length} file${files.length === 1 ? "" : "s"} at ${diff.range}: ${source.length} source, ${tests.length} test, ${docs.length} documentation`, "diff-checked");
 
   // 1. A claim that tests were written, with no test file gaining a line.
   const testClaims = sentencesWith(claims, TEST_CLAIM).filter((s) => !DESCRIBED_NOT_ADDED.test(s));
   if (testClaims.length) {
     const written = tests.filter((f) => f.added > 0);
     if (!written.length) {
-      add("warn", `the message says tests were added; no test file gains a line in this change (${files.length} file${files.length === 1 ? "" : "s"} counted, ${tests.length} of them under a test path)`);
+      add("warn", `the message says tests were added; no test file gains a line in this change (${files.length} file${files.length === 1 ? "" : "s"} counted, ${tests.length} of them under a test path)`, "diff-tests-missing");
     } else {
-      add("ok", `tests claimed and ${written.length} test ${written.length === 1 ? "file gains" : "files gain"} lines`);
+      add("ok", `tests claimed and ${written.length} test ${written.length === 1 ? "file gains" : "files gain"} lines`, "diff-tests-found");
     }
   }
 
@@ -134,9 +134,9 @@ export function crossCheck(text, diff, { cwd = process.cwd() } = {}) {
     const other = [...source, ...tests];
     if (other.length) {
       const named = other.slice(0, 3).map((f) => f.path).join(", ");
-      add("warn", `the message says the change is documentation only; ${other.length} file${other.length === 1 ? " is" : "s are"} not documentation: ${named}${other.length > 3 ? ", and more" : ""}`);
+      add("warn", `the message says the change is documentation only; ${other.length} file${other.length === 1 ? " is" : "s are"} not documentation: ${named}${other.length > 3 ? ", and more" : ""}`, "diff-docs-only-mismatch");
     } else {
-      add("ok", "documentation only, and the change touches documentation only");
+      add("ok", "documentation only, and the change touches documentation only", "diff-docs-only-ok");
     }
   }
 
@@ -155,8 +155,8 @@ export function crossCheck(text, diff, { cwd = process.cwd() } = {}) {
     const claimed = /^\d+$/.test(m[1]) ? Number(m[1]) : WORDS[m[1].toLowerCase()];
     if (claimed === undefined) continue;
     if (!CHANGE_VERB.test(s.slice(Math.max(0, m.index - 28), m.index))) continue;
-    if (claimed !== files.length) add("warn", `the message says ${m[1]} file${claimed === 1 ? "" : "s"}; the change has ${files.length}: "${s.trim().slice(0, 70)}"`);
-    else add("ok", `the stated file count matches the change: ${files.length}`);
+    if (claimed !== files.length) add("warn", `the message says ${m[1]} file${claimed === 1 ? "" : "s"}; the change has ${files.length}: "${s.trim().slice(0, 70)}"`, "diff-file-count-mismatch");
+    else add("ok", `the stated file count matches the change: ${files.length}`, "diff-file-count-ok");
   }
 
   // 4. A path named in the message that is neither in the change nor in the repository.
@@ -165,7 +165,7 @@ export function crossCheck(text, diff, { cwd = process.cwd() } = {}) {
   const inDiff = new Set(files.map((f) => f.path));
   const broken = namedPaths(body).filter((p) => !inDiff.has(p) && !existsSync(join(cwd, p)));
   if (broken.length) {
-    add("warn", `the message names ${broken.length === 1 ? "a path" : "paths"} that ${broken.length === 1 ? "is" : "are"} not in this change and not in the repository: ${broken.slice(0, 3).join(", ")}`);
+    add("warn", `the message names ${broken.length === 1 ? "a path" : "paths"} that ${broken.length === 1 ? "is" : "are"} not in this change and not in the repository: ${broken.slice(0, 3).join(", ")}`, "diff-path-missing");
   }
 
   return findings;

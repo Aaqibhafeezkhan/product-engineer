@@ -252,7 +252,7 @@ because no calibration for them is implemented here, not because the language re
 a script the tool cannot name is still refused. Before that, a block in Hindi, Tamil, Greek or
 Amharic came back Flesch 0, graded hard, which is a number nobody counted. Exit 1 on a missing block, 0 with `--warn`. Run on this repository's own last five commits
 it reports no errors and one warning (a sentence quoting the eval counts without a method
-word next to it). `--format github` turns the findings into run annotations. As a CI step
+word next to it). `--format github` turns the findings into run annotations, and `--format json` prints them as one JSON object, `{ ok, findings: [{ level, code, message }], readability }`, for editors and dashboards. As a CI step
 (needs `pull-requests: write` for the comment, see [`docs/install.md`](docs/install.md)):
 
 ```yaml

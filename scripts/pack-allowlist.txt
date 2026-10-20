@@ -6,6 +6,7 @@ bin/check.mjs
 bin/diff.mjs
 bin/doctor.mjs
 bin/headings.mjs
+bin/json-report.mjs
 bin/readability.mjs
 bin/references.mjs
 integrations/commitlint/README.md

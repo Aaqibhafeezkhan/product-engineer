@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url";
 import { readability } from "./readability.mjs";
 import { acceptedHeadings, preferredHeadings, shippedHeadings, isHeading, headingWithText, normalise } from "./headings.mjs";
 import { referenceFindings } from "./references.mjs";
+import { renderJson } from "./json-report.mjs";
 
 const HELP = `usage: product-engineer check [file|-|--stdin] [--pr <number>] [--warn] [--lang <code>] [--format text|github] [--comment]
        product-engineer template [--lang <code>]
@@ -23,8 +24,9 @@ skill asks. With no file it reads .git/COMMIT_EDITMSG when present.
                 and GITHUB_REPOSITORY are set (as in Actions), otherwise with gh pr view
   --comment     with --pr and a token: post the result as one comment on the pull
                 request, updated in place on later runs; a failed post is a warning
-  --format      text (default) or github: errors and warnings as ::error:: and
-                ::warning:: workflow commands, so they annotate the run
+  --format      text (default), github or json. github writes errors and warnings as ::error::
+                and ::warning:: workflow commands, so they annotate the run. json prints one
+                object, { ok, findings: [{ level, code, message }], readability }, and nothing else
   --diff [range] also read the change itself and report where the message and the
                 diff disagree: tests claimed but no test file touched, "documentation
                 only" over a source change, a stated file count that is wrong, a path
@@ -67,11 +69,11 @@ const OBSERVED = /\b(watched|saw|observed|checked (it|the|that)|verified (by|in|
  */
 export function analyse(text, opts = {}) {
   const findings = [];
-  const add = (level, message) => findings.push({ level, message });
+  const add = (level, message, code) => findings.push({ level, message, code });
   const lines = text.split("\n");
   const first = lines[0] ?? "";
   if (/^(Merge|fixup!|squash!|Revert)/.test(first) || /\[no-customer\]/.test(text)) {
-    return { skipped: true, findings: [{ level: "ok", message: "merge, fixup, squash, revert or [no-customer]: the block is not required" }] };
+    return { skipped: true, findings: [{ level: "ok", message: "merge, fixup, squash, revert or [no-customer]: the block is not required", code: "block-not-required" }] };
   }
 
   // The block may be written in the team's language: any row of references/headings.md is
@@ -89,9 +91,9 @@ export function analyse(text, opts = {}) {
   }
   const hasWhat = lines.some((l) => headingWithText(l, heading.what));
   if (blockStart < 0 || !hasWhat) {
-    add(opts.warn ? "warn" : "error", blockStart < 0 ? `no "${preferred.block}" block` : `"${heading.block}" block has no "${heading.what}" line`);
+    add(opts.warn ? "warn" : "error", blockStart < 0 ? `no "${preferred.block}" block` : `"${heading.block}" block has no "${heading.what}" line`, blockStart < 0 ? "block-missing" : "what-changed-missing");
   } else {
-    add("ok", `"${heading.block}" block with "${heading.what}"`);
+    add("ok", `"${heading.block}" block with "${heading.what}"`, "block-present");
   }
 
   // The block runs from its heading to the next blank line or the end.
@@ -100,26 +102,27 @@ export function analyse(text, opts = {}) {
     for (let i = blockStart + 1; i < lines.length && lines[i].trim() !== ""; i++) block.push(lines[i]);
   }
   const blockText = block.join("\n");
+  let readabilityOf = null;
 
   if (blockStart >= 0) {
-    if (block.some((l) => headingWithText(l, heading.why))) add("ok", `"${heading.why}" present`);
-    else add("warn", `"${heading.why}" missing or empty`);
+    if (block.some((l) => headingWithText(l, heading.why))) add("ok", `"${heading.why}" present`, "why-present");
+    else add("warn", `"${heading.why}" missing or empty`, "why-missing");
 
     const auto = block.find((l) => normalise(l).startsWith(normalise(heading.automation)));
-    if (!auto) add("ok", `"${heading.automation}" omitted (fine when no manual step disappeared)`);
-    else if (!headingWithText(auto, heading.automation)) add("error", `"${heading.automation}" is present but empty; omit the line or say what became automatic`);
-    else add("ok", `"${heading.automation}" present`);
+    if (!auto) add("ok", `"${heading.automation}" omitted (fine when no manual step disappeared)`, "automation-omitted");
+    else if (!headingWithText(auto, heading.automation)) add("error", `"${heading.automation}" is present but empty; omit the line or say what became automatic`, "automation-empty");
+    else add("ok", `"${heading.automation}" present`, "automation-present");
 
     const terms = jargonTerms(opts.tablePath);
     const lower = blockText.toLowerCase();
     const used = terms.filter((t) => new RegExp(`\\b${t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i").test(lower));
     const explained = (t) => new RegExp(`${t}[^\\n]*(\\(|, that is|, which means|, meaning|: )`, "i").test(lower);
     const unexplained = used.filter((t) => !explained(t));
-    if (unexplained.length) add("warn", `jargon in the customer block without a plain explanation: ${unexplained.join(", ")}`);
-    else if (used.length) add("ok", "jargon in the block is explained");
+    if (unexplained.length) add("warn", `jargon in the customer block without a plain explanation: ${unexplained.join(", ")}`, "jargon-unexplained");
+    else if (used.length) add("ok", "jargon in the block is explained", "jargon-explained");
 
     if (TEST_EVIDENCE.test(blockText) && !OBSERVED.test(text)) {
-      add("warn", "the block offers passing tests as the evidence; rule 3 asks for something observed (logs, the data, a device) or a line saying what you could not check");
+      add("warn", "the block offers passing tests as the evidence; rule 3 asks for something observed (logs, the data, a device) or a line saying what you could not check", "tests-as-evidence");
     }
 
     // Strip this block's own labels, whatever language they are in, so the score reads the
@@ -134,11 +137,13 @@ export function analyse(text, opts = {}) {
       })
       .join("\n");
     const r = readability(prose, opts.lang ?? (heading.language !== "custom" ? heading.language : "en"));
+    readabilityOf = r;
     add(
       "info",
       r.name
         ? `readability of the block: ${r.name} ${r.score} (${r.band}), LIX ${r.lix}`
         : `readability of the block: not scored, because ${r.reason}. Rule 5: a number comes from a count.`,
+      "readability",
     );
   }
 
@@ -147,9 +152,9 @@ export function analyse(text, opts = {}) {
     const items = [];
     for (let i = ns + 1; i < lines.length && lines[i].trim() !== ""; i++) items.push(lines[i]);
     const bad = items.filter((l) => !/^- .+:.+/.test(l));
-    if (!items.length) add("warn", `"${heading.notShipped}" has no items`);
-    else if (bad.length) add("warn", `"${heading.notShipped}" items should read "- <thing>: <why not now>" (${bad.length} do not)`);
-    else add("ok", `"${heading.notShipped}" lists ${items.length} item${items.length === 1 ? "" : "s"} with reasons`);
+    if (!items.length) add("warn", `"${heading.notShipped}" has no items`, "not-shipped-empty");
+    else if (bad.length) add("warn", `"${heading.notShipped}" items should read "- <thing>: <why not now>" (${bad.length} do not)`, "not-shipped-format");
+    else add("ok", `"${heading.notShipped}" lists ${items.length} item${items.length === 1 ? "" : "s"} with reasons`, "not-shipped-ok");
   }
 
   // A sentence ends at a full stop in any of the scripts this tool accepts a block in:
@@ -157,13 +162,13 @@ export function analyse(text, opts = {}) {
   // Without them a Japanese block is one long sentence and the count in the warning is wrong.
   const sentences = text.split(/(?<=[.!?])\s+|(?<=[。！？।])\s*|\n+/).filter((s) => /\d/.test(s) && !/^\s*(Co-Authored-By|Claude-Session|Signed-off-by)/.test(s));
   const bare = sentences.filter((s) => !METHOD.test(s) && !/^(#|\s*-\s|\w+\(.*\):)/.test(s) && !/\b(v?\d+\.\d+(\.\d+)?|#\d+|20\d\d)\b/.test(s));
-  if (bare.length) add("warn", `${bare.length} sentence${bare.length === 1 ? "" : "s"} with a number and no method or scope next to it: "${bare[0].trim().slice(0, 80)}"`);
+  if (bare.length) add("warn", `${bare.length} sentence${bare.length === 1 ? "" : "s"} with a number and no method or scope next to it: "${bare[0].trim().slice(0, 80)}"`, "number-without-method");
 
   // Evidence that points somewhere is checked against that somewhere. Whole message, not the block:
   // the path or run URL behind a claim usually sits in the technical body above it.
   for (const f of referenceFindings(text, { mode: opts.references, cwd: opts.cwd })) findings.push(f);
 
-  return { skipped: false, findings };
+  return { skipped: false, findings, readability: readabilityOf };
 }
 
 function summary(result) {
@@ -327,8 +332,8 @@ async function main(argv) {
   }
   const formatIndex = argv.indexOf("--format");
   const format = formatIndex >= 0 ? argv[formatIndex + 1] : "text";
-  if (format !== "text" && format !== "github") {
-    console.error(`--format must be text or github, got: ${format}`);
+  if (format !== "text" && format !== "github" && format !== "json") {
+    console.error(`--format must be text, github or json, got: ${format}`);
     return 2;
   }
   let text;
@@ -354,10 +359,12 @@ async function main(argv) {
     } catch (err) {
       // Outside a repository, or a range git does not know: say so and check the message alone.
       const message = `--diff could not read the change: ${err instanceof Error ? err.message.split("\n")[0] : String(err)}`;
-      result.findings.push({ level: "warn", message });
+      result.findings.push({ level: "warn", message, code: "diff-unreadable" });
     }
   }
-  console.log(render(result, format));
+  console.log(format === "json" ? renderJson(result, { warn: argv.includes("--warn") }) : render(result, format));
+  // With --format json, standard output is one JSON document and nothing else.
+  const say = format === "json" ? console.error : console.log;
   if (argv.includes("--comment")) {
     const pr = prNumber(argv);
     if (!pr) {
@@ -366,11 +373,11 @@ async function main(argv) {
     }
     try {
       const what = await upsertComment(pr, commentBody(result, version()));
-      console.log(`comment ${what} on pull request #${pr}`);
+      say(`comment ${what} on pull request #${pr}`);
     } catch (err) {
       // A read-only token (a pull request from a fork) cannot comment; the check still reports.
       const message = `could not post the comment: ${err instanceof Error ? err.message : String(err)}`;
-      console.log(format === "github" ? `::warning title=product-engineer::${message}` : `warn  ${message}`);
+      say(format === "github" ? `::warning title=product-engineer::${message}` : `warn  ${message}`);
     }
   }
   return argv.includes("--warn") ? 0 : exitCode(result);
