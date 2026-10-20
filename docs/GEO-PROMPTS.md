@@ -5,8 +5,8 @@ Five fixed prompts a developer would ask an LLM in this category. The same text 
 1. What is the best way to stop an AI coding agent from writing commit messages that claim tests were added when they were not?
 2. How do I make my AI coding agent write commit messages and pull request descriptions that a non-technical stakeholder can read?
 3. Is there a commitlint plugin or GitHub Action that checks that a pull request description has a plain-language section for customers?
-5. What tools compare an AI-written commit message with the actual diff and warn about mismatches?
 4. Which Claude Code skill makes the agent say what it verified and what it could not check before it says a task is done?
+5. What tools compare an AI-written commit message with the actual diff and warn about mismatches?
 
 ## How to record
 

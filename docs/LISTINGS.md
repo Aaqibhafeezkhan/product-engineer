@@ -16,7 +16,7 @@ Search phrases the keywords and README cover: "claude code skill commit message"
 
 Name: product-engineer check
 
-Description (125 characters or fewer): Checks that a pull request has a plain-language "For the customer" block and warns when it contradicts the diff,.
+Description (125 characters or fewer): Checks that a pull request has a plain-language "For the customer" block and warns when it contradicts the diff.
 
 Notes: the current `action.yml` description is `Fails a pull request whose description has no "For the customer" block, and says so in one comment on the pull request.` The text above also mentions the diff, which needs the `diff` input added in 0.7.0, so change `action.yml` only in the release commit for 0.7.0 (`test/action.test.mjs` checks the 125 character limit). Primary category: Code quality. Secondary: Continuous integration. Icon `check-square`, colour `blue` (already in `action.yml`).
 
@@ -31,11 +31,11 @@ Listing is read from the repository by `npx skills add Bubblegunn/product-engine
 
 ## Claude Code plugin directory
 
-Name: product-engineer. Category: engineering. Description: Makes a coding agent write a plain-language "For the customer" block in every commit and pull request, report what it observed, and name what it did not build. Four skills in one plugin. The plugin name cannot be changed after submission (research report 8), so confirm `product-engineer` before submitting. Keywords: product, commits, pull-requests, plain-language, definition-of-done (from `.claude-plugin/marketplace.json`).
+Name: product-engineer. Category: engineering. Description: Makes a coding agent write a plain-language "For the customer" block in every commit and pull request, report what it observed, and name what it did not build. Four skills in one plugin. The plugin name may not be changeable after submission, so confirm `product-engineer` before submitting. Keywords: product, commits, pull-requests, plain-language, definition-of-done (from `.claude-plugin/marketplace.json`).
 
 ## Codex and Cursor plugin directories
 
-Display name: product-engineer. Short description: Plain-language customer block in every commit, and done means observed. These are the values already in `.codex-plugin/plugin.json`. Do not submit either until the plugin has been installed in the real app and one commit made afterwards carries the block; Phase 1 verified the file shape and the skills they load, not the install. The Codex manifest privacy and terms URLs point at GitHub's general pages and need Efe's confirmation.
+Display name: product-engineer. Short description: Plain-language customer block in every commit, and done means observed. The display name and short description are the values already in `.codex-plugin/plugin.json` (`interface.displayName`, `interface.shortDescription`). `.cursor-plugin/plugin.json` has no short description. The file shape was checked by test; the install through each app has not been tested. Do not submit either until the plugin has been installed in the real app and one commit made afterwards carries the block. The Codex manifest privacy and terms URLs point at GitHub's general pages and need Efe's confirmation.
 
 ## Stores that do not apply
 
