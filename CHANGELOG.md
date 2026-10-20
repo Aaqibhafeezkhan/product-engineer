@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.7.0
+
+**`check --format json`.** Prints one JSON object, `{ ok, findings: [{ level, code, message }], readability }`, and
+nothing else on standard output; the exit code is the one text mode gives. Every finding carries a stable `code`
+(`block-missing`, `diff-tests-missing`, `references-broken`, and so on), set where the finding is made.
+
+**The Action can read the change and skips dependency bots.** New inputs: `diff` (a revision range, runs
+`check --diff`), `references` (`off`, `warn` or `error`) and `skip-authors` (default `dependabot[bot],renovate[bot]`,
+an empty string checks every pull request). A `diff` that is not plain revision text exits 2 before anything runs.
+
+**Codex and Cursor plugin manifests.** `.codex-plugin/plugin.json` and `.cursor-plugin/plugin.json` point at
+`./skills/`. Their shape and the skills they load are tested; installing through each app's plugin search is not yet
+verified. `THIRD_PARTY_NOTICES.md` carries the licence text of the manifests they were adapted from.
+
+**A generated comparison.** `docs/COMPARISON.md` runs `check` and commitlint on the same messages, from competitors
+pinned in `scripts/comparison/pins.json` and fetched into the gitignored `_upstream/`. It also compares the skill with
+two other skills on the eight eval tasks, one run each. The rows where product-engineer loses are printed like the
+others.
+
+**The eval can install a skill from outside the repository and stop at a budget.** `PE_EVAL_SKILL_PATH`,
+`PE_EVAL_SKILL_SOURCE` and `PE_EVAL_BUDGET_USD` for `evals/run.sh`; `node evals/by-model.mjs` prints one section per
+model and never averages them.
+
+**The skill was run on other models.** Three runs per task on claude-haiku-4-5 and claude-sonnet-5-5, every transcript
+published in `evals/results-<model>-2026-10-20/`, and the per-model report in `evals/RESULTS-models.md`, including the
+models and metrics where the effect was not clear.
+
 ## 0.6.2 (2026-10-16)
 
 **`customer-block` and `done-means-observed` are measured on their own.** With `PE_EVAL_SKILL` from 0.6.1, each
