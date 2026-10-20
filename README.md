@@ -24,7 +24,7 @@ English | [Türkçe](README.tr.md) | [简体中文](README.zh-CN.md)
 
 ## Does the skill part work?
 
-It depends on the model. The skill is four text files that tell an agent to write a plain-language "For the customer" block in each commit, say what it observed, and name what it did not build. It was run on the same eight small tasks, bare and with the skill, on three models. The row below is the commit carrying the block.
+It depends on the model. The skill is four skills, each a SKILL.md with the main one also carrying reference files, that tell an agent to write a plain-language "For the customer" block in each commit, say what it observed, and name what it did not build. It was run on the same eight small tasks, bare and with the skill, on three models. The row below is the commit carrying the block.
 
 | model | without the skill | with the skill | reading |
 |---|---|---|---|

@@ -4,7 +4,7 @@
 
 ## Same eight tasks, same day
 
-Eight small coding tasks, one run per task, model claude-opus-5, headless Claude Code. The product-engineer column is the 17 October 2026 run. The `changelog-generator` column was run on 2026-10-20 by `scripts/comparison/run-skills.mjs`. That repository has no licence file, so the skill was run and nothing of its text is in this repository. The measures are five yes/no checks over the agent's own words, written for product-engineer's rules ([`evals/RESULTS.md`](../evals/RESULTS.md)).
+Eight small coding tasks, one run per task, model claude-opus-5, headless Claude Code. The product-engineer column is the 17 October 2026 run. The `changelog-generator` column was run on 2026-10-20 by `scripts/comparison/run-skills.mjs`. No licence was detected for that repository, so the skill was run and nothing of its text is in this repository. The measures are five yes/no checks over the agent's own words, written for product-engineer's rules ([`evals/RESULTS.md`](../evals/RESULTS.md)).
 
 | measure | product-engineer | changelog-generator |
 |---|---|---|

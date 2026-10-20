@@ -4,7 +4,7 @@ product-engineer is an agent skill and command-line checker that makes AI coding
 
 ## What does product-engineer do?
 
-It has two parts. The skill is four text files that tell a coding agent to write a plain-language "For the customer" block in every commit and pull request, say what it observed and what it could not check, and name what it deliberately did not build. The checker is a command, `product-engineer check`, that reads a commit message or pull request description and reports whether the block is there and whether it reads the way the skill asks. The checker needs Node 22 or newer and has no dependencies.
+It has two parts. The skill is four skills, each a SKILL.md with the main one also carrying reference files, that tell a coding agent to write a plain-language "For the customer" block in every commit and pull request, say what it observed and what it could not check, and name what it deliberately did not build. The checker is a command, `product-engineer check`, that reads a commit message or pull request description and reports whether the block is there and whether it reads the way the skill asks. The checker needs Node 22 or newer and has no dependencies.
 
 ## How do I find out that my AI agent's commit message claims tests that it did not add?
 
