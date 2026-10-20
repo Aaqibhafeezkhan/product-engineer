@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.7.0
+## 0.7.0 (2026-10-20)
 
 **`check --format json`.** Prints one JSON object, `{ ok, findings: [{ level, code, message }], readability }`, and
 nothing else on standard output; the exit code is the one text mode gives. Every finding carries a stable `code`
