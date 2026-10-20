@@ -1,0 +1,194 @@
+{
+  "runDate": "2026-10-20",
+  "ourVersion": "0.6.2",
+  "tool": {
+    "id": "commitlint",
+    "name": "commitlint",
+    "licence": "MIT",
+    "version": "21.2.4",
+    "config": "@commitlint/config-conventional",
+    "commit": "b55c55775b38cfe05af85844dbbad17a316d4209"
+  },
+  "rows": [
+    {
+      "id": "block-present",
+      "area": "customer-block",
+      "title": "A full customer block",
+      "defect": false,
+      "ours": {
+        "outcome": "passed",
+        "detail": ""
+      },
+      "theirs": {
+        "outcome": "passed",
+        "detail": ""
+      },
+      "verdict": "tie"
+    },
+    {
+      "id": "block-missing",
+      "area": "customer-block",
+      "title": "No customer block",
+      "defect": true,
+      "ours": {
+        "outcome": "flagged",
+        "detail": "no \"For the customer:\" block"
+      },
+      "theirs": {
+        "outcome": "passed",
+        "detail": ""
+      },
+      "verdict": "ours wins"
+    },
+    {
+      "id": "block-empty",
+      "area": "customer-block",
+      "title": "A heading with nothing under it",
+      "defect": true,
+      "ours": {
+        "outcome": "flagged",
+        "detail": "\"For the customer:\" block has no \"What changed:\" line; \"Why it matters:\" missing or empty"
+      },
+      "theirs": {
+        "outcome": "passed",
+        "detail": ""
+      },
+      "verdict": "ours wins"
+    },
+    {
+      "id": "block-turkish",
+      "area": "customer-block",
+      "title": "A full block written in Turkish",
+      "defect": false,
+      "ours": {
+        "outcome": "passed",
+        "detail": ""
+      },
+      "theirs": {
+        "outcome": "passed",
+        "detail": ""
+      },
+      "verdict": "tie"
+    },
+    {
+      "id": "jargon-unexplained",
+      "area": "block-quality",
+      "title": "Jargon in the block with no explanation",
+      "defect": true,
+      "ours": {
+        "outcome": "flagged",
+        "detail": "jargon in the customer block without a plain explanation: idempotent, webhook"
+      },
+      "theirs": {
+        "outcome": "passed",
+        "detail": ""
+      },
+      "verdict": "ours wins"
+    },
+    {
+      "id": "tests-as-evidence",
+      "area": "block-quality",
+      "title": "Passing tests offered as the evidence",
+      "defect": true,
+      "ours": {
+        "outcome": "flagged",
+        "detail": "the block offers passing tests as the evidence; rule 3 asks for something observed (logs, the data, a device) or a line saying what you could not check"
+      },
+      "theirs": {
+        "outcome": "passed",
+        "detail": ""
+      },
+      "verdict": "ours wins"
+    },
+    {
+      "id": "bare-number",
+      "area": "block-quality",
+      "title": "A number with no method or scope",
+      "defect": true,
+      "ours": {
+        "outcome": "flagged",
+        "detail": "1 sentence with a number and no method or scope next to it: \"The report is 40 percent faster.\""
+      },
+      "theirs": {
+        "outcome": "passed",
+        "detail": ""
+      },
+      "verdict": "ours wins"
+    },
+    {
+      "id": "diff-tests-claim",
+      "area": "message-vs-change",
+      "title": "Says tests were added; the change has none",
+      "defect": true,
+      "ours": {
+        "outcome": "flagged",
+        "detail": "the message says tests were added; no test file gains a line in this change (1 file counted, 0 of them under a test path)"
+      },
+      "theirs": {
+        "outcome": "cannot",
+        "detail": "commitlint reads the message only and is never given the change"
+      },
+      "verdict": "ours wins"
+    },
+    {
+      "id": "subject-not-conventional",
+      "area": "conventional-format",
+      "title": "A subject with no type",
+      "defect": true,
+      "ours": {
+        "outcome": "passed",
+        "detail": ""
+      },
+      "theirs": {
+        "outcome": "flagged",
+        "detail": "subject-empty, type-empty"
+      },
+      "verdict": "ours loses"
+    },
+    {
+      "id": "subject-too-long",
+      "area": "conventional-format",
+      "title": "A subject over 100 characters",
+      "defect": true,
+      "ours": {
+        "outcome": "passed",
+        "detail": ""
+      },
+      "theirs": {
+        "outcome": "flagged",
+        "detail": "header-max-length"
+      },
+      "verdict": "ours loses"
+    },
+    {
+      "id": "body-line-too-long",
+      "area": "conventional-format",
+      "title": "A body line over 100 characters",
+      "defect": true,
+      "ours": {
+        "outcome": "passed",
+        "detail": ""
+      },
+      "theirs": {
+        "outcome": "flagged",
+        "detail": "body-max-line-length"
+      },
+      "verdict": "ours loses"
+    },
+    {
+      "id": "merge-commit",
+      "area": "skips",
+      "title": "A merge commit",
+      "defect": false,
+      "ours": {
+        "outcome": "passed",
+        "detail": ""
+      },
+      "theirs": {
+        "outcome": "passed",
+        "detail": ""
+      },
+      "verdict": "tie"
+    }
+  ]
+}

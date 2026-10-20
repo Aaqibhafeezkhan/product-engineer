@@ -1,0 +1,48 @@
+{
+  "comment": "Everything docs/COMPARISON.md compares against, pinned. A competitor is fetched into the gitignored _upstream/ directory at exactly this commit (or npm version) and nowhere else. `copy: true` is allowed only for an MIT, Apache-2.0, BSD or ISC licence; an unlicensed skill is run and never copied into this repository.",
+  "checkers": [
+    {
+      "id": "commitlint",
+      "name": "commitlint",
+      "licence": "MIT",
+      "repo": "conventional-changelog/commitlint",
+      "commit": "b55c55775b38cfe05af85844dbbad17a316d4209",
+      "npm": { "@commitlint/cli": "21.2.4", "@commitlint/config-conventional": "21.2.4" },
+      "config": "@commitlint/config-conventional"
+    }
+  ],
+  "skills": [
+    {
+      "id": "verification-before-completion",
+      "name": "superpowers: verification-before-completion",
+      "licence": "MIT",
+      "repo": "obra/superpowers",
+      "commit": "bb92a77741419a4ab5f06e711a283343f1ada0c3",
+      "path": "skills/verification-before-completion",
+      "copy": true
+    },
+    {
+      "id": "changelog-generator",
+      "name": "ComposioHQ: changelog-generator",
+      "licence": "none detected",
+      "repo": "ComposioHQ/awesome-claude-skills",
+      "commit": "be2a406907dbc61b73e6827ded415c96139d13a2",
+      "path": "changelog-generator",
+      "copy": false
+    }
+  ],
+  "considered": [
+    {
+      "name": "danger-js",
+      "licence": "MIT",
+      "run": false,
+      "why": "Its checks are rules the project writes itself in a Dangerfile and it needs a live pull request to read; it ships no built-in check of what a commit or pull request body says, so there is nothing to run on the same messages."
+    },
+    {
+      "name": "git-commit-msg-linter",
+      "licence": "MIT",
+      "run": false,
+      "why": "A commit-msg hook that checks the header's type, scope and length against the Angular format; its README describes no rule about what the message body says, so there is no body check to run on the same messages."
+    }
+  ]
+}
