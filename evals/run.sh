@@ -9,6 +9,7 @@
 #   PE_EVAL_SKILL=customer-block sh evals/run.sh --yes   # install only skills/customer-block in the skill arm
 #   PE_EVAL_SKILL_PATH=/abs/path/to/skill-dir sh evals/run.sh "" skill --yes   # install a skill from outside this repository
 #       PE_EVAL_SKILL_SOURCE="owner/repo@sha" is recorded in meta.json beside it, so a result names what it ran
+#   PE_EVAL_BUDGET_USD=5 sh evals/run.sh --yes   # stop after the run that takes the total cost past $5 (exit 3)
 #
 # Requires the `claude` CLI, logged in. Each run costs real tokens, so the script
 # prints what it is about to spend and stops unless you pass --yes (or set
@@ -48,6 +49,12 @@ if [ -n "${PE_EVAL_SKILL_PATH:-}" ]; then
 fi
 [ -f "$skill_src/SKILL.md" ] || { echo "no SKILL.md in $skill_src" >&2; exit 1; }
 yes="${PE_EVAL_YES:-}"
+# A ceiling on spend. It is checked after each run, so the total can pass it by at most one run.
+budget="${PE_EVAL_BUDGET_USD:-}"
+case "$budget" in
+  *[!0-9.]*) echo "PE_EVAL_BUDGET_USD must be a number of dollars, not '$budget'" >&2; exit 1 ;;
+esac
+spent=0
 overwrite=""
 for arg in "$@"; do
   [ "$arg" = "--yes" ] && yes=1
@@ -71,6 +78,7 @@ product-engineer evals
   runs/arm    $runs
   total runs  $run_count
   model       $model
+  budget      ${budget:-none} USD
   cli         $cli_version
   results     $results_dir
 The 16-run baseline in evals/RESULTS.md cost about \$7. This run costs real tokens.
@@ -126,6 +134,9 @@ for task in "$tasks_dir"/*/; do
       fs.writeFileSync(process.argv[2], (d.result || "") + "\n");
       fs.writeFileSync(process.argv[3], JSON.stringify({ model: Object.keys(d.modelUsage || {}).join(",") || null, requested_model: process.argv[4] || null, cli: process.argv[5] || null, skill: process.argv[6] || null, source: process.argv[7] || null, cost_usd: d.total_cost_usd || null, turns: d.num_turns || null, duration_ms: d.duration_ms || null }) + "\n");
     ' "$out/transcript.json" "$out/final.md" "$out/meta.json" "$model" "$cli_version" "$([ "$condition" = skill ] && echo "$skill")" "$([ "$condition" = skill ] && echo "$skill_source")"
+    cost=$(node -p 'try { Number(JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")).cost_usd) || 0 } catch { 0 }' "$out/meta.json")
+    spent=$(awk -v a="$spent" -v b="$cost" 'BEGIN { printf "%.4f", a + b }')
+    [ -z "$budget" ] || echo "   spent so far: \$$spent of \$$budget"
     (
       cd "$work"
       if [ "$(git rev-list --count HEAD)" -gt 1 ]; then
@@ -137,6 +148,10 @@ for task in "$tasks_dir"/*/; do
       fi
     )
     rm -rf "$work"
+    if [ -n "$budget" ] && awk -v a="$spent" -v b="$budget" 'BEGIN { exit !(a > b) }'; then
+      echo "budget of \$$budget exceeded after \$$spent; stopping. Results so far are in $results_dir" >&2
+      exit 3
+    fi
     done
   done
 done
