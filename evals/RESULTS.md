@@ -7,7 +7,7 @@ behind every cell are committed under `evals/results/`, so the table can be reco
 `node evals/score.mjs` without spending anything. Same tasks, same prompts, same flags; the only difference is whether
 `skills/product-engineer/` was present in the repository's `.claude/skills/`.
 
-Other models: [evals/RESULTS-models.md](evals/RESULTS-models.md) lists each model separately.
+Other models: [evals/RESULTS-models.md](RESULTS-models.md) lists each model separately.
 
 | metric | bare (n=8) | skill (n=8) | delta |
 |---|---|---|---|
