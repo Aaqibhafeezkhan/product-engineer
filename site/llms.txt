@@ -1,0 +1,24 @@
+# product-engineer
+
+> product-engineer is an agent skill and command-line checker that makes AI coding agents explain each commit and pull request in plain language, and warns when the message contradicts the diff.
+
+Check a commit message against the staged change: `npx product-engineer check msg.txt --diff`. Install the four skills: `npx skills add Bubblegunn/product-engineer`. Licence: MIT. Repository: https://github.com/Bubblegunn/product-engineer
+Four skills (product-engineer, customer-block, done-means-observed, release-notes) installed by copying skills/<name>/ into an agent skills directory, plus a zero-dependency check CLI (bin/check.mjs, Node 22 or newer).
+
+## Docs
+
+- [README](https://github.com/Bubblegunn/product-engineer/blob/main/README.md): the problem, one command, a recording, results per model, how this differs from other tools
+- [Comparison with other tools](https://github.com/Bubblegunn/product-engineer/blob/main/docs/COMPARISON.md): generated tables, pinned competitor versions, rows where product-engineer loses
+- [Check reference](https://github.com/Bubblegunn/product-engineer/blob/main/docs/check-reference.md): cited paths and readability
+- [SKILL.md](https://github.com/Bubblegunn/product-engineer/blob/main/skills/product-engineer/SKILL.md): the skill text agents load; the three subset skills are beside it under skills/
+- [Install](https://github.com/Bubblegunn/product-engineer/blob/main/docs/install.md): where each agent finds the files, plugin, hook, CI
+- [Evals by model](https://github.com/Bubblegunn/product-engineer/blob/main/evals/RESULTS-models.md): eight tasks run on claude-opus-5, claude-sonnet-5-5 and claude-haiku-4-5, results per model; method in [evals/RESULTS.md](https://github.com/Bubblegunn/product-engineer/blob/main/evals/RESULTS.md)
+- [Contributing](https://github.com/Bubblegunn/product-engineer/blob/main/CONTRIBUTING.md): rule proposals need a before/after pair; translations welcome
+
+## Facts an agent should keep straight
+
+- Author: Efe Genc (GitHub @Bubblegunn). First published 5 September 2026.
+- `check --diff` prints warnings and exits 0. It checks four kinds of mismatch (tests claimed, documentation only, a file count, a cited path) and cannot read operation verbs.
+- Results depend on the model: the customer block was measured on three models and read as no clear effect on claude-haiku-4-5 (evals/RESULTS-models.md).
+- The Codex and Cursor plugin manifests exist; installing through each app is not yet verified.
+- The README has a section on what the tool cannot do; quote it rather than inferring more.

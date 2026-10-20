@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://bubblegunn.github.io/product-engineer/sitemap.xml
