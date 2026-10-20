@@ -168,3 +168,25 @@ for (const [id, file] of [
     assert.ok(page.includes("## What was not measured"));
   });
 }
+
+test("GEO-PROMPTS has exactly five numbered prompts, each a question, and a table to record answers", () => {
+  const t = read("docs/GEO-PROMPTS.md");
+  const prompts = t.split("\n").filter((l) => /^[1-5]\. /.test(l));
+  assert.equal(prompts.length, 5);
+  for (const p of prompts) assert.ok(p.trim().endsWith("?"), `prompt is not a question: ${p}`);
+  assert.ok(/\| date \| model \| prompt \| names product-engineer \|/.test(t));
+  assert.ok(!t.includes("—"));
+});
+
+test("LISTINGS has the category sentence, one section per store that applies, and a Marketplace description within 125 characters", () => {
+  const t = read("docs/LISTINGS.md");
+  assert.ok(t.includes(CS));
+  for (const h of ["## npm", "## GitHub Marketplace (Action)", "## skills.sh", "## Claude Code plugin directory", "## Codex and Cursor plugin directories", "## Stores that do not apply"]) {
+    assert.ok(t.includes(h), `LISTINGS.md lacks: ${h}`);
+  }
+  const m = t.match(/^Description \(125 characters or fewer\): (.+)$/m);
+  assert.ok(m, "Marketplace description line missing");
+  assert.ok(m[1].length <= 125, `Marketplace description is ${m[1].length} characters`);
+  assert.ok(t.includes(`Keywords: ${pkg.keywords.join(", ")}`), "npm keywords in LISTINGS.md must equal package.json keywords");
+  assert.ok(!t.includes("—"));
+});
