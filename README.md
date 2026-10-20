@@ -10,7 +10,7 @@ npx product-engineer check msg.txt --diff
 
 ![The check warns that the message says tests were added and the change has none, then passes once a test file is staged](docs/demo-diff.gif)
 
-The recording is real output, made with [vhs](https://github.com/charmbracelet/vhs) from [`docs/demo-diff.tape`](docs/demo-diff.tape). `--diff` prints warnings and exits 0, so it never blocks a commit by itself. It checks four kinds of mismatch (listed [below](#does-the-message-match-the-change)) and it cannot read operation verbs, so "added" against "removed" goes unnoticed. On 59 real commits from this repository's own history it raised 0 false alarms ([`evals/baseline/RESULTS.md`](evals/baseline/RESULTS.md)).
+The recording is real output, made with [vhs](https://github.com/charmbracelet/vhs) from [`docs/demo-diff.tape`](docs/demo-diff.tape). `--diff` prints warnings and exits 0, so it never blocks a commit by itself. It checks four kinds of mismatch (listed [below](#does-the-message-match-the-change)) and it cannot read operation verbs, so "added" against "removed" goes unnoticed. On 59 real commits from this repository's own history, run at `25dcce7`, it raised 0 false alarms ([`evals/baseline/RESULTS.md`](evals/baseline/RESULTS.md)).
 
 English | [Türkçe](README.tr.md) | [简体中文](README.zh-CN.md)
 
