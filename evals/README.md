@@ -13,6 +13,7 @@ sh evals/run.sh                        # prints the plan and the cost, runs noth
 sh evals/run.sh --yes                  # 16 headless runs into evals/results-<timestamp>
 PE_EVAL_RUNS=3 sh evals/run.sh --yes   # 48 runs
 PE_EVAL_SKILL=customer-block sh evals/run.sh --yes   # the skill arm installs only that skill
+PE_EVAL_SKILL_PATH=/abs/dir sh evals/run.sh "" skill --yes   # install a skill from outside this repository
 sh evals/run.sh --yes --overwrite      # replace the published run in evals/results
 node evals/score.mjs                   # table, per-task rows, and every failing cell
 node evals/score.mjs evals/results-... # score your own run instead
