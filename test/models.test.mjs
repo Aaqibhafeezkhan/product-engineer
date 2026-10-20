@@ -13,35 +13,69 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const skipOnWindows = { skip: process.platform === "win32" ? "the fake claude is a shell script" : false };
 const tmp = (name) => mkdtempSync(join(tmpdir(), `pe-${name}-`));
 
-function fakeClaude(cost) {
+/** A stand-in `claude`: prints one JSON result, with `fragment` (a JSON member, or "") as its cost field. */
+function fakeClaude(fragment) {
   const dir = tmp("bin");
   const file = join(dir, "claude");
-  writeFileSync(file, `#!/bin/sh\nif [ "$1" = "--version" ]; then echo "9.9.9 (fake)"; exit 0; fi\necho '{"result":"x","total_cost_usd":${cost}}'\n`);
+  writeFileSync(file, `#!/bin/sh\nif [ "$1" = "--version" ]; then echo "9.9.9 (fake)"; exit 0; fi\necho '{"result":"x"${fragment ? "," + fragment : ""}}'\n`);
   chmodSync(file, 0o755);
   return dir;
 }
+const cost = (n) => `"total_cost_usd":${n}`;
 const runSh = (env, args) => spawnSync("sh", ["evals/run.sh", ...args], { cwd: root, encoding: "utf8", env: { ...process.env, ...env } });
+const metaCount = (out) => readdirSync(out, { recursive: true }).filter((f) => String(f).endsWith("meta.json")).length;
 
-test("a run past the budget stops after that run and exits 3, with the results so far kept", skipOnWindows, () => {
+test("a run that would take the total past the ceiling is never started: the first run goes, the second is refused, exit 3", skipOnWindows, () => {
   const out = tmp("budget");
-  const r = runSh({ PATH: `${fakeClaude(0.25)}:${process.env.PATH}`, PE_EVAL_OUT: out, PE_EVAL_BUDGET_USD: "0.4" }, ["", "", "--yes"]);
+  const r = runSh({ PATH: `${fakeClaude(cost(0.25))}:${process.env.PATH}`, PE_EVAL_OUT: out, PE_EVAL_BUDGET_USD: "0.4" }, ["", "", "--yes"]);
   assert.equal(r.status, 3, r.stdout + r.stderr);
-  assert.match(r.stderr, /budget of \$0\.4 exceeded after \$0\.5000/);
-  const metas = readdirSync(out, { recursive: true }).filter((f) => String(f).endsWith("meta.json"));
-  assert.equal(metas.length, 2);
+  assert.match(r.stderr, /budget of \$0\.4 would be passed by the next run: spent \$0\.2500 so far, largest run \$0\.2500/);
+  assert.equal(metaCount(out), 1);
+});
+
+test("a total that reaches the ceiling exactly is allowed, and the run after it is refused", skipOnWindows, () => {
+  const out = tmp("exact");
+  const r = runSh({ PATH: `${fakeClaude(cost(0.25))}:${process.env.PATH}`, PE_EVAL_OUT: out, PE_EVAL_BUDGET_USD: "0.5" }, ["", "", "--yes"]);
+  assert.equal(r.status, 3, r.stdout + r.stderr);
+  assert.equal(metaCount(out), 2);
+  assert.match(r.stdout, /spent so far: \$0\.5000 of \$0\.5/);
+});
+
+test("a total that stays under the ceiling runs every run and exits 0", skipOnWindows, () => {
+  const out = tmp("under");
+  const r = runSh({ PATH: `${fakeClaude(cost(0.25))}:${process.env.PATH}`, PE_EVAL_OUT: out, PE_EVAL_BUDGET_USD: "1" }, ["01", "", "--yes"]);
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.equal(metaCount(out), 2);
 });
 
 test("with no budget set the same runs all complete", skipOnWindows, () => {
   const out = tmp("nobudget");
-  const r = runSh({ PATH: `${fakeClaude(0.25)}:${process.env.PATH}`, PE_EVAL_OUT: out }, ["01", "", "--yes"]);
+  const r = runSh({ PATH: `${fakeClaude(cost(0.25))}:${process.env.PATH}`, PE_EVAL_OUT: out }, ["01", "", "--yes"]);
   assert.equal(r.status, 0, r.stdout + r.stderr);
   assert.match(r.stdout, /budget\s+none USD/);
 });
 
-test("a budget that is not a number is refused before anything runs", skipOnWindows, () => {
-  const r = runSh({ PE_EVAL_OUT: tmp("bad"), PE_EVAL_BUDGET_USD: "five" }, ["", "", "--yes"]);
-  assert.equal(r.status, 1);
-  assert.match(r.stderr, /must be a number of dollars/);
+test("a run whose meta.json has no cost stops the guard with exit 3, because the spend cannot be counted", skipOnWindows, () => {
+  const out = tmp("nocost");
+  const r = runSh({ PATH: `${fakeClaude("")}:${process.env.PATH}`, PE_EVAL_OUT: out, PE_EVAL_BUDGET_USD: "5" }, ["01", "", "--yes"]);
+  assert.equal(r.status, 3, r.stdout + r.stderr);
+  assert.match(r.stderr, /no positive cost_usd .* cannot be trusted/);
+  assert.equal(metaCount(out), 1);
+});
+
+test("a run that reports a zero cost is treated the same as a missing one", skipOnWindows, () => {
+  const out = tmp("zerocost");
+  const r = runSh({ PATH: `${fakeClaude(cost(0))}:${process.env.PATH}`, PE_EVAL_OUT: out, PE_EVAL_BUDGET_USD: "5" }, ["01", "", "--yes"]);
+  assert.equal(r.status, 3, r.stdout + r.stderr);
+  assert.match(r.stderr, /cannot be trusted/);
+});
+
+test("a budget that is not a plain decimal number is refused before anything runs", skipOnWindows, () => {
+  for (const bad of ["five", ".", "..", "1.2.3", "-1", ".5"]) {
+    const r = runSh({ PE_EVAL_OUT: tmp("bad"), PE_EVAL_BUDGET_USD: bad }, ["", "", "--yes"]);
+    assert.equal(r.status, 1, `budget ${bad}: ${r.stdout}${r.stderr}`);
+    assert.match(r.stderr, /must be a number of dollars/);
+  }
 });
 
 test("the reading is fixed by the interval alone", () => {

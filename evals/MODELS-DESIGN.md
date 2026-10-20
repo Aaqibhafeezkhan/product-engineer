@@ -19,8 +19,17 @@ came from? The published table is one model, `claude-opus-5`, one run per task.
   transcripts included.
 - Budget: the whole plan, including the competitor runs in `docs/COMPARISON.md`, spends at most
   $60. A model is started only if its projected cost, from a two-run pilot, fits in what is left,
-  and `PE_EVAL_BUDGET_USD` stops a run that passes its ceiling. A model that stops early is reported
-  as incomplete, not dropped.
+  and `PE_EVAL_BUDGET_USD` stops the study before a run that could take the total past its ceiling.
+  A model that stops early is reported as incomplete, not dropped.
+
+  The guard, exactly: before each run, it starts the run only if spent so far is below the ceiling
+  and spent + the largest single-run cost seen so far in this invocation (0 before the first run)
+  is at most the ceiling. So the first run is always allowed while spent is below the ceiling, and a
+  total that lands exactly on the ceiling is allowed; the run after it is refused. A later run can
+  still cost more than the largest run so far, so it can overshoot the ceiling by that difference;
+  the after-run check then reports the overshoot and exits 3. A run whose `meta.json` has no positive
+  `cost_usd` also stops with exit 3, because the spend can no longer be counted. A budget that is not
+  a plain decimal number (`5`, `2.50`) exits 1 before anything runs.
 
 ## What is measured
 
