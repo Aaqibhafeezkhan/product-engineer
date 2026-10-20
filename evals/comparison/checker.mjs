@@ -112,7 +112,7 @@ function main(argv) {
     dir,
     date,
     ourVersion,
-    tool: { id: pin.id, name: pin.name, licence: pin.licence, version: installed, config: pin.config, commit: pin.commit },
+    tool: { id: pin.id, name: pin.name, licence: pin.licence, version: installed, config: pin.config },
   });
   writeFileSync(RESULTS, `${JSON.stringify(out, null, 2)}\n`);
   console.log(`wrote ${RESULTS}: ${out.rows.length} cases`);

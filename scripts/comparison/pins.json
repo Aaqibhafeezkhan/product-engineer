@@ -6,7 +6,6 @@
       "name": "commitlint",
       "licence": "MIT",
       "repo": "conventional-changelog/commitlint",
-      "commit": "b55c55775b38cfe05af85844dbbad17a316d4209",
       "npm": { "@commitlint/cli": "21.2.4", "@commitlint/config-conventional": "21.2.4" },
       "config": "@commitlint/config-conventional"
     }

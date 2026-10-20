@@ -24,7 +24,7 @@ export function renderChecker(checker) {
   lines.push(
     "## Checker: product-engineer check against commitlint",
     "",
-    `Run on ${checker.runDate} with product-engineer ${checker.ourVersion} and ${t.name} ${t.version} (${t.licence}, extending \`${t.config}\`, source pinned at \`${t.commit.slice(0, 7)}\`).`,
+    `Run on ${checker.runDate} with product-engineer ${checker.ourVersion} and ${t.name} ${t.version} (${t.licence}, extending \`${t.config}\`).`,
     "Both tools were given the same message text. Nothing here calls a model.",
     "",
     "A tool is right when it flags a message that has a defect in the row's area, or passes one that has none. \"flagged\" means product-engineer reported an error or a warning, or commitlint exited non-zero. \"cannot\" means the tool is never shown the input that exposes the defect.",

@@ -6,8 +6,7 @@
     "name": "commitlint",
     "licence": "MIT",
     "version": "21.2.4",
-    "config": "@commitlint/config-conventional",
-    "commit": "b55c55775b38cfe05af85844dbbad17a316d4209"
+    "config": "@commitlint/config-conventional"
   },
   "rows": [
     {

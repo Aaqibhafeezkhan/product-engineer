@@ -43,7 +43,7 @@ test("the fetch plan installs commitlint at the pinned versions and fetches each
   const up = join(root, "_upstream");
   const steps = plan(pins, up);
   const flat = steps.map(([cmd, args]) => `${cmd} ${args.join(" ")}`);
-  assert.ok(flat.some((s) => s.includes(`npm install --prefix ${join(up, "commitlint")}`) && s.includes("@commitlint/cli@21.2.4")));
+  assert.ok(flat.some((s) => s.includes(`npm install --prefix ${join(up, "commitlint")}`) && s.includes(`@commitlint/cli@${pins.checkers[0].npm["@commitlint/cli"]}`)));
   for (const skill of pins.skills) assert.ok(flat.some((s) => s.includes(`${skill.repo}.git ${skill.commit}`)), skill.repo);
   for (const [, args, cwd] of steps) assert.ok(cwd === root || cwd.startsWith(up), `${cwd} is outside _upstream`);
 });
@@ -107,7 +107,7 @@ test("verdict: right means flagging a defect or passing a clean message, and can
 const fixture = {
   runDate: "2030-01-02",
   ourVersion: "9.9.9",
-  tool: { id: "commitlint", name: "commitlint", licence: "MIT", version: "1.2.3", config: "@commitlint/config-conventional", commit: "0123456789abcdef0123456789abcdef01234567" },
+  tool: { id: "commitlint", name: "commitlint", licence: "MIT", version: "1.2.3", config: "@commitlint/config-conventional" },
   rows: [
     { id: "block-missing", area: "customer-block", title: "No customer block", defect: true, ours: { outcome: "flagged", detail: "" }, theirs: { outcome: "passed", detail: "" }, verdict: "ours wins" },
     { id: "subject-too-long", area: "conventional-format", title: "A subject over 100 characters", defect: true, ours: { outcome: "passed", detail: "" }, theirs: { outcome: "flagged", detail: "header-max-length" }, verdict: "ours loses" },
