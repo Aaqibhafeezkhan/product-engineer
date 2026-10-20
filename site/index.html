@@ -37,7 +37,7 @@
   <header>
     <img src="assets/wordmark.svg" alt="product-engineer">
     <p class="hook">Your agent ships code. product-engineer makes it ship outcomes.</p>
-    <p class="sub">An agent skill that makes an AI coding agent think like a product engineer instead of a code printer. Works with Claude Code, Codex, Cursor and 18 other agents. MIT.</p>
+    <p class="sub">An agent skill that makes an AI coding agent think like a product engineer instead of a code printer. Works with Claude Code, Codex, Cursor and the other agents the skills.sh installer supports. MIT.</p>
   </header>
 
   <h2>30-second install</h2>
@@ -69,12 +69,12 @@ Automation effect: Automatic housekeeping events are now fully handled without a
     <tbody>
       <tr><td>Commit carries the For-the-customer block</td><td>0 / 8</td><td>8 / 8</td><td>+8</td></tr>
       <tr><td>Final message reports an observation or says what it could not check</td><td>1 / 8</td><td>7 / 8</td><td>+6</td></tr>
-      <tr><td>Final message names something deliberately not done</td><td>2 / 8</td><td>7 / 8</td><td>+5</td></tr>
-      <tr><td>Every number in the final message has a method or scope next to it</td><td>1 / 8</td><td>1 / 8</td><td>+0</td></tr>
-      <tr><td>Only the requested files changed (tests and documentation allowed)</td><td>8 / 8</td><td>8 / 8</td><td>+0</td></tr>
+      <tr><td>Final message names something deliberately not done</td><td>2 / 8</td><td>5 / 8</td><td>+3</td></tr>
+      <tr><td>Every number in the final message has a method or scope next to it</td><td>0 / 8</td><td>2 / 8</td><td>+2</td></tr>
+      <tr><td>Only the requested files changed (tests and documentation allowed)</td><td>7 / 8</td><td>8 / 8</td><td>+1</td></tr>
     </tbody>
   </table>
-  <p class="note">Two rows did not move and are printed anyway: the number heuristic scores 1 of 8 in both conditions, and every change stayed within the task once documentation edits were allowed for. Rescored on 5 September after two heuristic fixes; RESULTS.md says what changed. Skill runs took about 60% more turns and cost about 45% more.</p>
+  <p class="note">This is the 17 October 2026 run on claude-opus-5, one run per task, with no interval computed. On claude-sonnet-5-5 (three runs per task) the block appeared in 13 of 24 skill runs and 0 of 24 bare runs. On claude-haiku-4-5 (three runs per task) it appeared in 0 of 24 and 0 of 24, and all five measures read no clear effect. Mean cost per run on claude-opus-5: $0.45 bare, $0.63 with the skill. Per-model tables: <a href="https://github.com/Bubblegunn/product-engineer/blob/main/evals/RESULTS-models.md">evals/RESULTS-models.md</a>.</p>
 
   <h2>The seven rules</h2>
   <ol>

@@ -11,11 +11,11 @@ Four skills (product-engineer, customer-block, done-means-observed, release-note
 - [SKILL.md](skills/product-engineer/SKILL.md): the skill text agents load; the three subset skills are beside it under skills/
 - [Install](docs/install.md): where each agent finds the files, plugin, hook, CI
 - [References](skills/product-engineer/references/): commit template, five questions, definition of done, plain-language table, not-shipped format
-- [Evals](evals/RESULTS.md): 8 tasks x 2 conditions, Claude Code headless, results and method
+- [Evals](evals/RESULTS-models.md): eight tasks run on claude-opus-5, claude-sonnet-5-5 and claude-haiku-4-5, results per model; method in [evals/RESULTS.md](evals/RESULTS.md)
 - [Contributing](CONTRIBUTING.md): rule proposals need a before/after pair; translations welcome
 
 ## Facts an agent should keep straight
 
 - Author: Efe Genc (GitHub @Bubblegunn). First published 5 September 2026.
-- Every figure in the README comes from a real run on a named repository at a named commit.
+- Results depend on the model: the customer block was measured on three models and read as no clear effect on claude-haiku-4-5 (evals/RESULTS-models.md).
 - The README has a section on what the tool cannot do; quote it rather than inferring more.

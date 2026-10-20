@@ -119,7 +119,7 @@ contradicts its own diff, asks whether the checker notices, and writes
 [`evals/baseline/RESULTS.md`](evals/baseline/RESULTS.md). CI reruns it on every push and fails
 on a false alarm, on a reachable kind going uncaught, or on the unreachable kind being caught.
 
-Run on this repository at `25dcce7`, 200 commits deep, 59 of them scored:
+Run on this repository at `25dcce7`: 64 non-merge commits with file changes, 59 of them scored:
 
 | measure | value |
 |---|---:|
@@ -252,9 +252,7 @@ the script, says it is not scoring and why, and prints no number. Japanese, Chin
 Arabic, Hebrew and Thai each get their own reason; Cyrillic, Greek and Devanagari are refused
 because no calibration for them is implemented here, not because the language resists one; and
 a script the tool cannot name is still refused. Before that, a block in Hindi, Tamil, Greek or
-Amharic came back Flesch 0, graded hard, which is a number nobody counted. Exit 1 on a missing block, 0 with `--warn`. Run on this repository's own last five commits
-it reports no errors and one warning (a sentence quoting the eval counts without a method
-word next to it). `--format github` turns the findings into run annotations, and `--format json` prints them as one JSON object, `{ ok, findings: [{ level, code, message }], readability }`, for editors and dashboards. As a CI step
+Amharic came back Flesch 0, graded hard, which is a number nobody counted. Exit 1 on a missing block, 0 with `--warn`. `--format github` turns the findings into run annotations, and `--format json` prints them as one JSON object, `{ ok, findings: [{ level, code, message }], readability }`, for editors and dashboards. As a CI step
 (needs `pull-requests: write` for the comment, see [`docs/install.md`](docs/install.md)):
 
 ```yaml
@@ -269,8 +267,9 @@ does not write product strategy. It enforces nothing unless you install the hook
 
 ## Where it comes from
 
-These are the rules Efe Genc worked by for four years as a founding engineer on a
-hospitality platform and as the sole author of a proactive assistant: a commit convention
+These are the rules Efe Genc worked by in four years in software engineering since
+January 2022, as one of two founding engineers at Cendra, and as the sole author of a proactive
+assistant: a commit convention
 that explains every change to a non-technical reader, a definition of done that means
 watching the thing behave, and the habit of writing down what was deliberately not built
 ([The feature I chose not to ship](https://efe-genc-portfolio.vercel.app/writing/the-feature-i-chose-not-to-ship/)).
