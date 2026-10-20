@@ -1,0 +1,21 @@
+Fix broken check-in reminder times across time zones
+
+reminderHour() looked the guest's zone up in a two-entry table of
+hard-coded UTC offsets, which broke in three ways:
+
+- A guest with no time zone (4 of the 12 in data/customers.json) got
+  `9 - undefined`, i.e. a NaN reminder hour.
+- Any zone outside the table had the same NaN result.
+- Europe/London was pinned to +1, so it was an hour off for the half of
+  the year the UK is on GMT rather than BST.
+
+Offsets now come from Intl at the instant the reminder is computed, so
+DST is handled per zone and per season, and every IANA zone works. A
+guest with a missing or unrecognised zone falls back to 09:00 UTC and is
+flagged with `usedFallback` rather than silently producing NaN.
+
+Also returns minuteUtc, so half-hour zones such as Asia/Kolkata land on
+09:00 local instead of being rounded to the hour.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

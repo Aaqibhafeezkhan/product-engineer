@@ -1,0 +1,10 @@
+Show count of actionable notifications on the bell
+
+The bell now renders a badge with the number of notifications that
+need a person to do something: unread and flagged needsPerson. Items
+already read are treated as handled, so they do not count.
+
+No badge renders when the count is zero.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

@@ -1,0 +1,17 @@
+Fix reminder times for guests with no time zone
+
+reminderHour() looked each guest's zone up in a hardcoded offset table of
+two entries. Any zone outside that table produced `9 - undefined`, i.e. a
+NaN reminder hour. Four of the twelve guests in the roster (ids 3, 6, 9 and
+12) have no time zone set and were hitting this.
+
+The table was also wrong for Europe/London for half the year, since it
+pinned the offset at +1 rather than following BST.
+
+Resolve offsets against the IANA database via Intl instead, so DST and
+sub-hour offsets are handled, and fall back to 09:00 UTC when a guest's
+zone is missing or unrecognised. Reminder times now carry a minute as well
+as an hour, which zones like Asia/Kolkata (UTC+5:30) need.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

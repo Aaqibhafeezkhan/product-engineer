@@ -1,0 +1,17 @@
+Retry the accounting webhook so payouts are not silently dropped
+
+A single failed call to the accounting webhook meant a payout never
+reached accounting, and the only trace was a console.error nobody reads.
+
+- Retry transient failures (network errors, 408/425/429/5xx) up to 4
+  times with jittered exponential backoff.
+- Fail fast on non-retryable 4xx responses, which retrying cannot fix.
+- Throw once retries are exhausted instead of returning normally, so the
+  caller can queue or alert rather than assume the payout was recorded.
+- Add a 10s request timeout; a hung request previously blocked forever
+  and never triggered a retry.
+- Send an idempotency-key header derived from the payout id so a retried
+  POST is not booked twice, when the accounting side honors it.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

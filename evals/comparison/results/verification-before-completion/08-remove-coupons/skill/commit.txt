@@ -1,0 +1,8 @@
+Remove retired coupon code path from checkout
+
+Coupons were retired in March and the UI field was hidden, but
+applyCoupon was still reachable by any caller passing a code.
+Drop the function and the checkout `code` parameter.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

@@ -1,0 +1,18 @@
+Split pricing into one file per rule
+
+Every pricing change meant editing the single price() function, so an
+edit to one rule risked all the others.
+
+Each rule now lives in its own file under src/rules/ and exports a
+multiplier for a shared read-only context. price() folds the multipliers
+from the registry in src/rules/index.js and rounds once at the end.
+Adding or removing a rule means adding or deleting a file and one line
+in the registry; no other rule file changes.
+
+Also adds explain() for per-rule breakdowns, and tests: each rule is
+covered in isolation plus integration cases. Verified identical output
+to the previous implementation across 900 base/date/loyalty/nights
+combinations.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

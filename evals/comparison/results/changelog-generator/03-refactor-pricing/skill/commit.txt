@@ -1,0 +1,20 @@
+Split pricing rules into independent modules
+
+Every pricing change meant editing the one function that held all five
+rules, so each change risked the others. Pricing is now an engine plus a
+list of rules: src/pricing.js walks the list and multiplies, knowing
+nothing about any individual rule, and each rule is a self-contained
+module under src/rules/.
+
+Adding a rule is a new module plus one line in src/rules/index.js;
+removing one is deleting a line. No existing rule is touched either way.
+The gold and silver branches became one rate table, so a new loyalty tier
+is one row.
+
+Behaviour is unchanged: a test prices all 256 combinations of base, date
+and guest against the previous implementation and gets identical results.
+Also adds explain(), which reports each rule's contribution to a price so
+a change can be checked before it ships.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

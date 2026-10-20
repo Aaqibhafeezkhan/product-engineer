@@ -1,0 +1,20 @@
+Speed up monthly occupancy report by ~8x
+
+The inner loop re-parsed b.checkOut on every night of every booking, and
+re-formatted a full ISO timestamp per night. Parse each end of the stay
+once, step by a fixed 24h (equivalent to setUTCDate for UTC days), and
+memoize the day -> "YYYY-MM-DD" key so overlapping bookings reuse it.
+
+Measured on a deterministic benchmark: 8.0x faster for a month of 2k
+bookings, 8.4x for a year of 20k, 20.9x for long stays. Output is
+byte-identical to the previous implementation across 20 edge cases and
+20k fuzzed inputs.
+
+Adds test/report.test.js, which had no coverage before. Every test was
+mutation-checked: six plausible breakages of the new code (off-by-one on
+checkout day, Date.parse vs new Date, wrong step size, truncating
+instead of flooring the day number, a broken cache key, and lost
+accumulation) each fail the suite.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

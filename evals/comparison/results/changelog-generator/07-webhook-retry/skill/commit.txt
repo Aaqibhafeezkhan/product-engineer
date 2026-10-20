@@ -1,0 +1,18 @@
+Retry the accounting webhook on transient failures
+
+Payouts were dropped whenever a single POST failed: the error was logged
+and swallowed, so nothing upstream knew the payout never reached
+accounting.
+
+Retry up to 4 times with exponential backoff and jitter on network
+errors and transient statuses (408, 425, 429, 5xx), honouring Retry-After
+when present. Permanent 4xx responses are not retried. Each attempt sends
+a stable idempotency-key derived from the payout id so a retry after a
+lost response cannot book the payout twice.
+
+After the retries are exhausted notifyAccounting now throws instead of
+returning normally, so a payout that truly did not land surfaces to the
+caller rather than disappearing into a log line.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

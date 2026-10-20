@@ -1,0 +1,12 @@
+Show count of notifications needing a person on the bell
+
+Adds countNeedsPerson() and renders it as a badge on the bell, with an
+aria-label so the count is not screen-reader-only noise.
+
+The count includes items that are read. `read` tracks whether someone
+looked at a notification, not whether the work got done, so excluding
+read items would let the badge drop while the task is still outstanding.
+Draining the badge properly needs a separate resolved/handled field.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

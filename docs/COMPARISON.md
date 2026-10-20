@@ -48,7 +48,30 @@ The two tools do different jobs and are meant to run together: product-engineer 
 
 ## Skill: product-engineer against other skills on the same eight tasks
 
-Not run yet. The runs call a model and cost money; `scripts/comparison/run-skills.mjs` prints the plan and the estimated cost and runs nothing without `--yes`.
+Run on 2026-10-20. Every arm is the same eight tasks, one run per task, model `claude-opus-5`, headless Claude Code, scored by `evals/score.mjs` (five yes/no heuristics, described in `evals/RESULTS.md`). The bare arm and the product-engineer arm are the published 17 October run (`evals/results-2026-10-17/core`); the other skills were run later by `scripts/comparison/run-skills.mjs`.
+
+The heuristics were written for product-engineer's own rules. A skill that does not aim at one of them scores low on that row by design, and that is shown as measured rather than hidden.
+
+Note: the `verification-before-completion` arm ran with model `claude-opus-5` and CLI `2.1.304 (Claude Code)`; the reference arms used `claude-opus-5` and `2.1.301 (Claude Code)`.
+
+Note: the `changelog-generator` arm ran with model `claude-opus-5` and CLI `2.1.304 (Claude Code)`; the reference arms used `claude-opus-5` and `2.1.301 (Claude Code)`.
+
+| metric | bare (nothing installed) | product-engineer | superpowers: verification-before-completion (MIT) | ComposioHQ: changelog-generator (none detected) |
+|---|---:|---:|---:|---:|
+| Commit carries the For-the-customer block | 0 / 8 | 8 / 8 | 0 / 8 | 0 / 8 |
+| Final message reports an observation or says what it could not check | 1 / 8 | 7 / 8 | 0 / 8 | 0 / 8 |
+| Final message names something deliberately not done | 2 / 8 | 5 / 8 | 0 / 8 | 1 / 8 |
+| Every number in the final message has a method or scope next to it | 0 / 8 | 2 / 8 | 1 / 8 | 2 / 8 |
+| Only the requested files changed (tests and documentation allowed) | 7 / 8 | 8 / 8 | 7 / 8 | 7 / 8 |
+| mean cost per run | $0.45 | $0.63 | $0.61 | $0.53 |
+
+### Where product-engineer loses or ties
+
+- tie: Every number in the final message has a method or scope next to it: both 2 / 8 (changelog-generator).
+
+### What these tasks do not measure
+
+None of the eight tasks asks an agent to write release notes or a changelog, so the headline feature of a changelog skill is not measured here at all. This is a stated gap, not a win for either side.
 
 ## Tools considered and not run
 

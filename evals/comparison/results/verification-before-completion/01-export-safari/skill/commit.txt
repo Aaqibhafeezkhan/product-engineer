@@ -1,0 +1,21 @@
+Fix CSV export doing nothing in Safari
+
+The bookings export called window.showSaveFilePicker unconditionally.
+That is the File System Access API, which is Chromium-only: Safari does
+not implement it, so on reception's iPads the call threw
+"TypeError: window.showSaveFilePicker is not a function" immediately. The
+rejection was unhandled, so the button appeared to do nothing at all.
+Chrome was unaffected because it has the API.
+
+Feature-detect it and fall back to a Blob object URL on an anchor with a
+download attribute, which Safari supports. The fallback does not await
+before clicking, since Safari only honours a programmatic download inside
+the task started by the user's tap, and the anchor is attached to the
+document because Safari ignores download on a detached element.
+
+Also stop treating a dismissed save dialog as a failure on the
+showSaveFilePicker path, where it rejected with AbortError and produced
+the same unhandled rejection.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+

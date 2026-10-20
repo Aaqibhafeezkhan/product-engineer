@@ -1,0 +1,8 @@
+README.md
+src/pricing.js
+src/rules/index.js
+src/rules/long-stay-discount.js
+src/rules/loyalty-discount.js
+src/rules/summer-surcharge.js
+src/rules/weekend-surcharge.js
+test/pricing.test.js

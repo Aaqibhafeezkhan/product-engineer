@@ -1,0 +1,19 @@
+Speed up monthlyReport by ~7x
+
+The inner day loop re-parsed b.checkOut on every iteration, so each
+booking night cost two date string parses plus a Date mutation and a
+fresh toISOString() allocation.
+
+Parse each booking's dates once, walk the stay with integer day
+arithmetic (UTC days are always exactly 86400000ms apart, so this
+matches stepping the calendar), and cache the formatted YYYY-MM-DD key
+per day. A month of bookings spans only a few dozen distinct dates, so
+the keys are now formatted once each instead of once per night.
+
+Output is unchanged, including key insertion order, which callers rely
+on when rendering the report. Adds tests covering partial trailing
+days, empty/unparseable stays, calendar boundaries, and 200 randomised
+rounds checked against the previous implementation.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+
