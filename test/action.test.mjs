@@ -101,9 +101,11 @@ test("action.yml's name and description fit what GitHub Marketplace accepts", ()
 
 // The three inputs added for #27 and #28. A stand-in bin/check.mjs prints the arguments it was given, so
 // these tests see exactly what the step passes on without running the checker.
-// Every test below spawns the step with bash, so they are skipped on win32 (the step's path and
-// glob behaviour differ there, and the step is run on Windows only by the CI test matrix's own npm test).
-const SHELL_ONLY = process.platform === "win32" ? { skip: "spawns the action's bash step; Windows path and glob handling differ, covered on ubuntu and macos" } : {};
+// Every test below spawns the action's bash step directly. They are skipped on win32 as a precaution:
+// nothing here has been run on Windows, and the bash that `spawnSync("bash")` finds there is not
+// guaranteed to be Git Bash. The original tests in this file are not skipped; the CI test matrix runs
+// them on windows-latest under Git Bash, which the npm script-shell setting selects.
+const SHELL_ONLY = process.platform === "win32" ? { skip: "spawns bash directly; not run on Windows, and the bash found there is not guaranteed to be Git Bash" } : {};
 function echoingAction() {
   const dir = mkdtempSync(join(tmpdir(), "pe-action-"));
   mkdirSync(join(dir, "bin"));
@@ -165,9 +167,12 @@ test("an empty skip-authors turns skipping off, and spaces around a login are ig
   assert.equal(spaced.status, 0, spaced.stdout + spaced.stderr);
 });
 
-test("no author (a push event) is never skipped", SHELL_ONLY, () => {
-  const r = run({ BODY_FILE: fixture("without-block.txt"), PR_AUTHOR: "", SKIP_AUTHORS: "dependabot[bot]" });
-  assert.equal(r.status, 1);
+test("no author (a push event) is never skipped, including when the list has empty entries", SHELL_ONLY, () => {
+  for (const list of ["dependabot[bot]", "dependabot[bot],,", ",x", ","]) {
+    const r = run({ BODY_FILE: fixture("without-block.txt"), PR_AUTHOR: "", SKIP_AUTHORS: list });
+    assert.equal(r.status, 1, `skip-authors "${list}" with no author: ${r.stdout}${r.stderr}`);
+    assert.doesNotMatch(r.stdout, /::notice/, `skip-authors "${list}" with no author printed a skip notice`);
+  }
 });
 
 test("a login is compared as text, not as a glob: a file called dependabott does not make dependabott a bot", SHELL_ONLY, () => {
