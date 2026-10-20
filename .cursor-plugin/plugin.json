@@ -1,0 +1,21 @@
+{
+  "name": "product-engineer",
+  "displayName": "product-engineer",
+  "description": "Your agent ships code. product-engineer makes it ship outcomes. A plain-language customer block in every commit and pull request, and done means observed.",
+  "version": "0.6.2",
+  "author": {
+    "name": "Efe Genc",
+    "url": "https://efe-genc-portfolio.vercel.app"
+  },
+  "homepage": "https://github.com/Bubblegunn/product-engineer",
+  "repository": "https://github.com/Bubblegunn/product-engineer",
+  "license": "MIT",
+  "keywords": [
+    "product-engineering",
+    "commits",
+    "pull-requests",
+    "plain-language",
+    "definition-of-done"
+  ],
+  "skills": "./skills/"
+}

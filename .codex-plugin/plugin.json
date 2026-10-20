@@ -1,0 +1,40 @@
+{
+  "name": "product-engineer",
+  "version": "0.6.2",
+  "description": "Your agent ships code. product-engineer makes it ship outcomes. Four skills: the seven rules, the customer block alone, done means observed, and release notes.",
+  "author": {
+    "name": "Efe Genc",
+    "url": "https://efe-genc-portfolio.vercel.app"
+  },
+  "homepage": "https://github.com/Bubblegunn/product-engineer",
+  "repository": "https://github.com/Bubblegunn/product-engineer",
+  "license": "MIT",
+  "keywords": [
+    "product-engineering",
+    "commits",
+    "pull-requests",
+    "plain-language",
+    "definition-of-done"
+  ],
+  "skills": "./skills/",
+  "hooks": {},
+  "interface": {
+    "displayName": "product-engineer",
+    "shortDescription": "Plain-language customer block in every commit, and done means observed",
+    "longDescription": "Makes a coding agent restate work as a customer outcome, write a plain-language \"For the customer\" block in every commit and pull request, report what it observed or could not check, name what it deliberately did not build, and never print a number it did not count.",
+    "developerName": "Efe Genc",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Commit this change and write the For the customer block.",
+      "Check that my pull request description explains the change to a customer."
+    ],
+    "websiteURL": "https://github.com/Bubblegunn/product-engineer",
+    "privacyPolicyURL": "https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement",
+    "termsOfServiceURL": "https://docs.github.com/en/site-policy/github-terms/github-terms-of-service"
+  }
+}

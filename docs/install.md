@@ -59,6 +59,10 @@ and CI refuses a commit where they differ.
 
 Both commands were run and verified; `claude plugin validate .` passes.
 
+## Codex and Cursor plugin manifests
+
+The repository carries `.codex-plugin/plugin.json` and `.cursor-plugin/plugin.json`. Each points at `./skills/`, in the layout other plugins for those apps use, and `npm test` checks their shape and that all four skills load from them. Installing through each app's plugin search has not been verified yet ([#32](https://github.com/Bubblegunn/product-engineer/issues/32)); until it is, the install this page already describes, `npx skills add Bubblegunn/product-engineer`, is the one that has been run.
+
 ## By hand
 
 Copy `skills/<skill>/` into `.claude/skills/`, `.agents/skills/`, or your agent's skills
