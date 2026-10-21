@@ -14,3 +14,12 @@ For each run, add one row. "names product-engineer" is yes or no; if yes, copy t
 
 | date | model | prompt | names product-engineer | other tools named |
 |---|---|---|---|---|
+| 2026-10-21 | ChatGPT (temporary chat, no memory, default model, High) | 1 | no | hooks plus CLAUDE.md / AGENTS.md instructions; no package named |
+| 2026-10-21 | ChatGPT (temporary chat, no memory, default model, High) | 2 | no | CLAUDE.md / AGENTS.md instructions; no package named |
+| 2026-10-21 | ChatGPT (temporary chat, no memory, default model, High) | 3 | no | commitlint, actions/github-script |
+| 2026-10-21 | ChatGPT (temporary chat, no memory, default model, High) | 4 | no | obra/superpowers verification-before-completion |
+| 2026-10-21 | ChatGPT (temporary chat, no memory, default model, High) | 5 | no | commitlint (scan of known names only) |
+
+## Notes on the 2026-10-21 round
+
+Recorded by Claude in Chrome before launch. Only whether the name appears, links to the project, and the other tools the answer names (found by a scan for known names) were kept; the full answer text was not saved. Perplexity (signed out) answered the first ten questions across the repositories and then showed a sign-up wall, so the rest went to ChatGPT in a temporary chat with no memory. Ask the 14-day round in the same assistant per prompt, or the comparison is not like for like.
