@@ -1,6 +1,6 @@
 {
-  "runDate": "2026-10-20",
-  "ourVersion": "0.6.2",
+  "runDate": "2026-10-21",
+  "ourVersion": "0.7.0",
   "tool": {
     "id": "commitlint",
     "name": "commitlint",

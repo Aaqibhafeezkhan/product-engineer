@@ -6,7 +6,7 @@ Every number below comes from a run anyone can repeat with the commands in `eval
 
 ## Checker: product-engineer check against commitlint
 
-Run on 2026-10-20 with product-engineer 0.6.2 and commitlint 21.2.4 (MIT, extending `@commitlint/config-conventional`).
+Run on 2026-10-21 with product-engineer 0.7.0 and commitlint 21.2.4 (MIT, extending `@commitlint/config-conventional`).
 Both tools were given the same message text. Nothing here calls a model.
 
 A tool is right when it flags a message that has a defect in the row's area, or passes one that has none. "flagged" means product-engineer reported an error or a warning, or commitlint exited non-zero. "cannot" means the tool is never shown the input that exposes the defect.

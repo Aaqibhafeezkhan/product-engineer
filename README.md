@@ -36,7 +36,7 @@ On claude-haiku-4-5 all five measures read "no clear effect". The reading rule w
 
 ## How this differs
 
-The checker and the skill were run on the same inputs as other tools on 2026-10-20 (product-engineer 0.6.2). The generated tables, the pinned competitor versions and the commands to repeat them are in [`docs/COMPARISON.md`](docs/COMPARISON.md). Rows where product-engineer loses are in that file. The tables here show only rows it wins or ties.
+The checker was last run on the same inputs as other tools on 2026-10-21 (product-engineer 0.7.0), the skill on 2026-10-20 (0.6.2). The generated tables, the pinned competitor versions and the commands to repeat them are in [`docs/COMPARISON.md`](docs/COMPARISON.md). Rows where product-engineer loses are in that file. The tables here show only rows it wins or ties.
 
 **Against commitlint 21.2.4**, which checks the Conventional Commits shape, which product-engineer does not. They run together: product-engineer ships a commitlint plugin (`product-engineer/commitlint`). Same message text given to both:
 
