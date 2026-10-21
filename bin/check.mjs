@@ -13,6 +13,7 @@ import { renderJson } from "./json-report.mjs";
 
 const HELP = `usage: product-engineer check [file|-|--stdin] [--pr <number>] [--warn] [--lang <code>] [--format text|github] [--comment]
        product-engineer template [--lang <code>]
+       product-engineer notes <range>
        product-engineer doctor
 
 Reads a commit message or pull request description and reports whether it
@@ -38,6 +39,9 @@ skill asks. With no file it reads .git/COMMIT_EDITMSG when present.
   --lang <code> language of the block for the readability line: en (default) or tr
   -h, --help    this text
   --version     print the version
+
+notes <range> writes Markdown from each commit's customer block in a Git revision range.
+Commits without a block are counted and reported.
 
 doctor lists the agents on this machine that carry the skill, in this project and
 in your home directory, and whether each copy still matches the packaged rules.
@@ -304,6 +308,21 @@ async function main(argv) {
     return 0;
   }
   const command = argv[0];
+  if (command === "notes") {
+    const range = argv[1];
+    if (!range || range.startsWith("-")) {
+      console.error("usage: product-engineer notes <range>");
+      return 2;
+    }
+    try {
+      const { notes } = await import("./notes.mjs");
+      console.log(notes(range));
+      return 0;
+    } catch (err) {
+      console.error(err instanceof Error ? err.message : String(err));
+      return 2;
+    }
+  }
   if (command === "doctor") {
     const { doctor, render: renderDoctor } = await import("./doctor.mjs");
     const report = doctor();
