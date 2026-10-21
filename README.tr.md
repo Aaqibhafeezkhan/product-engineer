@@ -25,6 +25,12 @@ Bu, [skills.sh](https://skills.sh) kurucusudur. Projedeki ajanları algılar ve 
 için yerleştirir; `--all` desteklenen bütün ajanları hedefler, `-g` proje yerine kullanıcı
 düzeyine kurar.
 
+Claude Code'da bunun yerine eklenti olarak da kurabilirsiniz (Claude Code 2.1.275 veya sonrası):
+
+```
+/plugin install product-engineer --marketplace Bubblegunn/product-engineer
+```
+
 Her ajanda dosyanın nereye düştüğü, Claude Code plugin komutları, git kancası ve CI adımı
 [`docs/install.md`](docs/install.md) içinde. Depo dört skill taşır: `product-engineer` (yedi
 kural), `customer-block` (yalnız müşteri bloğu), `done-means-observed` (yalnız gözlemlenmiş
