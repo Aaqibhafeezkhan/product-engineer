@@ -127,7 +127,8 @@ rather than a skill is in [`docs/cursor.md`](docs/cursor.md).
 The skills are text files and need nothing installed. The `product-engineer` command (`check`,
 `doctor`, the pre-commit entry) needs Node 22 or newer; the commit-msg hook itself is POSIX sh.
 
-For npm users, install the generated commit hook with `npx product-engineer hook install`; add `--prefill` to also install the `prepare-commit-msg` template.
+For npm users, install the generated commit hook with `npx product-engineer hook install`; add `--prefill` to also install the `prepare-commit-msg` template (the `hook` command was contributed by
+[@Aaqibhafeezkhan](https://github.com/Aaqibhafeezkhan) in [#44](https://github.com/Bubblegunn/product-engineer/pull/44)).
 
 ## What the diff check costs
 

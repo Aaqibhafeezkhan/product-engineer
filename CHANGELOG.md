@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.8.0 (unreleased)
+
+**`product-engineer hook install` sets up the commit check from npm.** It writes the generated `commit-msg` hook (the
+same file as `scripts/commit-msg`, so the headings cannot drift) into the directory git actually uses, including a
+`core.hooksPath` such as husky's. `--prefill` also installs a `prepare-commit-msg` hook that starts each new message
+with the empty block; `hook uninstall` removes only hooks carrying the generated marker. An existing hook that is not
+ours is never overwritten without `--force`, and installing twice changes nothing. Written by
+[@Aaqibhafeezkhan](https://github.com/Aaqibhafeezkhan) ([#44](https://github.com/Bubblegunn/product-engineer/pull/44),
+closes [#30](https://github.com/Bubblegunn/product-engineer/issues/30)).
+
 ## 0.7.0 (2026-10-20)
 
 **`check --format json`.** Prints one JSON object, `{ ok, findings: [{ level, code, message }], readability }`, and
