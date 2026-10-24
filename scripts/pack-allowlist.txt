@@ -6,6 +6,7 @@ bin/check.mjs
 bin/diff.mjs
 bin/doctor.mjs
 bin/headings.mjs
+bin/hooks.mjs
 bin/json-report.mjs
 bin/readability.mjs
 bin/references.mjs
@@ -13,6 +14,7 @@ integrations/commitlint/README.md
 integrations/commitlint/config.mjs
 integrations/commitlint/index.mjs
 package.json
+scripts/commit-msg
 skills/.experimental/README.md
 skills/customer-block/SKILL.md
 skills/done-means-observed/SKILL.md

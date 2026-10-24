@@ -14,6 +14,8 @@ import { renderJson } from "./json-report.mjs";
 const HELP = `usage: product-engineer check [file|-|--stdin] [--pr <number>] [--warn] [--lang <code>] [--format text|github] [--comment]
        product-engineer template [--lang <code>]
        product-engineer doctor
+       product-engineer hook install [--prefill] [--force]
+       product-engineer hook uninstall
 
 Reads a commit message or pull request description and reports whether it
 carries the "For the customer" block and whether the block reads the way the
@@ -304,6 +306,15 @@ async function main(argv) {
     return 0;
   }
   const command = argv[0];
+  if (command === "hook") {
+    const { runHookCommand } = await import("./hooks.mjs");
+    try {
+      return runHookCommand(argv.slice(1));
+    } catch (err) {
+      console.error(err instanceof Error ? err.message : String(err));
+      return 1;
+    }
+  }
   if (command === "doctor") {
     const { doctor, render: renderDoctor } = await import("./doctor.mjs");
     const report = doctor();

@@ -70,9 +70,24 @@ directory.
 
 ## Git hook
 
-`sh scripts/install-hook.sh` copies `scripts/commit-msg` into `.git/hooks/`. A commit
-without the block is refused with a two-line explanation. Merge, fixup, squash and revert
-commits pass, and `[no-customer]` anywhere in the message opts one commit out.
+For a checkout of this repository, `sh scripts/install-hook.sh` copies `scripts/commit-msg`
+into `.git/hooks/`. npm users can install the same generated hook with:
+
+```sh
+npx product-engineer hook install
+```
+
+Add `--prefill` to also install a `prepare-commit-msg` hook that appends the customer-facing
+block to ordinary new commit messages:
+
+```sh
+npx product-engineer hook install --prefill
+```
+
+The installer refuses to replace an existing hook unless `--force` is supplied, and
+`hook uninstall` removes only hooks carrying its generated marker. A commit without the
+block is refused with a two-line explanation. Merge, fixup, squash and revert commits pass,
+and `[no-customer]` anywhere in the message opts one commit out.
 
 ## Commit template
 
