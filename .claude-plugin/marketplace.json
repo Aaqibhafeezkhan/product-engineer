@@ -2,7 +2,7 @@
   "name": "bubblegunn",
   "owner": {
     "name": "Efe Genc",
-    "url": "https://efe-genc-portfolio.vercel.app"
+    "url": "https://efegenc.me"
   },
   "description": "Efe Genc's agent skills, installable as Claude Code plugins.",
   "plugins": [

@@ -90,7 +90,7 @@ Not shipped:
 这些是 Efe Genç 四年里作为一家住宿平台的创始工程师、以及一个主动式助手的唯一作者所遵循
 的规则：一种向非技术读者解释每次改动的 commit 习惯，一种以亲眼看到运行为准的"完成"定义，
 以及把有意没做的事写下来的习惯
-（[The feature I chose not to ship](https://efe-genc-portfolio.vercel.app/writing/the-feature-i-chose-not-to-ship/)）。
+（[The feature I chose not to ship](https://efegenc.me/writing/the-feature-i-chose-not-to-ship/)）。
 
 ## 参与
 

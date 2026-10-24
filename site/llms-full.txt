@@ -308,7 +308,7 @@ January 2022, as one of two founding engineers at Cendra, and as the sole author
 assistant: a commit convention
 that explains every change to a non-technical reader, a definition of done that means
 watching the thing behave, and the habit of writing down what was deliberately not built
-([The feature I chose not to ship](https://efe-genc-portfolio.vercel.app/writing/the-feature-i-chose-not-to-ship/)).
+([The feature I chose not to ship](https://efegenc.me/writing/the-feature-i-chose-not-to-ship/)).
 
 ## Contributing
 

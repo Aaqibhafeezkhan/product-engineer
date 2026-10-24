@@ -98,7 +98,7 @@ Bunlar Efe Genç'in dört yıl boyunca bir konaklama platformunda kurucu mühend
 proaktif bir asistanın tek yazarı olarak çalıştığı kurallar: her değişikliği teknik olmayan
 bir okura anlatan bir commit geleneği, işi çalışırken izlemek anlamına gelen bir "bitti"
 tanımı ve bilerek yapılmayanı yazma alışkanlığı
-([The feature I chose not to ship](https://efe-genc-portfolio.vercel.app/writing/the-feature-i-chose-not-to-ship/)).
+([The feature I chose not to ship](https://efegenc.me/writing/the-feature-i-chose-not-to-ship/)).
 
 ## Katkı
 
