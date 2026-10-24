@@ -54,14 +54,16 @@ for f in skills/.experimental/*/SKILL.md; do
   grep -q '^description: Experimental:' "$f" || fail "$f: description must open with 'Experimental:', because that marker is what travels with the file once installed"
 done
 
-for j in .claude-plugin/marketplace.json .claude-plugin/plugin.json; do
+for j in .claude-plugin/marketplace.json plugin/.claude-plugin/plugin.json; do
   [ -f "$j" ] || fail "$j missing"
   node -e "JSON.parse(require('fs').readFileSync('$j','utf8'))" || fail "$j is not valid JSON"
 done
-grep -q '"name": "product-engineer"' .claude-plugin/plugin.json || fail "plugin name"
+grep -q '"name": "product-engineer"' plugin/.claude-plugin/plugin.json || fail "plugin name"
 v=$(node -p "require('./package.json').version")
-grep -q "\"version\": \"$v\"" .claude-plugin/plugin.json || fail "plugin version must equal package.json ($v)"
+grep -q "\"version\": \"$v\"" plugin/.claude-plugin/plugin.json || fail "plugin version must equal package.json ($v)"
 [ -f AGENTS.md ] || fail "AGENTS.md missing"
+grep -q '"source": "./plugin"' .claude-plugin/marketplace.json || fail "marketplace.json must point at ./plugin"
+[ -f plugin/README.md ] && [ -f plugin/LICENSE ] || fail "plugin/ needs README.md and LICENSE"
 # The hook is generated from the headings table; every shipped block heading must be in it.
 sed -n 's/^| \([a-z][a-z]\) | \([^|]*\) |.*/\2/p' skills/product-engineer/references/headings.md | while read -r h; do
   h=$(printf '%s' "$h" | sed 's/[[:space:]]*$//; s/:$//')

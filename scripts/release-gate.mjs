@@ -17,6 +17,7 @@ import { versionedFiles, readVersion, LIST } from "./versioned-files.mjs";
 const root = process.cwd();
 const read = (f) => readFileSync(join(root, f), "utf8");
 const has = (f) => existsSync(join(root, f));
+const PLUGIN_JSON = has("plugin/.claude-plugin/plugin.json") ? "plugin/.claude-plugin/plugin.json" : ".claude-plugin/plugin.json";
 const problems = [];
 
 const pkg = JSON.parse(read("package.json"));
@@ -62,9 +63,9 @@ if (has("python/pyproject.toml")) {
   const v = /^version = "([^"]*)"$/m.exec(read("python/pyproject.toml"))?.[1];
   if (v !== version) problems.push(`python/pyproject.toml version is ${v}, package.json is ${version}`);
 }
-if (has(".claude-plugin/plugin.json")) {
-  const v = JSON.parse(read(".claude-plugin/plugin.json")).version;
-  if (v !== version) problems.push(`.claude-plugin/plugin.json version is ${v}, package.json is ${version}`);
+if (has(PLUGIN_JSON)) {
+  const v = JSON.parse(read(PLUGIN_JSON)).version;
+  if (v !== version) problems.push(`${PLUGIN_JSON} version is ${v}, package.json is ${version}`);
 }
 
 // The repository's own list (scripts/versioned-files.json), the same one release.mjs sets.

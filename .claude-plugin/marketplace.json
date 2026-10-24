@@ -8,7 +8,7 @@
   "plugins": [
     {
       "name": "product-engineer",
-      "source": "./",
+      "source": "./plugin",
       "description": "Makes your agent think like a product engineer: customer outcome first, a plain-language block in every commit and PR, done means observed, name what you did not ship, no number without a count. Plus three subset skills: customer-block, done-means-observed and release-notes.",
       "category": "engineering",
       "keywords": [

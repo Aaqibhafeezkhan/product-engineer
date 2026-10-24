@@ -57,7 +57,7 @@ and CI refuses a commit where they differ.
 /plugin install product-engineer@bubblegunn
 ```
 
-Both commands were run and verified; `claude plugin validate .` passes.
+Both commands were run and verified; `claude plugin validate .` and `claude plugin validate plugin --strict` pass. The plugin lives in `plugin/`; its `skills/` are generated copies of the top-level `skills/` (`node scripts/generate-adapters.mjs`).
 
 ## Codex and Cursor plugin manifests
 

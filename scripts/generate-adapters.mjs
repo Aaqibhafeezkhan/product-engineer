@@ -4,7 +4,7 @@
 // and into examples/cursor/, a copy people drop into their own project.
 //   node scripts/generate-adapters.mjs            # write the files
 //   node scripts/generate-adapters.mjs --check    # exit 1 when any file is out of date
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { shippedHeadings } from "../bin/headings.mjs";
@@ -96,14 +96,53 @@ export function adapters(skillText, version, rows = shippedHeadings()) {
   };
 }
 
+/**
+ * The Claude Code plugin folder carries its own copy of the four skills (plugin/skills/), because
+ * the plugin directory validates one folder and a symbolic link is not allowed in it. skills/ stays
+ * the source: the npm package, the Codex and Cursor manifests, the skills CLI and every test read it.
+ * Only the four packaged skills are copied; skills/.experimental/ is not.
+ */
+export function pluginCopies(root) {
+  const out = {};
+  const walk = (rel) => {
+    for (const name of readdirSync(join(root, rel)).sort()) {
+      const sub = `${rel}/${name}`;
+      if (statSync(join(root, sub)).isDirectory()) walk(sub);
+      else out[`plugin/${sub}`] = readFileSync(join(root, sub), "utf8");
+    }
+  };
+  for (const dir of readdirSync(join(root, "skills")).sort()) {
+    if (dir.startsWith(".") || !existsSync(join(root, "skills", dir, "SKILL.md"))) continue;
+    walk(`skills/${dir}`);
+  }
+  return out;
+}
+
+function listPlugin(root) {
+  const out = {};
+  const walk = (rel) => {
+    for (const name of readdirSync(join(root, rel))) {
+      const sub = `${rel}/${name}`;
+      if (statSync(join(root, sub)).isDirectory()) walk(sub);
+      else out[sub] = true;
+    }
+  };
+  walk("plugin/skills");
+  return out;
+}
+
 function main(argv) {
   const rootIndex = argv.indexOf("--root");
   const root = resolve(rootIndex >= 0 ? argv[rootIndex + 1] : join(dirname(fileURLToPath(import.meta.url)), ".."));
   const check = argv.includes("--check");
   const skill = readFileSync(join(root, SOURCE), "utf8");
   const version = JSON.parse(readFileSync(join(root, "package.json"), "utf8")).version;
-  const files = adapters(skill, version);
+  const files = { ...adapters(skill, version), ...pluginCopies(root) };
   const stale = [];
+  if (check && existsSync(join(root, "plugin", "skills"))) {
+    // A skill deleted from skills/ must not linger in the plugin copy.
+    for (const rel of Object.keys(listPlugin(root))) if (!(rel in files)) stale.push(rel);
+  }
   for (const [rel, content] of Object.entries(files)) {
     const path = join(root, rel);
     if (check) {
