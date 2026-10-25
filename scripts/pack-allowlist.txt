@@ -8,6 +8,7 @@ bin/doctor.mjs
 bin/headings.mjs
 bin/hooks.mjs
 bin/json-report.mjs
+bin/notes.mjs
 bin/readability.mjs
 bin/references.mjs
 integrations/commitlint/README.md

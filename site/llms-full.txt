@@ -245,6 +245,27 @@ git config commit.template .gitmessage.txt
 ```
 
 
+### Generate customer notes
+
+Use `product-engineer notes` to turn customer blocks from a Git revision range into Markdown for a release note. The range follows Git's revision syntax; commits without a customer block are counted rather than silently omitted.
+
+```sh
+npx product-engineer notes v0.7.0..HEAD
+```
+
+For example, the output looks like this:
+
+```markdown
+# Customer notes
+
+- Customers can download monthly bookings.
+  - Why it matters: They no longer copy each row by hand.
+
+1 commit without a block
+```
+
+The command honours the headings configured in `.product-engineer.json`. An invalid range, a missing range, or a range beginning with a flag exits with code 2.
+
 ### Does the message match the change?
 
 Everything above reads the message alone, so it can tell whether you said the right shapes.
