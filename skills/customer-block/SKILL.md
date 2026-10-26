@@ -4,7 +4,7 @@ description: Use when writing a commit message or a pull request description for
 license: MIT
 metadata:
   author: Efe Genc
-  version: 0.7.0
+  version: 0.8.0
   source: https://github.com/Bubblegunn/product-engineer
   measuredBy: [customerBlock]
 ---

@@ -4,7 +4,7 @@ description: Use when reporting that a piece of software work is finished. Makes
 license: MIT
 metadata:
   author: Efe Genc
-  version: 0.7.0
+  version: 0.8.0
   source: https://github.com/Bubblegunn/product-engineer
   measuredBy: [observedOrHonest]
 ---

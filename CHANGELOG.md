@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.8.0 (unreleased)
+## 0.8.0 (2026-10-26)
 
 **`product-engineer hook install` sets up the commit check from npm.** It writes the generated `commit-msg` hook (the
 same file as `scripts/commit-msg`, so the headings cannot drift) into the directory git actually uses, including a

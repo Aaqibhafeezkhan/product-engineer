@@ -2,7 +2,7 @@
   "name": "product-engineer",
   "displayName": "product-engineer",
   "description": "Your agent ships code. product-engineer makes it ship outcomes. A plain-language customer block in every commit and pull request, and done means observed.",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "author": {
     "name": "Efe Genc",
     "url": "https://efegenc.me"
