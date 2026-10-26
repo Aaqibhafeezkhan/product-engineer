@@ -10,6 +10,21 @@ ours is never overwritten without `--force`, and installing twice changes nothin
 [@Aaqibhafeezkhan](https://github.com/Aaqibhafeezkhan) ([#44](https://github.com/Bubblegunn/product-engineer/pull/44),
 closes [#30](https://github.com/Bubblegunn/product-engineer/issues/30)).
 
+**`product-engineer notes <range>` writes customer release notes from the commit blocks.** Each commit's `What
+changed` line in the range becomes a bullet, with `Why it matters` nested beneath it. Commits without a block are
+counted at the end instead of dropped, headings set in `.product-engineer.json` are honoured, and a missing range, a
+range starting with `-`, or one git cannot read exits 2 with one line saying why. Written by
+[@Aaqibhafeezkhan](https://github.com/Aaqibhafeezkhan) ([#46](https://github.com/Bubblegunn/product-engineer/pull/46),
+closes [#31](https://github.com/Bubblegunn/product-engineer/issues/31)).
+
+**A gallery of before and after pairs from the eval runs.** `site/gallery.html` quotes, for every committed run under
+`evals/results*`, the commit the agent made without the skill and the one it made with it, scores both with
+`evals/score.mjs` and links both transcripts. Pairs where the skill changed nothing or made the message worse are
+shown at the same size as the wins. `scripts/generate-gallery.mjs` writes the page, and `test/gallery.test.mjs`
+regenerates it and fails when the committed page and the transcripts disagree. Written by
+[@Nitjsefnie](https://github.com/Nitjsefnie) ([#47](https://github.com/Bubblegunn/product-engineer/pull/47), closes
+[#21](https://github.com/Bubblegunn/product-engineer/issues/21)).
+
 ## 0.7.0 (2026-10-20)
 
 **`check --format json`.** Prints one JSON object, `{ ok, findings: [{ level, code, message }], readability }`, and

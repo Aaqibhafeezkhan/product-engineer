@@ -103,6 +103,11 @@ The check, on a message without the block and then with it (the two fixtures are
 
 A longer pair, unedited, from the evaluation: [`docs/examples.md`](docs/examples.md).
 
+Every pair from the committed eval runs, including the ones where the skill changed nothing or made the message
+worse, is on [the gallery page](https://bubblegunn.github.io/product-engineer/gallery.html), generated from the
+transcripts (contributed by [@Nitjsefnie](https://github.com/Nitjsefnie) in
+[#47](https://github.com/Bubblegunn/product-engineer/pull/47)).
+
 One real defect in a public repository, fixed twice by the same model on the same commit,
 with the skill and without, both commit messages quoted whole:
 [`docs/case-study.md`](docs/case-study.md).
@@ -214,7 +219,7 @@ git config commit.template .gitmessage.txt
 
 ### Generate customer notes
 
-Use `product-engineer notes` to turn customer blocks from a Git revision range into Markdown for a release note. The range follows Git's revision syntax; commits without a customer block are counted rather than silently omitted.
+Use `product-engineer notes` to turn customer blocks from a Git revision range into Markdown for a release note. The range follows Git's revision syntax; commits without a customer block are counted rather than silently omitted. (The `notes` command was contributed by [@Aaqibhafeezkhan](https://github.com/Aaqibhafeezkhan) in [#46](https://github.com/Bubblegunn/product-engineer/pull/46).)
 
 ```sh
 npx product-engineer notes v0.7.0..HEAD
@@ -303,6 +308,15 @@ watching the thing behave, and the habit of writing down what was deliberately n
 Rule changes need one before/after pair and one eval task; see
 [CONTRIBUTING.md](CONTRIBUTING.md), which also describes the one-command release. The [roadmap](ROADMAP.md) is short on purpose.
 Translations and per-stack jargon tables are labelled `good first issue`.
+
+## Contributors
+
+Thank you to everyone who has sent a change that landed here:
+
+- [@Enard52](https://github.com/Enard52): the `template` command for the customer block ([#41](https://github.com/Bubblegunn/product-engineer/pull/41))
+- [@jay23606](https://github.com/jay23606): measuring one skill at a time in the evals with `PE_EVAL_SKILL` ([#43](https://github.com/Bubblegunn/product-engineer/pull/43))
+- [@Aaqibhafeezkhan](https://github.com/Aaqibhafeezkhan): `hook install` ([#44](https://github.com/Bubblegunn/product-engineer/pull/44)) and `notes` ([#46](https://github.com/Bubblegunn/product-engineer/pull/46))
+- [@Nitjsefnie](https://github.com/Nitjsefnie): the before and after gallery ([#47](https://github.com/Bubblegunn/product-engineer/pull/47))
 
 ## Cite this
 
