@@ -39,9 +39,13 @@ export function notes(range, cwd = process.cwd()) {
   const preferred = preferredHeadings(cwd);
   let shas;
   try {
-    shas = execFileSync("git", ["rev-list", "--no-merges", range], { cwd, encoding: "utf8" }).trim().split(/\r?\n/).filter(Boolean);
+    shas = execFileSync("git", ["rev-list", "--no-merges", range], { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] })
+      .trim()
+      .split(/\r?\n/)
+      .filter(Boolean);
   } catch (err) {
-    const detail = err instanceof Error ? err.message.split("\n")[0] : String(err);
+    const stderr = typeof err?.stderr === "string" ? err.stderr.trim().split(/\r?\n/)[0] : "";
+    const detail = stderr || (err instanceof Error ? err.message.split("\n")[0] : String(err));
     throw new Error(`cannot read commit range "${range}": ${detail}`);
   }
   const entries = [];

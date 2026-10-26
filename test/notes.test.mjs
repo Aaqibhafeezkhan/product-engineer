@@ -70,6 +70,11 @@ test("CLI rejects a missing or flag-like range with exit code 2", () => {
     const flagLike = spawnSync(process.execPath, [cli, "notes", "-range"], { cwd: f.cwd, encoding: "utf8" });
     assert.equal(flagLike.status, 2);
     assert.match(flagLike.stderr, /usage: product-engineer notes <range>/);
+
+    const unknown = spawnSync(process.execPath, [cli, "notes", "missing-ref..HEAD"], { cwd: f.cwd, encoding: "utf8" });
+    assert.equal(unknown.status, 2);
+    assert.equal(unknown.stderr.trim().split("\n").length, 1, unknown.stderr);
+    assert.match(unknown.stderr, /^cannot read commit range "missing-ref\.\.HEAD": fatal: /);
   } finally {
     rmSync(f.cwd, { recursive: true, force: true });
   }
