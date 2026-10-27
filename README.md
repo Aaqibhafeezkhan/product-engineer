@@ -15,6 +15,7 @@ The recording is real output, made with [vhs](https://github.com/charmbracelet/v
 English | [Türkçe](README.tr.md) | [简体中文](README.zh-CN.md)
 
 <p>
+  <a href="https://www.npmjs.com/package/product-engineer"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FBubblegunn%2Fproduct-engineer%2Fmetrics%2Fbadges%2Fnpm-week.json&style=flat-square" alt="npm downloads per week"></a>
   <img src="https://img.shields.io/badge/dependencies-0-111111?style=flat-square" alt="zero dependencies">
   <img src="https://img.shields.io/badge/skills-4-111111?style=flat-square" alt="four skills">
   <img src="https://img.shields.io/github/actions/workflow/status/Bubblegunn/product-engineer/ci.yml?style=flat-square&color=111111&label=ci" alt="ci">
