@@ -246,3 +246,42 @@ test("an unfilled template fails check, and passes once filled in", () => {
   assert.equal(exitCode(resFilled), 0, "filled template must pass check");
 });
 
+
+
+test("the commit-range check reports each commit by short SHA and honors --warn", () => {
+  const dir = mkdtempSync(join(tmpdir(), "pe-commit-range-"));
+  const git = (args) => execFileSync("git", args, {
+    cwd: dir,
+    encoding: "utf8",
+    env: { ...process.env, GIT_AUTHOR_NAME: "Test", GIT_AUTHOR_EMAIL: "test@example.com", GIT_COMMITTER_NAME: "Test", GIT_COMMITTER_EMAIL: "test@example.com" },
+  });
+  try {
+    git(["init", "-q", "-b", "main"]);
+    git(["config", "user.name", "Test"]);
+    git(["config", "user.email", "test@example.com"]);
+    writeFileSync(join(dir, "file.txt"), "baseline\\n");
+    git(["add", "file.txt"]);
+    git(["commit", "-q", "-m", "chore: baseline [no-customer]"]);
+
+    writeFileSync(join(dir, "file.txt"), "passing\\n");
+    git(["add", "file.txt"]);
+    git(["commit", "-q", "-m", "feat: valid change\\n\\nFor the customer:\\nWhat changed: People can read the updated file.\\nWhy it matters: The latest information is available."]);
+
+    writeFileSync(join(dir, "file.txt"), "failing\\n");
+    git(["add", "file.txt"]);
+    git(["commit", "-q", "-m", "fix: missing customer block"]);
+    const failingSha = git(["rev-parse", "--short", "HEAD"]).trim();
+    const range = "main~2..HEAD";
+
+    const bad = spawnSync("node", [cli, "check", "--commits", range], { cwd: dir, encoding: "utf8" });
+    assert.equal(bad.status, 1, bad.stdout + bad.stderr);
+    assert.match(bad.stdout, new RegExp(failingSha + " error"));
+    assert.match(bad.stdout, /no "For the customer:" block/);
+
+    const warned = spawnSync("node", [cli, "check", "--commits", range, "--warn"], { cwd: dir, encoding: "utf8" });
+    assert.equal(warned.status, 0, warned.stdout + warned.stderr);
+    assert.match(warned.stdout, new RegExp(failingSha + " warn"));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
