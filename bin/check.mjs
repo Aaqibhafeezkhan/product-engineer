@@ -11,7 +11,7 @@ import { acceptedHeadings, preferredHeadings, shippedHeadings, isHeading, headin
 import { referenceFindings } from "./references.mjs";
 import { renderJson } from "./json-report.mjs";
 
-const HELP = `usage: product-engineer check [file|-|--stdin] [--pr <number>] [--warn] [--lang <code>] [--format text|github] [--comment]
+const HELP = `usage: product-engineer check [file|-|--stdin] [--pr <number>] [--commits <range>] [--warn] [--lang <code>] [--format text|github] [--comment]
        product-engineer template [--lang <code>]
        product-engineer notes <range>
        product-engineer doctor
@@ -23,6 +23,7 @@ carries the "For the customer" block and whether the block reads the way the
 skill asks. With no file it reads .git/COMMIT_EDITMSG when present.
 
   file, --stdin path to a message, or - / --stdin for standard input
+  --commits <range> check every non-merge commit in a Git revision range
   --pr <n>      fetch the pull request body: through the GitHub API when GITHUB_TOKEN
                 and GITHUB_REPOSITORY are set (as in Actions), otherwise with gh pr view
   --comment     with --pr and a token: post the result as one comment on the pull
@@ -300,6 +301,71 @@ async function readInput(argv) {
 
 const version = () => JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
 
+async function checkCommitRange(argv) {
+  const index = argv.indexOf("--commits");
+  const range = argv[index + 1];
+  if (!range || range.startsWith("-")) {
+    console.error("usage: product-engineer check --commits <range>");
+    return 2;
+  }
+  const warn = argv.includes("--warn");
+  const formatIndex = argv.indexOf("--format");
+  const format = formatIndex >= 0 ? argv[formatIndex + 1] : "text";
+  if (format !== "text" && format !== "github" && format !== "json") {
+    console.error(\`--format must be text, github or json, got: \${format}\`);
+    return 2;
+  }
+  try {
+    const commits = execFileSync("git", ["rev-list", "--no-merges", range], { encoding: "utf8" })
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+    const reports = [];
+    let failed = false;
+    for (const sha of commits) {
+      const shortSha = sha.slice(0, 7);
+      const message = execFileSync("git", ["show", "-s", "--format=%B", sha], { encoding: "utf8" });
+      const result = analyse(message, { warn });
+      if (result.skipped) {
+        reports.push({ sha: shortSha, status: "skipped", message: "exemption applies" });
+        continue;
+      }
+      const findings = result.findings.filter((finding) => finding.level === "error" || finding.level === "warn");
+      if (!findings.length) {
+        reports.push({ sha: shortSha, status: "ok", message: "no findings" });
+        continue;
+      }
+      for (const finding of findings) {
+        if (finding.level === "error" && !warn) failed = true;
+        reports.push({
+          sha: shortSha,
+          level: warn ? "warn" : finding.level,
+          message: finding.message,
+          code: finding.code,
+        });
+      }
+    }
+    if (!commits.length) reports.push({ status: "empty", message: \`no non-merge commits in range \${range}\` });
+    if (format === "json") {
+      console.log(JSON.stringify({ ok: warn || !failed, findings: reports }, null, 2));
+    } else {
+      const lines = reports.map((report) => {
+        if (report.status) return report.sha ? \`\${report.sha} \${report.status}: \${report.message}\` : report.message;
+        const message = \`\${report.sha}: \${report.message}\`;
+        if (format === "github") return report.level === "error"
+          ? \`::error title=product-engineer::\${message}\`
+          : \`::warning title=product-engineer::\${message}\`;
+        return \`\${report.sha} \${report.level.padEnd(5)} \${report.message}\`;
+      });
+      console.log(lines.join("\n"));
+    }
+    return warn || !failed ? 0 : 1;
+  } catch (err) {
+    console.error(err instanceof Error ? err.message.split("\n")[0] : String(err));
+    return 2;
+  }
+}
+
 async function main(argv) {
   if (argv.includes("--version")) {
     console.log(version());
@@ -310,6 +376,7 @@ async function main(argv) {
     return 0;
   }
   const command = argv[0];
+  if (argv.includes("--commits")) return checkCommitRange(argv);
   if (command === "notes") {
     const range = argv[1];
     if (!range || range.startsWith("-")) {
