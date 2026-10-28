@@ -312,7 +312,7 @@ async function checkCommitRange(argv) {
   const formatIndex = argv.indexOf("--format");
   const format = formatIndex >= 0 ? argv[formatIndex + 1] : "text";
   if (format !== "text" && format !== "github" && format !== "json") {
-    console.error(\`--format must be text, github or json, got: \${format}\`);
+    console.error("--format must be text, github or json, got: " + format);
     return 2;
   }
   try {
@@ -345,17 +345,17 @@ async function checkCommitRange(argv) {
         });
       }
     }
-    if (!commits.length) reports.push({ status: "empty", message: \`no non-merge commits in range \${range}\` });
+    if (!commits.length) reports.push({ status: "empty", message: "no non-merge commits in range " + range });
     if (format === "json") {
       console.log(JSON.stringify({ ok: warn || !failed, findings: reports }, null, 2));
     } else {
       const lines = reports.map((report) => {
-        if (report.status) return report.sha ? \`\${report.sha} \${report.status}: \${report.message}\` : report.message;
-        const message = \`\${report.sha}: \${report.message}\`;
+        if (report.status) return report.sha ? report.sha + " " + report.status + ": " + report.message : report.message;
+        const message = report.sha + ": " + report.message;
         if (format === "github") return report.level === "error"
-          ? \`::error title=product-engineer::\${message}\`
-          : \`::warning title=product-engineer::\${message}\`;
-        return \`\${report.sha} \${report.level.padEnd(5)} \${report.message}\`;
+          ? "::error title=product-engineer::" + message
+          : "::warning title=product-engineer::" + message;
+        return report.sha + " " + report.level.padEnd(5) + " " + report.message;
       });
       console.log(lines.join("\n"));
     }
