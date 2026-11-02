@@ -632,7 +632,15 @@ non-merge commits of each repository, working tree at the repository's head. Two
 - **Tuned on**: express, flask, fastify, requests, ripgrep, gin, execa, vite. 4,796 commits with a readable parent.
 - **Second corpus**: tokio, cobra, click, httpx, commander.js, axios. 3,598 commits. It was held out until the first
   version of the checks had been tuned on the first corpus. It then exposed five more false alarm shapes, which were fixed, so
-  it is no longer held out either. A third corpus is the honest next measurement.
+  it is no longer held out either.
+- **Third corpus**: jinja, fd, viper, got, zod, pytest. 3,600 commits, all with a readable parent, chosen before the run and not used in
+  the first two. It was run once as a held-out set with no tuning, and `scripts/false-alarm-corpus.mjs` reproduces it. It
+  gave 45 reports, 1.25% of commits (by code: `diff-path-missing` 38, `diff-docs-only-mismatch` 5, `diff-symbol-direction` 2; fd and
+  viper 0, got 1, jinja 2, pytest 10, zod 32). Reading them, the shapes were: a path written without its leading directories
+  (`core/regexes.ts`), alternatives and lists that are not paths (`os.open/os.scandir`, `.js/.cjs/.d.ts`, `@zod/mini@4.5.4`, `.../x.html`),
+  "Internal-only doc", "its only documentation", "when only docs change", "No source changes; only test assertions", a `docs-only`
+  change whose code lines are all comments, and "(which removed `additionalItems`)". They were fixed with a regression test
+  (`third-corpus false alarms stay fixed`), so **this corpus is no longer held out**. After the fixes: 9 reports, 0.25% (pytest 3, zod 5, got 1).
 
 Reports per finding code, before and after the fixes:
 
@@ -653,7 +661,12 @@ name; "in a backwards compatible fashion" said about the future; "drop the waker
 commit it undoes; "the test I added in #7431"; "security fixes and bug patches"; bare "fix:" titles over documentation; and
 Go import paths, relative paths and version ranges read as files.
 
-What is left. `diff-path-missing`: `app.set/app.get`, `Pipfile/Pipfile.lock`, repository names such as `zeit/next.js`, partial
+What is left after the third corpus. `diff-path-missing`: a product or repository name that looks like a path (`vercel/next.js`, `Vite/Next.js`),
+another project's file (`xdist/newhooks.py`), and four files that existed at that commit and are gone at head (the working tree is
+not the commit). `diff-symbol-direction`: a gerund that is the subject of a described behaviour ("removing a `connection` header
+drops the fields it nominated" over a change that adds the code doing that), which the check reads as "removed `connection`".
+
+What was left after the first two corpora. `diff-path-missing`: `app.set/app.get`, `Pipfile/Pipfile.lock`, repository names such as `zeit/next.js`, partial
 paths such as `fs/try_exists.rs`, and files that existed at that commit and are gone at head (the working tree is not the commit).
 `diff-tests-missing`: a test edit inside a module that already held tests, which a line-level diff cannot see, and a squash message
 that lists "Add failing test case" while the final change holds no test (httpx #1634), where the report is arguably right.
