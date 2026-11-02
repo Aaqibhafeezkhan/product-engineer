@@ -112,7 +112,7 @@ export function render(report) {
   return lines.join("\n");
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const report = doctor();
   console.log(render(report));
   process.exit(report.stale ? 1 : 0);

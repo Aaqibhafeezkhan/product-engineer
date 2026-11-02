@@ -7,6 +7,7 @@
 //   node evals/judge.mjs --yes     # runs it; each call costs real tokens
 //
 // The judge is `claude -p` by default (PE_JUDGE_COMMAND overrides it, used by the tests).
+import { realpathSync } from "node:fs";
 import { readFileSync, readdirSync, existsSync, writeFileSync } from "node:fs";
 import { execFile } from "node:child_process";
 import { join, dirname } from "node:path";
@@ -107,6 +108,6 @@ async function main(argv) {
   return 0;
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) {
   main(process.argv.slice(2)).then((c) => process.exit(c), (e) => { console.error(e.message); process.exit(1); });
 }

@@ -8,6 +8,7 @@
 //   node evals/comparison/render.mjs --check    # exit 1 when docs/COMPARISON.md is not what the results produce
 //
 // Node built-ins only.
+import { realpathSync } from "node:fs";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -144,4 +145,4 @@ function main(argv) {
   return 0;
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) process.exit(main(process.argv.slice(2)));
+if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) process.exit(main(process.argv.slice(2)));

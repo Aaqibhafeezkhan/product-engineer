@@ -6,6 +6,7 @@
 //   node evals/by-model.mjs evals/results-haiku-4-5-2026-10-21 evals/results-2026-10-17/core > evals/RESULTS-models.md
 //
 // No model is called. Node built-ins only.
+import { realpathSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { metrics, score, bootstrapDelta } from "./score.mjs";
@@ -81,7 +82,7 @@ export function render(summaries) {
   return out.join("\n");
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
+if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const dirs = process.argv.slice(2).filter((a) => !a.startsWith("--"));
   if (!dirs.length) {
     console.error("usage: node evals/by-model.mjs <results-dir> [<results-dir> ...]");

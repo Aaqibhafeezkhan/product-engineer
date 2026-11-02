@@ -6,6 +6,7 @@
 //   node scripts/comparison/fetch-upstream.mjs             # run them (needs network)
 //
 // Node built-ins only.
+import { realpathSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -74,4 +75,4 @@ function main(argv) {
   return 0;
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) process.exit(main(process.argv.slice(2)));
+if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) process.exit(main(process.argv.slice(2)));

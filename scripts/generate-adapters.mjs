@@ -4,6 +4,7 @@
 // and into examples/cursor/, a copy people drop into their own project.
 //   node scripts/generate-adapters.mjs            # write the files
 //   node scripts/generate-adapters.mjs --check    # exit 1 when any file is out of date
+import { realpathSync } from "node:fs";
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -161,4 +162,4 @@ function main(argv) {
   return 0;
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) process.exit(main(process.argv.slice(2)));
+if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) process.exit(main(process.argv.slice(2)));

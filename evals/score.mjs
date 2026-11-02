@@ -2,6 +2,7 @@
 // Scores evals/results/*/{bare,skill} on five yes/no heuristics and prints a
 // Markdown table. No dependencies. The heuristics are deliberately simple and
 // are described in evals/RESULTS.md together with what they miss.
+import { realpathSync } from "node:fs";
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -185,7 +186,7 @@ export function failures(rows) {
   return lines.length ? lines.join("\n") : "No failing cells.";
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const dir = process.argv.slice(2).find((a) => !a.startsWith("--"));
   const rows = score(dir ? resolve(dir) : root);
   if (process.argv.includes("--failures")) {

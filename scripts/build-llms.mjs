@@ -1,6 +1,7 @@
 // Generates site/llms.txt and site/llms-full.txt from llms.txt (hand-written) and the docs.
 //   node scripts/build-llms.mjs          write both files
 //   node scripts/build-llms.mjs --check  exit 1 if either file differs from what would be written
+import { realpathSync } from "node:fs";
 import { readFileSync, writeFileSync, existsSync, readdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -30,7 +31,7 @@ export function build() {
   return { "site/llms.txt": llms, "site/llms-full.txt": full };
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const out = build();
   const check = process.argv.includes("--check");
   let drift = false;

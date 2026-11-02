@@ -2,6 +2,7 @@
 // product-engineer check: does a commit message or PR description carry the
 // "For the customer" block, and does the block read the way the skill asks?
 // Zero dependencies, Node 22 or newer. Exit 1 on a missing block unless --warn.
+import { realpathSync } from "node:fs";
 import { readFileSync, existsSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { dirname, join } from "node:path";
@@ -501,5 +502,5 @@ async function main(argv) {
   return argv.includes("--warn") ? 0 : exitCode(result);
 }
 
-const invoked = process.argv[1] && (fileURLToPath(import.meta.url) === process.argv[1] || /product-engineer$/.test(process.argv[1]));
+const invoked = process.argv[1] && (realpathSync(process.argv[1]) === fileURLToPath(import.meta.url) || /product-engineer$/.test(process.argv[1]));
 if (invoked) main(process.argv.slice(2)).then((code) => process.exit(code));

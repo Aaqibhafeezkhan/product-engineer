@@ -12,6 +12,7 @@
 // .../skills/<skill-name>/... . Both are things the agent did, read from its own tool calls; neither is
 // inferred from cost. A skill that was never called and never read is reported as not loaded.
 // Node built-ins only.
+import { realpathSync } from "node:fs";
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -95,4 +96,4 @@ function main(argv) {
   return 0;
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) process.exit(main(process.argv.slice(2)));
+if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) process.exit(main(process.argv.slice(2)));

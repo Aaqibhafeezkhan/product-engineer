@@ -8,6 +8,7 @@
 // and drops transcript.json and stderr.txt: a transcript contains the text of the skill the agent loaded,
 // and one of the skills compared has no licence that lets this repository republish it.
 // Node built-ins only.
+import { realpathSync } from "node:fs";
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -93,4 +94,4 @@ function main(argv) {
   return 2;
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) process.exit(main(process.argv.slice(2)));
+if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) process.exit(main(process.argv.slice(2)));

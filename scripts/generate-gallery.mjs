@@ -5,6 +5,7 @@
 //   node scripts/generate-gallery.mjs --out <path>   write there instead (the drift test uses this)
 // The measures are imported from evals/score.mjs, so the page can never drift from the
 // tables in evals/RESULTS.md. Node built-ins only.
+import { realpathSync } from "node:fs";
 import { readFileSync, writeFileSync, existsSync, readdirSync } from "node:fs";
 import { join, dirname, resolve, basename } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -225,7 +226,7 @@ export function renderPage(pairs) {
   ].join("\n");
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
+if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const outIdx = process.argv.indexOf("--out");
   if (outIdx > -1 && !process.argv[outIdx + 1]) {
     console.error("usage: node scripts/generate-gallery.mjs [--out <path>]");

@@ -11,6 +11,7 @@
 // (evals/comparison/checker-results-2026-10-21.json is the 0.7.0 run, kept as evidence).
 //
 // Node built-ins only.
+import { realpathSync } from "node:fs";
 import { spawnSync, execFileSync } from "node:child_process";
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -126,4 +127,4 @@ function main(argv) {
   return 0;
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) process.exit(main(process.argv.slice(2)));
+if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) process.exit(main(process.argv.slice(2)));
