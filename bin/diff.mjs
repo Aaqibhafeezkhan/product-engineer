@@ -253,10 +253,12 @@ export function crossCheck(text, diff, { cwd = process.cwd() } = {}) {
 
   // 2. A claim that only documentation changed, with source or tests in the diff. "Comments only" is
   // checked on the lines themselves: a comment typo in a test file is a comment-only change.
-  const docsClaim = DOCS_ONLY_CLAIM.exec(claims);
-  if (docsClaim) {
+  const docsClaims = [...claims.matchAll(new RegExp(DOCS_ONLY_CLAIM.source, "gi"))].map((m) => m[0]);
+  if (docsClaims.length) {
     const other = [...source, ...tests];
-    if (other.length && /comment/i.test(docsClaim[0]) && !/docs?|documentation|readme/i.test(docsClaim[0]) && commentsOnly(diff, other)) {
+    // Every such claim in the message has to be a comments-only claim that the changed lines bear out.
+    const onlyComments = docsClaims.every((c) => /comment/i.test(c) && !/docs?|documentation|readme/i.test(c));
+    if (other.length && onlyComments && commentsOnly(diff, other)) {
       add("ok", "comments only, and every changed line in the code files is a comment", "diff-docs-only-ok");
     } else if (other.length) {
       const named = other.slice(0, 3).map((f) => f.path).join(", ");
