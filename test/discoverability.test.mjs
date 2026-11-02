@@ -16,7 +16,7 @@ const HOME = "https://bubblegunn.github.io/product-engineer/";
 test("the category sentence is the package description, pinned, and short enough for every store", () => {
   assert.equal(
     CS,
-    "product-engineer is an agent skill and command-line checker that makes AI coding agents explain each commit and pull request in plain language, and warns when the message contradicts the diff.",
+    "product-engineer is an agent skill and command-line checker: the skill asks AI coding agents to explain each commit and pull request in plain language, and the checker warns when a message contradicts the diff.",
   );
   assert.ok(CS.length <= 350, "GitHub description limit is 350 characters");
 });

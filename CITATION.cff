@@ -24,4 +24,4 @@ identifiers:
     description: "Concept DOI: always resolves to the newest archived version."
 license: MIT
 type: software
-abstract: "An agent skill that makes AI coding agents restate work as a customer outcome, write a plain-language For-the-customer block in every commit and PR, and never call unobserved work done."
+abstract: "An agent skill that asks AI coding agents to restate work as a customer outcome, write a plain-language For-the-customer block in every commit and PR, and never call unobserved work done."

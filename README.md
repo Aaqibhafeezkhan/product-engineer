@@ -1,6 +1,6 @@
 # My coding agent's commit message says it added tests, and the change has none.
 
-product-engineer is an agent skill and command-line checker that makes AI coding agents explain each commit and pull request in plain language, and warns when the message contradicts the diff.
+product-engineer is an agent skill and command-line checker: the skill asks AI coding agents to explain each commit and pull request in plain language, and the checker warns when a message contradicts the diff.
 
 That is two parts that work separately: a checker that compares a message with the change it describes, and a skill that gets the agent to write the plain-language note. [Below](#two-parts-used-separately) says which evidence belongs to which.
 
@@ -52,6 +52,16 @@ It depends on the model. The skill is four skills, each a SKILL.md with the main
 | claude-haiku-4-5 | 0 / 24 | 0 / 24 | no clear effect |
 
 On claude-haiku-4-5 all five measures read "no clear effect". Why is partly visible in the cost data ([`evals/WEAK-MODELS.md`](evals/WEAK-MODELS.md)): the runs that wrote the block are the ones that spent extra turns and tokens, and the Haiku skill runs spent none, which fits a skill that never loaded; the transcripts do not record it, so it is not proven. The reading rule was written before any data existed ([`evals/MODELS-DESIGN.md`](evals/MODELS-DESIGN.md)). The checks are regular expressions over the agent's own words, so they reward saying the right thing ([`evals/RESULTS.md`](evals/RESULTS.md) lists what they miss). The skill also costs more on the largest model: $0.45 per run bare and $0.63 with the skill on claude-opus-5. Every number, cost and transcript: [`evals/RESULTS-models.md`](evals/RESULTS-models.md).
+
+### What the skill's effect is, per model
+
+Measured on these eight tasks, each number is the count of runs that passed a regular-expression check on the agent's own words ([`evals/RESULTS-models.md`](evals/RESULTS-models.md)):
+
+- **claude-opus-5**, one run per task, no interval computed: the commit carries the block 0 of 8 bare, 8 of 8 with the skill; reports what it observed or could not check 1 of 8, 7 of 8; names something deliberately not done 2 of 8, 5 of 8; a method or scope next to every number 0 of 8, 2 of 8. A run cost $0.45 bare and $0.63 with the skill.
+- **claude-sonnet-5-5**, three runs per task: the block 0 of 24, 13 of 24 (interval +0.25 to +0.83 per task, "worked"). The other four measures show no clear effect. A run cost $0.09 bare and $0.10 with the skill.
+- **claude-haiku-4-5**, three runs per task: no clear effect on any of the five measures; the block appeared 0 of 24 with and without the skill.
+
+Not measured: whether the block is more accurate or easier to read than what the model writes without the skill, and whether the agent's work is better. A larger comparison was made on a development branch, with an extended, unreleased version of the skill against the bare model and other skills, on tasks written by people who had not seen it. It showed no reliable lead over the bare model: one development round was ahead, but on the sealed final set and on the two other rounds the interval for the difference included zero, and the extended version cost about 1.4 to 1.5 times the bare model's price per session. Those result files are not in this repository's main history, so no number from them is quoted here. This README therefore does not say that installing the skill makes an agent's work better than the bare model's; it says the block appears on some models and not on others.
 
 ## How this differs
 

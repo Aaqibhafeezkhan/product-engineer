@@ -2,7 +2,7 @@
   "name": "product-engineer",
   "displayName": "product-engineer",
   "version": "0.8.0",
-  "description": "Your agent ships code. product-engineer makes it ship outcomes. Four skills: the seven rules, the customer block alone, done means observed, and release notes.",
+  "description": "Your agent ships code. product-engineer asks it to ship outcomes. Four skills: the seven rules, the customer block alone, done means observed, and release notes.",
   "author": {
     "name": "Efe Genc",
     "url": "https://efegenc.me"

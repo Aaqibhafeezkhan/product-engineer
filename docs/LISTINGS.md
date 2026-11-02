@@ -2,7 +2,7 @@
 
 Copy-ready text for each store this repository appears in. Submitting it is a separate step done by the maintainer. One category sentence is used everywhere:
 
-> product-engineer is an agent skill and command-line checker that makes AI coding agents explain each commit and pull request in plain language, and warns when the message contradicts the diff.
+> product-engineer is an agent skill and command-line checker: the skill asks AI coding agents to explain each commit and pull request in plain language, and the checker warns when a message contradicts the diff.
 
 ## npm
 
