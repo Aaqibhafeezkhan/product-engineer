@@ -35,7 +35,14 @@ skill asks. With no file it reads .git/COMMIT_EDITMSG when present.
                 diff disagree: tests claimed but no test file touched, "documentation
                 only" over a source change, a stated file count that is wrong, a path
                 named that is neither in the change nor in the repository. With no
-                range it reads the staged change. Reports warnings only
+                range it reads the staged change. Reports warnings only. It also
+                lists, at info level, what the message claims and no diff can
+                show (tests ran, tested by hand, a speed figure)
+  --strict      with --diff: make a mismatch the change proves an error (exit 1):
+                tests claimed and none added, "documentation only" over code, a bug
+                fix over documentation only, a file said to be added that is deleted
+                or the reverse, a name said to be removed that is only added or the
+                reverse. Counts, paths and the heuristic findings stay warnings
   --warn        report a missing block as a warning; always exit 0
 --references <mode>  resolve the paths and run URLs the message cites: warn (default),
               error, or off. A message that cites nothing is never a failure.
@@ -267,6 +274,9 @@ export async function upsertComment(number, body, env = process.env) {
   return "created";
 }
 
+/** The --diff findings a change can prove, so --strict may fail a run on them. */
+const STRICT_CODES = new Set(["diff-tests-missing", "diff-docs-only-mismatch", "diff-fix-docs-only", "diff-file-operation", "diff-symbol-direction"]);
+
 export function exitCode(result) {
   return result.findings.some((f) => f.level === "error") ? 1 : 0;
 }
@@ -440,6 +450,10 @@ async function main(argv) {
     console.error(err instanceof Error ? err.message : String(err));
     return 2;
   }
+  if (argv.includes("--strict") && !argv.includes("--diff")) {
+    console.error("--strict needs --diff: it only changes how the findings from the change are reported");
+    return 2;
+  }
   const langIndex = argv.indexOf("--lang");
   const refIndex = argv.indexOf("--references");
   const result = analyse(text, {
@@ -452,7 +466,14 @@ async function main(argv) {
     try {
       const { readDiff, crossCheck } = await import("./diff.mjs");
       const diff = readDiff({ range: ri >= 0 ? argv[ri + 1] : undefined });
-      result.findings.push(...crossCheck(text, diff, { cwd: process.cwd() }));
+      const found = crossCheck(text, diff, { cwd: process.cwd() });
+      // Opt-in: only findings where the change itself contradicts the message become errors.
+      if (argv.includes("--strict")) for (const f of found) if (f.level === "warn" && STRICT_CODES.has(f.code)) f.level = "error";
+      result.findings.push(...found);
+      // A message that says it removed or renamed a file cites a path that no longer exists, because
+      // the change did that. "cites X, which does not resolve" is wrong for those paths.
+      const gone = new Set(diff.files.flatMap((f) => (f.status === "D" ? [f.path] : f.oldPath ? [f.oldPath] : [])));
+      if (gone.size) result.findings = result.findings.filter((f) => !(f.code === "references-broken" && /which does not resolve: no such file here$/.test(f.message) && gone.has((/^cites (\S+?)(?::\d+)?, which/.exec(f.message) ?? [])[1])));
     } catch (err) {
       // Outside a repository, or a range git does not know: say so and check the message alone.
       const message = `--diff could not read the change: ${err instanceof Error ? err.message.split("\n")[0] : String(err)}`;

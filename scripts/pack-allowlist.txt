@@ -3,6 +3,7 @@ README.md
 README.tr.md
 README.zh-CN.md
 bin/check.mjs
+bin/diff-claims.mjs
 bin/diff.mjs
 bin/doctor.mjs
 bin/headings.mjs
