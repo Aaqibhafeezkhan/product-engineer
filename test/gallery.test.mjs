@@ -173,5 +173,6 @@ test("a commit message is quoted exactly as committed; characters the pull reque
   assert.match(page, /&lt;b&gt;/);
   assert.match(page, /Ampersand &amp; Turkish: m&#252;&#351;teri/);
   assert.ok(!page.includes(EM));
+  // biome-ignore lint/suspicious/noControlCharactersInRegex: the range is all of ASCII on purpose
   assert.ok(/^[\x00-\x7F]*$/.test(page), "the generated page is pure ASCII");
 });

@@ -1,0 +1,29 @@
+name: lint
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # A Dependabot auto-merge pushes with GITHUB_TOKEN, which starts no workflow, so main can sit
+  # on commits CI never ran and the release script waits for a run that never comes. The nightly
+  # run checks main within a day of any bot merge; workflow_dispatch lets a person start one now.
+  workflow_dispatch:
+  schedule:
+    - cron: "23 3 * * *"
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  biome:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      # Exact version: an unpinned npx runs whatever the registry serves that day. Not a devDependency, so
+      # installs and the lockfile stay as they are. Rules and scope are in biome.json.
+      - run: npx --yes @biomejs/biome@2.6.4 lint

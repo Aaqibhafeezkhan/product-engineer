@@ -23,6 +23,7 @@ const esc = (s) =>
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
+    // biome-ignore lint/suspicious/noControlCharactersInRegex: the range is all of ASCII on purpose
     .replace(/[^\x00-\x7F]/g, (ch) => `&#${ch.codePointAt(0)};`);
 
 const dirsOf = (dir) =>

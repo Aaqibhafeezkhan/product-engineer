@@ -1,0 +1,35 @@
+name: test
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # A Dependabot auto-merge pushes with GITHUB_TOKEN, which starts no workflow, so main can sit
+  # on commits CI never ran and the release script waits for a run that never comes. The nightly
+  # run checks main within a day of any bot merge; workflow_dispatch lets a person start one now.
+  workflow_dispatch:
+  schedule:
+    - cron: "23 3 * * *"
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      # npm runs scripts through cmd.exe on Windows; the test script calls `sh`, and the
+      # commit-msg hook it tests is POSIX sh, which is what Git for Windows runs hooks with.
+      # Git Bash is the shell, so the hook is tested the way a Windows user's git runs it.
+      - name: Run npm scripts with Git Bash (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: npm config set script-shell "C:\\Program Files\\Git\\bin\\bash.exe"
+      - run: npm test
+        shell: bash
