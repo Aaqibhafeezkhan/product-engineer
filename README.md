@@ -55,7 +55,7 @@ On claude-haiku-4-5 all five measures read "no clear effect". Why is partly visi
 
 ## How this differs
 
-The checker was last run on the same inputs as other tools on 2026-10-21 (product-engineer 0.7.0), the skill on 2026-10-20 (0.6.2). The generated tables, the pinned competitor versions and the commands to repeat them are in [`docs/COMPARISON.md`](docs/COMPARISON.md). Rows where product-engineer loses are in that file. The tables here show only rows it wins or ties.
+The checker comparison was rerun on 2026-11-02 on this branch (version 0.8.0 plus later commits; the first run, 2026-10-21 on 0.7.0, is kept in `evals/comparison/`) and gave the same outcome on all 12 messages. The skill comparison was not rerun: it needs a model and still stands at its 2026-10-20 run (skill 0.6.2). The generated tables, the pinned competitor versions and the commands to repeat them are in [`docs/COMPARISON.md`](docs/COMPARISON.md). Rows where product-engineer loses are in that file. The tables here show only rows it wins or ties.
 
 **Against commitlint 21.2.4**, which checks the Conventional Commits shape, which product-engineer does not. They run together: product-engineer ships a commitlint plugin (`product-engineer/commitlint`). Same message text given to both:
 

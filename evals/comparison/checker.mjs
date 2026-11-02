@@ -5,6 +5,10 @@
 //
 //   node scripts/comparison/fetch-upstream.mjs                       # once, needs network
 //   node evals/comparison/checker.mjs --run --date 2026-10-21        # POSIX shell only
+//   node evals/comparison/checker.mjs --run --date 2026-11-02 --out evals/comparison/checker-results-2026-11-02.json
+//
+// Without --out the run overwrites checker-results.json, so copy the previous one to a dated name first
+// (evals/comparison/checker-results-2026-10-21.json is the 0.7.0 run, kept as evidence).
 //
 // Node built-ins only.
 import { spawnSync, execFileSync } from "node:child_process";
@@ -95,6 +99,7 @@ function main(argv) {
     return 2;
   }
   const date = get("--date");
+  const out_ = argv.includes("--out") ? join(process.cwd(), get("--out")) : RESULTS;
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date ?? "")) {
     console.error("--date must be YYYY-MM-DD");
     return 2;
@@ -108,14 +113,16 @@ function main(argv) {
     return 1;
   }
   const ourVersion = JSON.parse(readFileSync(join(root, "package.json"), "utf8")).version;
+  const ourCommit = execFileSync("git", ["rev-parse", "--short", "HEAD"], { cwd: root, encoding: "utf8" }).trim();
   const out = runAll({
     dir,
     date,
     ourVersion,
     tool: { id: pin.id, name: pin.name, licence: pin.licence, version: installed, config: pin.config },
   });
-  writeFileSync(RESULTS, `${JSON.stringify(out, null, 2)}\n`);
-  console.log(`wrote ${RESULTS}: ${out.rows.length} cases`);
+  out.ourCommit = ourCommit;
+  writeFileSync(out_, `${JSON.stringify(out, null, 2)}\n`);
+  console.log(`wrote ${out_}: ${out.rows.length} cases`);
   return 0;
 }
 
