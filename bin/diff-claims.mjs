@@ -57,6 +57,8 @@ export function operationClaims(text) {
     const re = new RegExp(`\\b(${ADD_VERB}|${REMOVE_VERB})\\s+((?:(?:${SYMBOL_FILLER})\\s+){0,3})(?:\`([^\`\\n]+)\`|((?:[\\w.@-]+/)+[\\w.@-]+\\.[a-z0-9]{1,6})\\b)`, "gi");
     for (const m of sentence.matchAll(re)) {
       if (NOT_A_CLAIM.test(sentence.slice(Math.max(0, m.index - 30), m.index))) continue;
+      // "draft-2020-12 (which removed `additionalItems`)": a past event told about something else, not this change.
+      if (/\b(which|that|who)\s+$/i.test(sentence.slice(Math.max(0, m.index - 12), m.index)) && /ed$/i.test(m[1])) continue;
       const object = (m[3] ?? m[4]).trim();
       const fillers = m[2].trim().split(/\s+/).filter(Boolean);
       const prepositional = fillers.some((w) => /^(for|of|to|call|calls|usage|usages|import|reference|references|support|check|checks|guard|test|tests)$/i.test(w));

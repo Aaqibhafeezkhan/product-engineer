@@ -142,7 +142,9 @@ const TEST_CLAIM = new RegExp(`\\b(add(ed|s|ing)?|wrote|writes?|writing|introduc
 // The lookbehind keeps a hyphenated identifier from reading as a claim: the corpus type
 // name `extra-docs-only` contains "docs-only" and named it in a commit message here, which
 // the baseline caught as a false alarm. A token inside a longer compound is a name.
-const DOCS_ONLY_CLAIM = /(?<![-\w])(documentation|docs?|readme|comment)[- ]only\b|\bonly (the )?(documentation|docs?|readme|comments?)\b|\bno (code|source) changes?\b/i;
+// "Internal-only doc" (a hyphenated modifier), "its only documentation" (an adjective) and "when only docs change"
+// (a condition) are not claims about this change. Found on jinja and zod commits.
+const DOCS_ONLY_CLAIM = /(?<![-\w])(documentation|docs?|readme|comment)[- ]only\b|(?<![-\w])(?<!\b(?:its|their|his|her|our|my|your|the|a|an|this|that|when|if|unless|whenever|once|where|until|while) )only (the )?(documentation|docs?|readme|comments?)\b(?! change)|\bno (code|source) changes?\b/i;
 
 const CHANGE_VERB = /\b(chang(e|ed|es)|touch(ed|es)?|modif(y|ied|ies)|updat(e|ed|es)|edit(ed|s)?|add(ed|s)?|remov(e|ed|es)|delet(e|ed|es)|rewrit(e|ten|es))\b/i;
 
@@ -162,6 +164,10 @@ const isRepositoryPath = (p) => {
   if (parts[0] === "." || parts[0] === "..") return false;
   if (/\.(com|org|net|io|in|dev|sh|co|app|ai|cloud|so)$/i.test(parts[0])) return false;
   if (parts.some((x) => /^v?\d+(\.(\d+|x))+$/.test(x))) return false;
+  // "..." stands for omitted directories; "os.open/os.scandir", "z.input/z.output" and ".js/.cjs/.d.ts" are alternatives
+  // of dotted names and lists of extensions: every segment carries a dot. Found on pytest, zod and jinja commits.
+  if (parts.some((x) => /^\.{3,}$/.test(x))) return false;
+  if (parts.every((x) => x.includes("."))) return false;
   return true;
 };
 
@@ -173,9 +179,9 @@ export function namedPaths(raw) {
   const found = new Set();
   for (const m of text.matchAll(/`([^`\n]+)`/g)) {
     const t = m[1].trim();
-    if (/^[\w.@-]+(\/[\w.@ -]+)+\.[a-z0-9]+$/i.test(t)) found.add(t);
+    if (/^[\w.@-]+(\/[\w.@ -]+)+\.(?=[a-z0-9]*[a-z])[a-z0-9]+$/i.test(t)) found.add(t);
   }
-  for (const m of text.matchAll(/(?<![`\w/.])((?:[\w.@-]+\/)+[\w.@-]+\.[a-z0-9]+)(?![\w`])/gi)) found.add(m[1]);
+  for (const m of text.matchAll(/(?<![`\w/.@])((?:[\w.@-]+\/)+[\w.@-]+\.(?=[a-z0-9]*[a-z])[a-z0-9]+)(?![\w`@])/gi)) found.add(m[1]);
   return [...found].filter(isRepositoryPath);
 }
 
@@ -255,16 +261,16 @@ export function crossCheck(text, diff, { cwd = process.cwd() } = {}) {
   // checked on the lines themselves: a comment typo in a test file is a comment-only change.
   const docsClaims = [...claims.matchAll(new RegExp(DOCS_ONLY_CLAIM.source, "gi"))].map((m) => m[0]);
   if (docsClaims.length) {
-    const other = [...source, ...tests];
-    // Every such claim in the message has to be a comments-only claim that the changed lines bear out.
-    const onlyComments = docsClaims.every((c) => /comment/i.test(c) && !/docs?|documentation|readme/i.test(c));
-    if (other.length && onlyComments && commentsOnly(diff, other)) {
+    // "No source changes" is about source: test files may change. "No code changes" and the rest count tests too.
+    const other = docsClaims.every((c) => /^no source/i.test(c)) ? source : [...source, ...tests];
+    // Code files whose every changed line is a comment leave the change documentation only.
+    if (other.length && commentsOnly(diff, other)) {
       add("ok", "comments only, and every changed line in the code files is a comment", "diff-docs-only-ok");
     } else if (other.length) {
       const named = other.slice(0, 3).map((f) => f.path).join(", ");
       add("warn", `the message says the change is documentation only; ${other.length} file${other.length === 1 ? " is" : "s are"} not documentation: ${named}${other.length > 3 ? ", and more" : ""}`, "diff-docs-only-mismatch");
     } else {
-      add("ok", "documentation only, and the change touches documentation only", "diff-docs-only-ok");
+      add("ok", tests.length && docsClaims.every((c) => /^no source/i.test(c)) ? "no source changes, and the change touches only tests and documentation" : "documentation only, and the change touches documentation only", "diff-docs-only-ok");
     }
   }
 
@@ -295,7 +301,21 @@ export function crossCheck(text, diff, { cwd = process.cwd() } = {}) {
   // reported: that is the shape a renamed or invented file leaves behind.
   // A renamed file is in the change under both its names.
   const inDiff = new Set(files.flatMap((f) => (f.oldPath ? [f.path, f.oldPath] : [f.path])));
-  const broken = namedPaths(body).filter((p) => !inDiff.has(p) && !existsSync(join(cwd, p)));
+  // A path written without its leading directories ("core/regexes.ts" for packages/zod/src/core/regexes.ts) names the
+  // file that exists under them. Found on pytest and zod commits.
+  let tracked;
+  const endsLikeKnownFile = (p) => {
+    if ([...inDiff].some((f) => f.endsWith(`/${p}`))) return true;
+    if (tracked === undefined) {
+      try {
+        tracked = git(["ls-files", "-z"], cwd, 256 * 1024 * 1024).split("\0");
+      } catch {
+        tracked = [];
+      }
+    }
+    return tracked.some((f) => f.endsWith(`/${p}`));
+  };
+  const broken = namedPaths(body).filter((p) => !inDiff.has(p) && !existsSync(join(cwd, p)) && !endsLikeKnownFile(p));
   if (broken.length) {
     add("warn", `the message names ${broken.length === 1 ? "a path" : "paths"} that ${broken.length === 1 ? "is" : "are"} not in this change and not in the repository: ${broken.slice(0, 3).join(", ")}`, "diff-path-missing");
   }

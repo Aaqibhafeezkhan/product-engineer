@@ -302,3 +302,42 @@ test("a deleted or renamed file the message names is not reported as an unresolv
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+// Third corpus (pallets/jinja, sharkdp/fd, spf13/viper, sindresorhus/got, colinhacks/zod, pytest-dev/pytest), 3,600
+// commits, run on 2 November 2026 while still held out. It exposed these shapes; each was a message that was right.
+test("third-corpus false alarms stay fixed (jinja, pytest, zod, got)", () => {
+  const base = { "src/_pytest/mark/structures.py": "a\n", "src/x.py": "a\n", "src/core/regexes.ts": "r\n" };
+  const edit = { "src/x.py": "b\n" };
+  // A path written without its leading directories names the file that exists under them.
+  assert.deepEqual(codes(check("refactor: reuse the helper from `mark/structures.py`", base, edit)), []);
+  assert.deepEqual(codes(check("fix: tighten core/regexes.ts", base, edit)), []);
+  // ...but a suffix that matches no file is still a broken reference.
+  assert.deepEqual(codes(check("refactor: reuse the helper from `mark/gone.py`", base, edit)), ["diff-path-missing"]);
+  // Not paths: alternatives of dotted names, extension lists, a package version, an ellipsis, a branch name with a version.
+  for (const m of ["Avoid `os.open/os.scandir` here", "Fix z.input/z.output inference", "Emit .js/.cjs/.d.ts files", "Sync @zod/mini@4.5.4", "Expected .../broken.html", "Merge from pytest-dev/release-9.1.1"]) {
+    assert.deepEqual(codes(check(m, base, edit)), [], m);
+  }
+
+  // jinja and zod: "docs only" read inside a longer phrase is not a claim about this change.
+  const src = { "src/x.py": "a\n" };
+  const srcEdit = { "src/x.py": "b\n" };
+  for (const m of ["Add a note\n\nInternal-only doc; not published.", "Add a note\n\nThe section is currently its only documentation.", "skip code tests when only docs change", "use a cache if only docs change"]) {
+    assert.deepEqual(codes(check(m, src, srcEdit)), [], m);
+  }
+  // zod: "no source changes" is about source; test files may change. "no code changes" still counts tests.
+  const t = { "test/a.test.js": "a\n", "src/a.js": "a\n" };
+  const tEdit = { "test/a.test.js": "b\n" };
+  assert.deepEqual(codes(check("test: align assertions\n\nNo source changes; only test assertions.", t, tEdit)), []);
+  assert.deepEqual(codes(check("test: align assertions\n\nNo code changes.", t, tEdit)), ["diff-docs-only-mismatch"]);
+  assert.deepEqual(codes(check("test: align assertions\n\nNo source changes.", t, { "src/a.js": "b\n" })), ["diff-docs-only-mismatch"]);
+  // zod: a "docs only" change whose code lines are all comments is documentation only.
+  assert.deepEqual(codes(check("docs: explain optin\n\nThis keeps it docs-only.", { "src/a.js": "a\n" }, { "src/a.js": "a\n// optin is read here\n" })), []);
+  assert.deepEqual(codes(check("docs: explain optin\n\nThis keeps it docs-only.", { "src/a.js": "a\n" }, { "src/a.js": "a\nrun();\n" })), ["diff-docs-only-mismatch"]);
+
+  // zod: a relative clause about someone else's removal ("draft-2020-12 (which removed `additionalItems`)") is not this change's claim.
+  assert.deepEqual(
+    codes(check("fix: emit `items: false` for draft-2020-12 (which removed `additionalItems`)", { "src/a.js": "a\n" }, { "src/a.js": "a\nadditionalItems;\n" })),
+    [],
+  );
+  assert.deepEqual(codes(check("fix: removed `additionalItems`", { "src/a.js": "a\n" }, { "src/a.js": "a\nadditionalItems;\n" })), ["diff-symbol-direction"]);
+});
