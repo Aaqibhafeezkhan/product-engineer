@@ -1,5 +1,42 @@
 # Changelog
 
+## 0.9.0 (unreleased)
+
+**`check --diff` reads the direction of an operation, and says what no diff can show.** It now warns when a message says
+a file was added and the change deletes it (or the reverse), when a backticked name or one of six security words
+(authentication, permission, CSRF, rate limiting, sanitization, encryption) is said to be added or removed and the changed
+lines show it only on the other side, when a bug fix is claimed over a change that is documentation only, and when "no breaking
+changes" is claimed over a removed export (JavaScript and TypeScript, Python, Go, Rust). Every claim in a message about the
+kind of file changed is checked, not only the first. Claims a diff cannot hold (tests ran or passed, tried by hand, a speed
+figure) are listed at info level as claimed only. `--strict` turns the findings the change proves into errors; the default is
+unchanged: warnings, exit code 0. Outside a git repository `--diff` says to run it inside one instead of printing a git command
+line. Messages in other languages still get the block and readability checks and no claim checks (#15).
+
+**False alarms were measured on public commits and fixed.** The cross-check was run on the last 600 non-merge commits of 20
+public repositories in three corpora (8,394 + 3,600 commits). On the first corpus path reports fell from 251 to 9 and test reports
+from 11 to 1. The third corpus, six repositories chosen before the run and not tuned against, gave 45 reports (1.25% of 3,600
+commits) on its first run; seven shapes were fixed with a regression test and the same run now gives 9 (0.25%). That corpus is no
+longer held out, and the second one was not either; the remaining shapes are listed in `docs/check-reference.md`.
+`scripts/false-alarm-corpus.mjs` repeats a run on clones you provide.
+
+**The first screen says what is measured.** The README opens with one command, separates the checker (deterministic, no model) from
+the agent skill (depends on the model), and lists per model what the skill changed: the For-the-customer block appears on
+claude-opus-5 (8 of 8) and claude-sonnet-5-5 (13 of 24) and not on claude-haiku-4-5 (0 of 24). It no longer says the skill
+"makes" an agent do anything, and it says that no lead over the bare model was found in a larger comparison on a development
+branch. `docs/install.md#what-has-been-run` lists, per install route, what was actually run and what was not (Codex and Cursor
+manifests, other agents' rule files and third-party use of the Action are not verified). `docs/proof.md` shows six catches and two
+misses from real checker runs.
+
+**The checker comparison was rerun.** `docs/COMPARISON.md` was regenerated on 2026-11-02 from this branch (0.8.0 plus these
+changes) against commitlint 21.2.4 run with an isolated HOME: the outcome is the same on all 12 messages, so the three rows where
+product-engineer loses (no type, subject over 100 characters, body line over 100) stay. The 2026-10-21 result on 0.7.0 is kept in
+`evals/comparison/`. The skill comparison needs a model and was not rerun.
+
+**New eval runs record what the agent did.** `evals/run.sh` stores the event stream, every tool call, whether the skill was called
+or read (`skill_loaded` in `meta.json`) and the final diff, so that skill loading can be read instead of inferred from cost. Tested
+on a fake stream only; no model run has used it yet. `evals/WEAK-MODELS.md` reads, from the existing runs, why the skill shows no
+effect on claude-haiku-4-5; it is an inference and a blind four-arm evaluation is proposed there, not run.
+
 ## 0.8.0 (2026-10-26)
 
 **`product-engineer hook install` sets up the commit check from npm.** It writes the generated `commit-msg` hook (the
