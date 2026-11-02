@@ -6,7 +6,8 @@ A small, reproducible before/after of what the skill changes in a coding agent.
 - `run.sh` runs every task twice with Claude Code in headless mode: `bare` (nothing installed) and `skill` (this skill copied into `.claude/skills/`). Only project settings are loaded, so the machine's own CLAUDE.md and skills cannot leak into the bare condition. Each run's final message, commit message and changed files land in `results/<task>/<condition>/`.
 - `score.mjs` applies five yes/no heuristics and prints the table in `RESULTS.md`. With `PE_EVAL_RUNS=3` each arm runs three times per task, results land in `run-N/` directories, and the table gains a seeded bootstrap interval on the mean per-task delta.
 - `judge.mjs` asks a model which of the two commit messages is truer to the diff, in a random order per pair; it prints the pair count and cost and runs nothing without `--yes`.
-- `skill-load-signal.mjs` compares each skill-arm run's turns and cached tokens with the bare runs of the same task, because the transcripts do not record whether the skill loaded; [`WEAK-MODELS.md`](WEAK-MODELS.md) reads it.
+- `skill-load-signal.mjs` compares each skill-arm run's turns and cached tokens with the bare runs of the same task, because the transcripts of the runs up to 2 November 2026 do not record whether the skill loaded; [`WEAK-MODELS.md`](WEAK-MODELS.md) reads it.
+- `record-run.mjs` is what `run.sh` calls from the next run on: each run also stores `stream.jsonl`, `tool-calls.json` (every tool call, and whether the skill was called or read; `meta.json` carries `skill_loaded`) and `final.diff`, so loading can be read rather than inferred. It has been tested only on a fake stream; no real run has used it yet.
 - `BENCHMARK.md` is the design for a fifty-diff measurement on public commits. Design only.
 
 ```

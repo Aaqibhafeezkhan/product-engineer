@@ -11,6 +11,9 @@
 #       PE_EVAL_SKILL_SOURCE="owner/repo@sha" is recorded in meta.json beside it, so a result names what it ran
 #   PE_EVAL_BUDGET_USD=5 sh evals/run.sh --yes   # never start a run that could take the total past $5 (exit 3)
 #
+# Each run also stores stream.jsonl (every event), tool-calls.json (each tool call, and whether the skill was called
+# or read: meta.json has skill_loaded and tool_calls) and final.diff (the change against the fixture commit).
+#
 # Requires the `claude` CLI, logged in. Each run costs real tokens, so the script
 # prints what it is about to spend and stops unless you pass --yes (or set
 # PE_EVAL_YES=1). The model is pinned so a rerun compares like with like; override
@@ -124,23 +127,29 @@ for task in "$tasks_dir"/*/; do
     (
       cd "$work"
       env -u CLAUDECODE claude -p "$prompt" \
-        --output-format json \
+        --output-format stream-json --verbose \
         --max-turns 25 \
         --permission-mode acceptEdits \
         --setting-sources project \
         --allowedTools "Edit,Write,Bash,Read,Glob,Grep,Skill" \
         ${model:+--model "$model"} \
-        > "$out/transcript.json" 2> "$out/stderr.txt"
+        > "$out/stream.jsonl" 2> "$out/stderr.txt"
     )
     status=$?
     set -e
     echo "$status" > "$out/exit.txt"
+    # stream.jsonl is every event of the run. record-run.mjs derives from it transcript.json (the final result
+    # event, same shape as --output-format json) and tool-calls.json (each tool call, and whether the skill
+    # was called or read). Without a result event no transcript.json is written and the meta below is empty.
+    node "$root/evals/record-run.mjs" "$out/stream.jsonl" "$out" "$([ "$condition" = skill ] && echo "$skill")" || true
     node -e '
       const fs = require("fs");
       let d = {};
       try { d = JSON.parse(fs.readFileSync(process.argv[1], "utf8")); } catch {}
+      let t = {};
+      try { t = JSON.parse(fs.readFileSync(process.argv[1].replace(/transcript\.json$/, "tool-calls.json"), "utf8")); } catch {}
       fs.writeFileSync(process.argv[2], (d.result || "") + "\n");
-      fs.writeFileSync(process.argv[3], JSON.stringify({ model: Object.keys(d.modelUsage || {}).join(",") || null, requested_model: process.argv[4] || null, cli: process.argv[5] || null, skill: process.argv[6] || null, source: process.argv[7] || null, cost_usd: d.total_cost_usd || null, turns: d.num_turns || null, duration_ms: d.duration_ms || null }) + "\n");
+      fs.writeFileSync(process.argv[3], JSON.stringify({ model: Object.keys(d.modelUsage || {}).join(",") || null, requested_model: process.argv[4] || null, cli: process.argv[5] || null, skill: process.argv[6] || null, source: process.argv[7] || null, cost_usd: d.total_cost_usd || null, turns: d.num_turns || null, duration_ms: d.duration_ms || null, tool_calls: t.callCount ?? null, skill_loaded: t.skillLoaded ?? null }) + "\n");
     ' "$out/transcript.json" "$out/final.md" "$out/meta.json" "$model" "$cli_version" "$([ "$condition" = skill ] && echo "$skill")" "$([ "$condition" = skill ] && echo "$skill_source")"
     (
       cd "$work"
@@ -151,6 +160,9 @@ for task in "$tasks_dir"/*/; do
         : > "$out/commit.txt"
         git status --porcelain | awk '{print $2}' > "$out/changed.txt"
       fi
+      # The final change as a patch against the fixture commit: committed, staged, edited and new files alike.
+      git add -A
+      git diff --cached "$(git rev-list --max-parents=0 HEAD)" > "$out/final.diff"
     )
     rm -rf "$work"
     if [ -n "$budget" ]; then
