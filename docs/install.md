@@ -19,8 +19,26 @@ prompt lets you pick a subset.
 | Codex, Cursor, Copilot, Gemini CLI and other agents that read the shared skills directory | `.agents/skills/<skill>/` |
 | Windsurf, Roo, Kiro, Trae, Qwen Code, CodeBuddy, Goose and others with their own directory | `.<agent>/skills/<skill>/` |
 
-Verified on 5 September 2026 with `npx skills add Bubblegunn/product-engineer --all --copy`
-in an empty repository: four skills found, placed for 56 agent directories.
+Re-run on 2 November 2026 with `npx skills add Bubblegunn/product-engineer --all --copy -y`
+in an empty repository, with an empty home directory: four skills found, placed in 53 agent
+directories (56 on 5 September; the installer's list of agents changes, so the number is not stable).
+That shows where the files land. It does not show that each of those agents loads the skill.
+
+## What has been run
+
+Read this before relying on a route. A manifest or a generated file that exists is not an integration that works.
+
+| route | what was run | what was not |
+|---|---|---|
+| `npx product-engineer check msg.txt --diff` | The published 0.8.0 package from an empty directory on macOS with Node 24.13, using the demo repository from `scripts/demo-setup.sh`: it warns on the tests claim and passes once a test is staged (2 November 2026) | Windows; Node 22 on this machine. CI runs the test suite on the Node versions in `.github/workflows/test.yml` |
+| Claude Code skill | The evals drive Claude Code headless with the skill in `.claude/skills/` on claude-opus-5, claude-sonnet-5-5 and claude-haiku-4-5 ([`evals/RESULTS-models.md`](../evals/RESULTS-models.md)) | Any other agent. Whether the skill loads at all is not recorded in those transcripts |
+| Claude Code plugin | `claude plugin validate .` and `claude plugin validate plugin --strict` pass (Claude Code 2.1.316, 2 November 2026); the two install commands below were run in September | Installing it from the marketplace again today |
+| `npx skills add` | File placement in 53 agent directories (above) | That any agent other than Claude Code loads or follows the skill |
+| Codex and Cursor plugin manifests | A shape and loader test in `npm test` ([#32](https://github.com/Bubblegunn/product-engineer/issues/32)) | Installing from either app. The manifests are unverified until someone does |
+| Rule files for Cursor, Copilot, Gemini CLI, Cline, Kiro, Windsurf, Codex (`AGENTS.md`) | CI checks that each file matches the text generated from `SKILL.md` | Opening any of them in the tool it is for |
+| Git hook | The generated `commit-msg` hook runs under POSIX `sh` in `test/commit-msg.test.sh` and `test/hook-install.test.mjs` | Husky, lefthook or a Windows shell |
+| GitHub Action | This repository's CI runs it through `uses: ./` on fixed text | A third-party repository's pull request |
+| commitlint plugin | `docs/COMPARISON.md` runs both tools on the same messages with commitlint 21.2.4 | Other commitlint versions |
 
 ## The pack
 
