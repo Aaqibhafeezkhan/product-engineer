@@ -2,15 +2,19 @@
 
 product-engineer is an agent skill and command-line checker that makes AI coding agents explain each commit and pull request in plain language, and warns when the message contradicts the diff.
 
+That is two parts that work separately: a checker that compares a message with the change it describes, and a skill that gets the agent to write the plain-language note. [Below](#two-parts-used-separately) says which evidence belongs to which.
+
+**Start here.** Nothing to install, no model, no account, works on a message written by an agent or by a person:
+
 ```
 npx product-engineer check msg.txt --diff
 ```
 
-`msg.txt` holds the commit message and the change is what you staged with `git add`. For a pull request: `npx product-engineer check --pr 12 --diff main...HEAD` (needs `gh`). To make the agent write the plain-language block in the first place: `npx skills add Bubblegunn/product-engineer`.
+`msg.txt` holds the commit message and the change is what you staged with `git add`. Run it inside a git repository. For a pull request: `npx product-engineer check --pr 12 --diff main...HEAD` (needs `gh`).
 
 ![The check warns that the message says tests were added and the change has none, then passes once a test file is staged](docs/demo-diff.gif)
 
-The recording is real output, made with [vhs](https://github.com/charmbracelet/vhs) from [`docs/demo-diff.tape`](docs/demo-diff.tape). `--diff` prints warnings and exits 0, so it never blocks a commit by itself. It checks four kinds of mismatch (listed [below](#does-the-message-match-the-change)) and it cannot read operation verbs, so "added" against "removed" goes unnoticed. On 59 real commits from this repository's own history, run at `25dcce7`, it raised 0 false alarms ([`evals/baseline/RESULTS.md`](evals/baseline/RESULTS.md)).
+The recording is real output, made with [vhs](https://github.com/charmbracelet/vhs) from [`docs/demo-diff.tape`](docs/demo-diff.tape). `--diff` prints warnings and exits 0, so it never blocks a commit by itself; `--strict` makes the mismatches the change proves exit 1. It splits what it finds in two: what it verified against the change, and what the author claims that no diff can show (that tests ran, that it was tried by hand). What it can and cannot decide is [listed below](#does-the-message-match-the-change); "added" against "removed" goes unnoticed unless the message names a file, a backticked name or one of six security words.
 
 English | [Türkçe](README.tr.md) | [简体中文](README.zh-CN.md)
 
@@ -26,6 +30,17 @@ English | [Türkçe](README.tr.md) | [简体中文](README.zh-CN.md)
   <a href="https://github.com/marketplace/actions/product-engineer-check"><img src="https://img.shields.io/badge/GitHub_Marketplace-product--engineer--check-111111?style=flat-square&logo=github" alt="GitHub Marketplace"></a>
 </p>
 
+## Two parts, used separately
+
+| | 1. The diff check | 2. The agent skill |
+|---|---|---|
+| What it does | Reads a message and the change, warns when the message says something the change contradicts | Tells an agent to restate the work as a customer outcome and end each commit with a "For the customer" block |
+| Needs | Node 22 or newer, a git repository | An agent that loads skills, and a model that follows them |
+| Deterministic | Yes. No model call, same input gives the same output | No. The result depends on the model |
+| Evidence | 0 false alarms on 59 of this repository's own commits ([`evals/baseline/RESULTS.md`](evals/baseline/RESULTS.md)); a run over thousands of public commits is in [`docs/check-reference.md`](docs/check-reference.md#false-alarms-on-public-commits) | The table below: the block appears on Opus 8 of 8, Sonnet 13 of 24, Haiku 0 of 24. Nothing here shows that the explanations are more accurate or easier to understand |
+
+Take the check first. Add the skill if you want the agent to write the plain-language block; add the hook or the Action once you trust the check on your own history. Which of the other routes were actually run is in [`docs/install.md`](docs/install.md#what-has-been-run).
+
 ## Does the skill part work?
 
 It depends on the model. The skill is four skills, each a SKILL.md with the main one also carrying reference files, that tell an agent to write a plain-language "For the customer" block in each commit, say what it observed, and name what it did not build. It was run on the same eight small tasks, bare and with the skill, on three models. The row below is the commit carrying the block.
@@ -36,7 +51,7 @@ It depends on the model. The skill is four skills, each a SKILL.md with the main
 | claude-sonnet-5-5 | 0 / 24 | 13 / 24 | worked |
 | claude-haiku-4-5 | 0 / 24 | 0 / 24 | no clear effect |
 
-On claude-haiku-4-5 all five measures read "no clear effect". The reading rule was written before any data existed ([`evals/MODELS-DESIGN.md`](evals/MODELS-DESIGN.md)). The checks are regular expressions over the agent's own words, so they reward saying the right thing ([`evals/RESULTS.md`](evals/RESULTS.md) lists what they miss). The skill also costs more on the largest model: $0.45 per run bare and $0.63 with the skill on claude-opus-5. Every number, cost and transcript: [`evals/RESULTS-models.md`](evals/RESULTS-models.md).
+On claude-haiku-4-5 all five measures read "no clear effect". Why is partly visible in the cost data ([`evals/WEAK-MODELS.md`](evals/WEAK-MODELS.md)): the runs that wrote the block are the ones that spent extra turns and tokens, and the Haiku skill runs spent none, which fits a skill that never loaded; the transcripts do not record it, so it is not proven. The reading rule was written before any data existed ([`evals/MODELS-DESIGN.md`](evals/MODELS-DESIGN.md)). The checks are regular expressions over the agent's own words, so they reward saying the right thing ([`evals/RESULTS.md`](evals/RESULTS.md) lists what they miss). The skill also costs more on the largest model: $0.45 per run bare and $0.63 with the skill on claude-opus-5. Every number, cost and transcript: [`evals/RESULTS-models.md`](evals/RESULTS-models.md).
 
 ## How this differs
 
@@ -105,7 +120,7 @@ The check, on a message without the block and then with it (the two fixtures are
 
 <img src="assets/check-demo.svg" width="760" alt="product-engineer check on a message without the block, then with it">
 
-A longer pair, unedited, from the evaluation: [`docs/examples.md`](docs/examples.md).
+A longer pair, unedited, from the evaluation: [`docs/examples.md`](docs/examples.md). The mismatches the check reports, what it only lists, and two cases where it passes something wrong, each with the real output: [`docs/proof.md`](docs/proof.md).
 
 Every pair from the committed eval runs, including the ones where the skill changed nothing or made the message
 worse, is on [the gallery page](https://bubblegunn.github.io/product-engineer/gallery.html), generated from the
@@ -116,7 +131,9 @@ One real defect in a public repository, fixed twice by the same model on the sam
 with the skill and without, both commit messages quoted whole:
 [`docs/case-study.md`](docs/case-study.md).
 
-## Install
+## Add the agent skill, the hook or the Action
+
+The skill is the second part ([above](#two-parts-used-separately)).
 
 ```
 npx skills add Bubblegunn/product-engineer
@@ -128,9 +145,10 @@ In Claude Code you can install it as a plugin instead (Claude Code 2.1.275 or la
 /plugin install product-engineer --marketplace Bubblegunn/product-engineer
 ```
 
-That places the skills for the agents in your project (Claude Code, Codex, Cursor, Copilot,
-Gemini CLI and the rest). Where each file lands, the Claude Code plugin commands, the git
-hook and the CI action are in [`docs/install.md`](docs/install.md); Cursor as a rule file
+`npx skills add` places the skill files for the agents it finds in your project. That is a statement about
+where files go. Only Claude Code has been run with the skill loaded; for Codex, Cursor, Copilot, Gemini CLI and the rest
+the files are placed and nothing more has been verified. [`docs/install.md`](docs/install.md#what-has-been-run) lists, route by
+route, what was run and what was not, and where each file lands. Cursor as a rule file
 rather than a skill is in [`docs/cursor.md`](docs/cursor.md).
 
 The skills are text files and need nothing installed. The `product-engineer` command (`check`,
@@ -254,18 +272,29 @@ node bin/check.mjs check .git/COMMIT_EDITMSG --diff        # the staged change
 node bin/check.mjs check --pr 12 --diff main...HEAD        # a branch
 ```
 
-Four disagreements are reported, each naming what was counted:
+The result is split in two. **Verified from the change** are statements a diff can prove or disprove by itself:
 
 | the message says | and the change shows | reported |
 |---|---|---|
-| tests were added | no test file gains a line | a warning, with the file counts |
+| tests were added | no test file gains a line (a Rust or Python test written inside a source file counts) | a warning, with the file counts |
 | documentation only | a source or test file changed | a warning, naming the files |
+| comments only | a changed line in a code file is not a comment | a warning |
 | a file count | a different number of files | a warning, with both numbers |
 | a path | it is in neither the change nor the repository | a warning, naming the path |
+| a file was added or removed | the change does the opposite to that file | a warning |
+| a name in backticks was added or removed | it appears only on the opposite side of the changed lines | a warning |
+| authentication, permissions, CSRF, rate limiting, sanitization or encryption was added or removed | it appears only on the opposite side | a warning |
+| a bug was fixed | every changed file is documentation (`.md`, `.rst`, `.adoc`) and the message names no documentation | a warning |
+| no breaking changes | an exported name (JS/TS, Python, Go, Rust) is removed and defined nowhere in the added lines | a warning, to confirm it is not public API |
 
-The fourth is the one worth having. A path that exists but is untouched is ordinary context
+**Claimed by the author and not checkable** are listed at info level and never judged: that tests ran or pass, that it was tested or verified by hand, a speed or size figure. A diff contains no execution, so the check cannot tell a true "all tests pass" from an invented one; it lists the sentence so the reviewer knows it rests on trust. The message-level check still warns when a customer block offers a green suite as its evidence.
+
+Where the change does not decide the question, the check says nothing: a name that appears on both sides (edited or moved), a name that is not in the change at all, a message that both adds and removes the same name (a squash of several steps), a statement about the future, a negation, and any message in a language other than English. These checks read English only. A Turkish, Japanese or Chinese message gets the block and readability checks and no claim checks; that is a miss, never a false alarm ([#15](https://github.com/Bubblegunn/product-engineer/issues/15)).
+
+The path check is the one worth having. A path that exists but is untouched is ordinary context
 and is never reported; a path that is in neither place is a reference to a file that was
-renamed, or never existed, which is a shape agent-written messages leave behind.
+renamed, or never existed, which is a shape agent-written messages leave behind. A URL is not a path, and a
+pull request template's comments and unchecked checklist items are not claims.
 
 A phrase inside backticks or quotation marks is being named, not asserted, so a message that
 describes these checks does not trip them. That was the first thing the flag caught, on the
@@ -273,9 +302,12 @@ commit that added it.
 
 Each check is conservative on purpose. A refactor claiming no behaviour change is not
 checked against the source it touches, because that claim is usually true, and a number is
-only read as a file count when its sentence also carries a verb of changing. Nothing here
-reports an error, so a run that passed yesterday cannot fail today; without `--diff` the
-output is byte-identical to before.
+only read as a file count when its sentence also carries a verb of changing. By default
+nothing here reports an error, so a run that passed yesterday cannot fail today; without
+`--diff` the output is byte-identical to before. `--diff --strict` turns the findings a change
+proves (tests claimed and none added, documentation only over code, comments only over code, a bug fix over
+documentation, a file or name added when it was removed or the reverse) into errors, for a CI step that should fail on them. Counts, paths
+and the heuristic findings stay warnings under `--strict`.
 
 **Cited paths are checked too.** Every file path and GitHub Actions run URL the message cites is resolved against the working tree. A missing path or a line past the end of a file is a warning. The modes, and the reason a message that cites nothing still passes, are in [`docs/check-reference.md`](docs/check-reference.md#cited-paths).
 

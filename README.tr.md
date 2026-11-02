@@ -16,7 +16,17 @@ sağlayan bir ajan skill'i. Yapmadan önce işi bir müşteri sonucu olarak yeni
 commit ve pull request'e sade dilde bir "For the customer" bloğu ekler. Gözlemlemediği işe
 "bitti" demez, bilerek yapmadığını adıyla söyler ve saymadığı bir rakamı asla yazmaz.
 
-## 30 saniyede kurulum
+## Önce bunu deneyin: fark denetimi
+
+```
+npx product-engineer check msg.txt --diff
+```
+
+`msg.txt` commit mesajını içerir; değişiklik `git add` ile hazırladığınız değişikliktir. Bir git deposunun içinde çalıştırın. Kurulum, model ve hesap gerekmez. Mesajın söylediği ile değişikliğin gösterdiği çelişirse uyarır; örneğin mesaj "test ekledim" der ama hiçbir test dosyasına satır eklenmemiştir. Uyarı verir ve çıkış kodu 0 olur; `--strict` ile, değişikliğin kanıtladığı çelişkiler hata sayılır. İddia kontrolleri yalnız İngilizce mesajı okur: Türkçe, Japonca veya Çince bir mesajda blok ve okunabilirlik kontrolleri çalışır, iddialar kontrol edilmez (bu bir kaçırmadır, yanlış alarm değildir). Çalıştırılmış gerçek çıktılar, hataları ve kaçırdığı durumlar: [`docs/proof.md`](docs/proof.md).
+
+Bu iki ayrı parçadır. (1) Fark denetimi: model çağırmaz, aynı girdi aynı çıktıyı verir. (2) Skill: ajana sade dilde "For the customer" bloğunu yazdırır; sonucu modele bağlıdır. İngilizce README'deki tabloya göre blok Opus'ta 8/8, Sonnet'te 13/24, Haiku'da 0/24 commit'te görünüyor; açıklamaların doğruluğunu artırdığı ölçülmedi.
+
+## Skill'i kurmak (30 saniye)
 
 ```
 npx skills add Bubblegunn/product-engineer

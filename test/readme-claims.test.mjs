@@ -165,5 +165,6 @@ test("the README links the comparison file, says where product-engineer loses an
 test("the README says --diff warns and never blocks, and names its blind spot", () => {
   const readme = read("README.md");
   assert.ok(readme.includes("prints warnings and exits 0"));
-  assert.ok(readme.includes("it cannot read operation verbs"));
+  // The direction of an operation is read for files, backticked names and six security words only.
+  assert.ok(readme.includes('"added" against "removed" goes unnoticed unless the message names a file, a backticked name or one of six security words'));
 });
