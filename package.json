@@ -1,6 +1,6 @@
 {
   "name": "product-engineer",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "product-engineer is an agent skill and command-line checker: the skill asks AI coding agents to explain each commit and pull request in plain language, and the checker warns when a message contradicts the diff.",
   "type": "module",
   "bin": {

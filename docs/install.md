@@ -173,7 +173,7 @@ Three more inputs:
 ```yaml
 repos:
   - repo: https://github.com/Bubblegunn/product-engineer
-    rev: v0.8.0
+    rev: v0.9.0
     hooks:
       - id: product-engineer-check
 ```

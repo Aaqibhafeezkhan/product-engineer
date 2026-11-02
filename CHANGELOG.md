@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.9.0 (unreleased)
+## 0.9.0 (2026-11-02)
 
 **`check --diff` reads the direction of an operation, and says what no diff can show.** It now warns when a message says
 a file was added and the change deletes it (or the reverse), when a backticked name or one of six security words
